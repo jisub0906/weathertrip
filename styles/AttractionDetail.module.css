@@ -1,0 +1,277 @@
+.detailContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 380px;
+  height: 100vh;
+  background-color: #fff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.3s ease;
+  padding-top: 60px;
+}
+
+.navigationButtons {
+  position: fixed;
+  top: 75px;
+  left: 15px;
+  right: 15px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 1001;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.backButton:hover {
+  background: #fff;
+  transform: translateX(-3px);
+}
+
+.backButtonText {
+  margin-left: 6px;
+}
+
+.closeButton {
+  position: relative;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background: #fff;
+  transform: scale(1.1);
+}
+
+.imageContainer {
+  width: 100%;
+  height: 230px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 15px;
+}
+
+.mainImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contentContainer {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #333;
+  flex: 1;
+}
+
+.likeContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.likeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  transition: all 0.2s;
+}
+
+.likeButton:hover {
+  transform: scale(1.2);
+}
+
+.likeCount {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.address {
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.description {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 20px 0;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  margin: 0 0 15px;
+  color: #333;
+}
+
+.reviewForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ratingContainer {
+  display: flex;
+  gap: 6px;
+}
+
+.starButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ddd;
+  transition: all 0.2s;
+}
+
+.starButton:hover {
+  transform: scale(1.2);
+}
+
+.reviewInput {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  resize: none;
+  font-family: inherit;
+}
+
+.submitButton {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.noReviews {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+.loading {
+  text-align: center;
+  color: #888;
+  padding: 20px 0;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reviewItem {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.userName {
+  font-weight: 600;
+  color: #333;
+}
+
+.reviewRating {
+  display: flex;
+  gap: 2px;
+  font-size: 0.8rem;
+}
+
+.reviewComment {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 5px 0 10px;
+  color: #444;
+}
+
+.reviewDate {
+  display: block;
+  font-size: 0.8rem;
+  color: #888;
+  text-align: right;
+} 

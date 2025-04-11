@@ -1,0 +1,435 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 1rem;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 1rem;
+  color: #dc3545;
+  background-color: #f8d7da;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.recommendationBadge {
+  display: inline-block;
+  padding: 0.5rem 1.2rem;
+  border-radius: 20px;
+  margin-top: 1rem;
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filtersSection {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.filtersSection h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.filterGroup {
+  margin-bottom: 1.5rem;
+}
+
+.filterGroup h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.filterOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  max-width: 100%;
+  margin-bottom: 1rem;
+}
+
+.filterOption {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border-light);
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  flex-grow: 0;
+  white-space: nowrap;
+}
+
+.filterOption:hover {
+  background-color: var(--primary-light);
+}
+
+.filterOption.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.attractionsTitle {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.attractionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.attractionCard {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.attractionCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.attractionCard img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.attractionContent {
+  padding: 1.5rem;
+}
+
+.attractionContent h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.attractionMeta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.attractionContent p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.attractionTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.attractionTag {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  padding: 0.3rem 0.8rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+@media (max-width: 992px) {
+  .attractionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageTitle {
+    font-size: 2rem;
+  }
+  
+  .filtersSection {
+    padding: 1.2rem;
+  }
+  
+  .filterOptions {
+    gap: 0.5rem;
+  }
+  
+  .filterOption {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .attractionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .attractionContent {
+    padding: 1.2rem;
+  }
+  
+  .attractionContent h3 {
+    font-size: 1.2rem;
+  }
+}
+
+.statusMessage {
+  background-color: #e3f2fd;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.errorMessage {
+  background-color: #ffebee;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  text-align: center;
+  color: #d32f2f;
+}
+
+.noResults {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin: 2rem 0;
+}
+
+.weatherCard {
+  display: flex;
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.weatherIcon {
+  font-size: 3rem;
+  margin-right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.weatherClear {
+  background-color: #ffeb3b40;
+}
+
+.weatherClouds {
+  background-color: #e0e0e040;
+}
+
+.weatherRain {
+  background-color: #90caf940;
+}
+
+.weatherSnow {
+  background-color: #e0f7fa40;
+}
+
+.weatherInfo {
+  flex: 1;
+}
+
+.weatherInfo h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.weatherDetails {
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.recommendationBadge {
+  display: inline-block;
+  background-color: #4caf50;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.warningText {
+  color: #ff9800;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* 인스타그램 스타일 피드 */
+.instagramFeed {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 30px;
+  padding: 20px;
+  margin-bottom: 50px;
+}
+
+.instagramPost {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.instagramPost:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.postHeader {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #efefef;
+  background-color: white;
+  z-index: 1;
+}
+
+.postUser {
+  display: flex;
+  align-items: center;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 16px;
+  color: #262626;
+}
+
+.postImage {
+  width: 100%;
+  position: relative;
+  background-color: #f9f9f9;
+  height: 300px;
+  overflow: hidden;
+}
+
+.postImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.instagramPost:hover .postImage img {
+  transform: scale(1.05);
+}
+
+.postContent {
+  padding: 16px;
+}
+
+.postCaption {
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.captionText {
+  margin-left: 6px;
+}
+
+.postMeta {
+  display: flex;
+  gap: 16px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.postTags {
+  margin: 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  color: #00376b;
+  font-size: 13px;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  padding: 4px 10px;
+  border-radius: 20px;
+  transition: background-color 0.2s ease;
+}
+
+.tag:hover {
+  background-color: #e3f2fd;
+}
+
+.loadingMore {
+  text-align: center;
+  padding: 20px;
+  color: #8e8e8e;
+  font-size: 14px;
+  grid-column: 1 / -1;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 992px) {
+  .instagramFeed {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .instagramFeed {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+  
+  .postImage img {
+    max-height: 400px;
+  }
+} 

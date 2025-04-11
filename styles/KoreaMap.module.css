@@ -1,0 +1,108 @@
+/* KoreaMap.module.css */
+.mapContainer {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+  }
+  
+  .koreaMap {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .region {
+    stroke: rgba(255, 255, 255, 0.8);
+    stroke-width: 1;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    fill-opacity: 0.9;
+    cursor: pointer;
+  }
+  
+  .island {
+    stroke: rgba(255, 255, 255, 0.8);
+    stroke-width: 0.5;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  
+  .region:hover, .island:hover {
+    filter: brightness(1.15);
+    cursor: pointer;
+    transform: translateY(-2px);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+    fill-opacity: 1;
+  }
+  
+  .selected {
+    stroke: #444;
+    stroke-width: 2;
+    filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.25));
+    fill-opacity: 1;
+  }
+  
+  
+/* 각 지역별 색상 - 더 부드럽고 투명도 있는 파스텔 색상으로 수정 */
+.seoul { fill: rgba(255, 229, 180, 0.85); }        /* 밝은 황토색 - 투명도 적용 */
+.incheon { fill: rgba(176, 224, 230, 0.85); }      /* 파우더 블루 - 투명도 적용 */
+.gyeonggi { fill: rgba(230, 230, 250, 0.85); }     /* 라벤더 - 투명도 적용 */
+.gangwon { fill: rgba(250, 250, 210, 0.85); }      /* 밝은 골든로드 - 투명도 적용 */
+.chungbuk { fill: rgba(152, 251, 152, 0.85); }     /* 연한 녹색 - 투명도 적용 */
+.chungnam { fill: rgba(135, 206, 250, 0.85); }     /* 밝은 하늘색 - 투명도 적용 */
+.daejeon { fill: rgba(221, 160, 221, 0.85); }      /* 자두색 - 투명도 적용 */
+.sejong { fill: rgba(240, 230, 140, 0.85); }       /* 카키 - 투명도 적용 */
+.jeonbuk { fill: rgba(176, 196, 222, 0.85); }      /* 밝은 강철색 - 투명도 적용 */
+.gwangju { fill: rgba(216, 191, 216, 0.85); }      /* 엉겅퀴 - 투명도 적용 */
+.jeonnam { fill: rgba(230, 165, 126, 0.85); }      /* 연한 산호색 - 투명도 적용 */
+.gyeongbuk { fill: rgba(165, 242, 243, 0.85); }    /* 민트 - 투명도 적용 */
+.daegu { fill: rgba(240, 255, 240, 0.85); }        /* 허니듀 - 투명도 적용 */
+.gyeongnam { fill: rgba(255, 192, 203, 0.85); }    /* 파스텔 핑크 - 투명도 적용 */
+.ulsan { fill: rgba(211, 211, 211, 0.85); }        /* 연한 회색 - 투명도 적용 */
+.busan { fill: rgba(255, 182, 193, 0.85); }        /* 밝은 핑크 - 투명도 적용 */
+.jeju { fill: rgba(245, 222, 179, 0.85); }         /* 밀 - 투명도 적용 */
+  
+  @keyframes pulse {
+    0% { r: 1; opacity: 0.8; }
+    50% { r: 2; opacity: 1; }
+    100% { r: 1; opacity: 0.8; }
+  }
+  
+
+  /* 미디어 쿼리 */
+  @media (max-width: 600px) {
+    .regionLabel {
+      font-size: 0; /* 모바일에서는 라벨 숨김 */
+    }
+    
+    .islandLabel {
+      font-size: 6px;
+    }
+    
+    .countryLabel {
+      font-size: 10px;
+    }
+    
+    .mapContainer {
+      box-shadow: none;
+      padding: 0;
+    }
+    
+    .region:hover, .island:hover {
+      transform: none; /* 모바일에서는 호버 애니메이션 제거 */
+    }
+  }
+  
+  @media (min-width: 601px) and (max-width: 900px) {
+    .regionLabel {
+      font-size: 8px;
+    }
+    
+    .mapContainer {
+      padding: 0;
+    }
+  }
