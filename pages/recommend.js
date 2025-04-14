@@ -310,7 +310,7 @@ export default function Recommend() {
   };
 
   return (
-    <Layout>
+    <Layout hideFooter={true}>
       <Head>
         <title>맞춤형 관광지 추천 - 날씨별 관광지 추천 서비스</title>
         <meta name="description" content="나에게 맞는 관광지를 추천받아보세요." />

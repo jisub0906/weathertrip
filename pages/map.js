@@ -72,7 +72,7 @@ export default function Map() {
     });
   }
   return (
-    <Layout>
+    <Layout hideFooter={true}>
       <Head>
         <title>지도로 관광지 찾기 | 날씨 관광 앱</title>
         <meta name="description" content="현재 위치 주변의 관광지를 지도에서 찾아보세요." />
