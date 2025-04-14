@@ -195,7 +195,7 @@ export default function Recommend() {
   // 0414 searchBar 관련
   useEffect(() => {
     applySearchFilter(searchTerm);
-  }, [attractions, activeFilters]);
+  }, [attractions, activeFilters, applySearchFilter, searchTerm]);
 
   // 필터 변경 핸들러
   const handleFilterChange = (filterType, value) => {
