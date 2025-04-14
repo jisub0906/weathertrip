@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Head from 'next/head';
 import Layout from '../components/Layout/Layout';
 import KoreaMap from '../components/Map/KoreaMap';
@@ -6,6 +6,28 @@ import useLocation from '../hooks/useLocation';
 import Link from 'next/link';
 import axios from 'axios';
 import styles from '../styles/Home.module.css';
+
+// 컴포넌트 외부로 이동
+const REGION_COORDINATES = {
+  'seoul': { latitude: 37.5665, longitude: 126.9780 },
+  'busan': { latitude: 35.1796, longitude: 129.0756 },
+  'daegu': { latitude: 35.8714, longitude: 128.6014 },
+  'incheon': { latitude: 37.4563, longitude: 126.7052 },
+  'gwangju': { latitude: 35.1595, longitude: 126.8526 },
+  'daejeon': { latitude: 36.3504, longitude: 127.3845 },
+  'ulsan': { latitude: 35.5384, longitude: 129.3114 },
+  'sejong': { latitude: 36.4800, longitude: 127.2890 },
+  'gyeonggi': { latitude: 37.4138, longitude: 127.5183 },
+  'gangwon': { latitude: 37.8228, longitude: 128.1555 },
+  'chungbuk': { latitude: 36.8000, longitude: 127.7000 },
+  'chungnam': { latitude: 36.5184, longitude: 126.8000 },
+  'jeonbuk': { latitude: 35.8200, longitude: 127.1500 },
+  'jeonnam': { latitude: 34.8160, longitude: 126.4630 },
+  'gyeongbuk': { latitude: 36.4919, longitude: 128.8889 },
+  'gyeongnam': { latitude: 35.4606, longitude: 128.2132 },
+  'jeju': { latitude: 33.4996, longitude: 126.5312 },
+  'all': { latitude: 36.5, longitude: 127.8 }
+};
 
 export default function Home() {
   const { location } = useLocation();
@@ -16,38 +38,11 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const attractionsPerPage = 8;
 
-  const regionCoordinates = {
-    'seoul': { latitude: 37.5665, longitude: 126.9780 },
-    'busan': { latitude: 35.1796, longitude: 129.0756 },
-    'daegu': { latitude: 35.8714, longitude: 128.6014 },
-    'incheon': { latitude: 37.4563, longitude: 126.7052 },
-    'gwangju': { latitude: 35.1595, longitude: 126.8526 },
-    'daejeon': { latitude: 36.3504, longitude: 127.3845 },
-    'ulsan': { latitude: 35.5384, longitude: 129.3114 },
-    'sejong': { latitude: 36.4800, longitude: 127.2890 },
-    'gyeonggi': { latitude: 37.4138, longitude: 127.5183 },
-    'gangwon': { latitude: 37.8228, longitude: 128.1555 },
-    'chungbuk': { latitude: 36.8000, longitude: 127.7000 },
-    'chungnam': { latitude: 36.5184, longitude: 126.8000 },
-    'jeonbuk': { latitude: 35.8200, longitude: 127.1500 },
-    'jeonnam': { latitude: 34.8160, longitude: 126.4630 },
-    'gyeongbuk': { latitude: 36.4919, longitude: 128.8889 },
-    'gyeongnam': { latitude: 35.4606, longitude: 128.2132 },
-    'jeju': { latitude: 33.4996, longitude: 126.5312 },
-    'all': { latitude: 36.5, longitude: 127.8 }
-  };
-
-  const handleRegionSelect = (region) => {
-    setActiveRegion(region);
-    setCurrentPage(1);
-    fetchAttractions(region);
-  };
-
-  const fetchAttractions = async (region) => {
+  const fetchAttractions = useCallback(async (region) => {
     setLoading(true);
     setError(null);
     try {
-      const coords = regionCoordinates[region] || regionCoordinates.all;
+      const coords = REGION_COORDINATES[region] || REGION_COORDINATES.all;
       const response = await axios.get('/api/attractions', {
         params: {
           latitude: coords.latitude,
@@ -69,11 +64,18 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // 종속성 제거
 
+  const handleRegionSelect = useCallback((region) => {
+    setActiveRegion(region);
+    setCurrentPage(1);
+    fetchAttractions(region);
+  }, [fetchAttractions]);
+
+  // 컴포넌트 마운트 시 한 번만 실행
   useEffect(() => {
     fetchAttractions('seoul');
-  }, []);
+  }, [fetchAttractions]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);

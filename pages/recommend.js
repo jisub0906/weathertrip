@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import Head from 'next/head';
 import Layout from '../components/Layout/Layout';
 import useLocation from '../hooks/useLocation';
@@ -195,7 +196,7 @@ export default function Recommend() {
   // 0414 searchBar 관련
   useEffect(() => {
     applySearchFilter(searchTerm);
-  }, [attractions, activeFilters, applySearchFilter, searchTerm]);
+  }, [searchTerm, applySearchFilter]);
 
   // 필터 변경 핸들러
   const handleFilterChange = (filterType, value) => {
@@ -277,37 +278,37 @@ export default function Recommend() {
     }
   };
 
-  // 0414 searchBar 관련
-  const applySearchFilter = (term) => {
-    let filtered = [...attractions];
+// 0414 searchBar 관련
+const applySearchFilter = useCallback((term) => {
+  let filtered = [...attractions];
 
-    if (term && term.trim()) {
-      filtered = filtered.filter(item => {
-        const name = item.name?.toLowerCase() || '';
-        const desc = item.description?.toLowerCase() || '';
-        return name.includes(term.toLowerCase()) || desc.includes(term.toLowerCase());
-      });
-    }
+  if (term && term.trim()) {
+    filtered = filtered.filter(item => {
+      const name = item.name?.toLowerCase() || '';
+      const desc = item.description?.toLowerCase() || '';
+      return name.includes(term.toLowerCase()) || desc.includes(term.toLowerCase());
+    });
+  }
 
-    if (activeFilters.type !== '전체') {
-      const typeMap = { '실내': 'indoor', '야외': 'outdoor' };
-      const filterType = typeMap[activeFilters.type];
-      filtered = filtered.filter(item => item.type === filterType);
-    }
+  if (activeFilters.type !== '전체') {
+    const typeMap = { '실내': 'indoor', '야외': 'outdoor' };
+    const filterType = typeMap[activeFilters.type];
+    filtered = filtered.filter(item => item.type === filterType);
+  }
 
-    if (activeFilters.category !== '전체') {
-      filtered = filtered.filter(item => {
-        if (!item.tags || !Array.isArray(item.tags)) return false;
-        return item.tags.some(tag =>
-          tag === activeFilters.category ||
-          tag.includes(activeFilters.category)
-        );
-      });
-    }
+  if (activeFilters.category !== '전체') {
+    filtered = filtered.filter(item => {
+      if (!item.tags || !Array.isArray(item.tags)) return false;
+      return item.tags.some(tag =>
+        tag === activeFilters.category ||
+        tag.includes(activeFilters.category)
+      );
+    });
+  }
 
-    setFilteredAttractions(filtered);
-    setPage(1);
-  };
+  setFilteredAttractions(filtered);
+  setPage(1);
+}, [attractions, activeFilters]);
 
   return (
     <Layout hideFooter={true}>
@@ -437,7 +438,14 @@ export default function Recommend() {
                     </div>
 
                     <div className={styles.postImage}>
-                      <img src={attraction.images?.[0] || 'https://via.placeholder.com/600x600?text=' + attraction.name} alt={attraction.name} />
+                    <Image 
+                      src={attraction.images?.[0] || `https://via.placeholder.com/600x600?text=${attraction.name}`} 
+                      alt={attraction.name}
+                      width={600}
+                      height={600}
+                      layout="responsive"
+                      objectFit="cover"
+                    />
                     </div>
 
                     <div className={styles.postContent}>

@@ -16,6 +16,14 @@ export default async function handler(req, res) {
     const db = await getDatabase();
     const attractions = db.collection('attractions');
     
+    // 2dsphere 인덱스 생성 (인덱스가 없는 경우에만 생성됨)
+    try {
+      await attractions.createIndex({ "location": "2dsphere" });
+      console.log("2dsphere 인덱스 생성 완료");
+    } catch (indexError) {
+      console.error("인덱스 생성 오류:", indexError);
+    }
+    
     // 날씨 조건에 따른 관광지 타입 설정
     const attractionType = getRecommendedAttractionType(weatherCondition || 'Clear');
     
@@ -134,4 +142,4 @@ export default async function handler(req, res) {
     console.error('관광지 검색 오류:', error);
     return res.status(500).json({ message: '서버 오류가 발생했습니다.', error: error.stack });
   }
-} 
+}
