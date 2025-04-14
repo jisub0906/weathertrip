@@ -15,7 +15,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const attractionsPerPage = 8;
-  
+
   const regionCoordinates = {
     'seoul': { latitude: 37.5665, longitude: 126.9780 },
     'busan': { latitude: 35.1796, longitude: 129.0756 },
@@ -36,13 +36,13 @@ export default function Home() {
     'jeju': { latitude: 33.4996, longitude: 126.5312 },
     'all': { latitude: 36.5, longitude: 127.8 }
   };
-  
+
   const handleRegionSelect = (region) => {
     setActiveRegion(region);
     setCurrentPage(1);
     fetchAttractions(region);
   };
-  
+
   const fetchAttractions = async (region) => {
     setLoading(true);
     setError(null);
@@ -56,7 +56,7 @@ export default function Home() {
           limit: 100
         }
       });
-      
+
       if (response.data && response.data.attractions) {
         setAttractions(response.data.attractions);
       } else {
@@ -70,11 +70,11 @@ export default function Home() {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchAttractions('seoul');
   }, []);
-  
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo({
@@ -82,24 +82,24 @@ export default function Home() {
       behavior: 'smooth'
     });
   };
-  
+
   const indexOfLastAttraction = currentPage * attractionsPerPage;
   const indexOfFirstAttraction = indexOfLastAttraction - attractionsPerPage;
   const currentAttractions = attractions.slice(indexOfFirstAttraction, indexOfLastAttraction);
   const totalPages = Math.ceil(attractions.length / attractionsPerPage);
-  
+
   const renderPaginationButtons = () => {
     const buttons = [];
     const maxVisibleButtons = 5;
     let startPage, endPage;
-    
+
     if (totalPages <= maxVisibleButtons) {
       startPage = 1;
       endPage = totalPages;
     } else {
       const maxPagesBeforeCurrentPage = Math.floor(maxVisibleButtons / 2);
       const maxPagesAfterCurrentPage = Math.ceil(maxVisibleButtons / 2) - 1;
-      
+
       if (currentPage <= maxPagesBeforeCurrentPage) {
         startPage = 1;
         endPage = maxVisibleButtons;
@@ -111,15 +111,7 @@ export default function Home() {
         endPage = currentPage + maxPagesAfterCurrentPage;
       }
     }
-    
-    if (startPage > 1) {
-      buttons.push(
-        <button key="first" className={styles.paginationButton} onClick={() => handlePageChange(1)}>
-          처음
-        </button>
-      );
-    }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       buttons.push(
         <button
@@ -130,15 +122,7 @@ export default function Home() {
         </button>
       );
     }
-    
-    if (endPage < totalPages) {
-      buttons.push(
-        <button key="last" className={styles.paginationButton} onClick={() => handlePageChange(totalPages)}>
-          마지막
-        </button>
-      );
-    }
-    
+
     return buttons;
   };
 
@@ -164,18 +148,18 @@ export default function Home() {
         <div className="container">
           <h2 className={styles.sectionTitle}>대한민국 관광지 둘러보기</h2>
           <div className={styles.koreaMapContainer}>
-            <KoreaMap 
+            <KoreaMap
               onRegionSelect={handleRegionSelect}
               selectedRegion={activeRegion}
             />
           </div>
-          
+
           {loading && (
             <div className={styles.loading}>
               <p>관광지 정보를 불러오는 중...</p>
             </div>
           )}
-          
+
           {error && (
             <div className={styles.error}>
               <p>{error}</p>
@@ -185,24 +169,24 @@ export default function Home() {
           {!loading && !error && attractions.length > 0 && (
             <div className={styles.resultsInfo}>
               <h3>
-                {activeRegion === 'all' ? '전국' : 
-                 activeRegion === 'seoul' ? '서울' :
-                 activeRegion === 'busan' ? '부산' :
-                 activeRegion === 'daegu' ? '대구' :
-                 activeRegion === 'incheon' ? '인천' :
-                 activeRegion === 'gwangju' ? '광주' :
-                 activeRegion === 'daejeon' ? '대전' :
-                 activeRegion === 'ulsan' ? '울산' :
-                 activeRegion === 'sejong' ? '세종' :
-                 activeRegion === 'gyeonggi' ? '경기도' :
-                 activeRegion === 'gangwon' ? '강원도' :
-                 activeRegion === 'chungbuk' ? '충청북도' :
-                 activeRegion === 'chungnam' ? '충청남도' :
-                 activeRegion === 'jeonbuk' ? '전라북도' :
-                 activeRegion === 'jeonnam' ? '전라남도' :
-                 activeRegion === 'gyeongbuk' ? '경상북도' :
-                 activeRegion === 'gyeongnam' ? '경상남도' :
-                 activeRegion === 'jeju' ? '제주도' : '선택 지역'}의 
+                {activeRegion === 'all' ? '전국' :
+                  activeRegion === 'seoul' ? '서울' :
+                    activeRegion === 'busan' ? '부산' :
+                      activeRegion === 'daegu' ? '대구' :
+                        activeRegion === 'incheon' ? '인천' :
+                          activeRegion === 'gwangju' ? '광주' :
+                            activeRegion === 'daejeon' ? '대전' :
+                              activeRegion === 'ulsan' ? '울산' :
+                                activeRegion === 'sejong' ? '세종' :
+                                  activeRegion === 'gyeonggi' ? '경기도' :
+                                    activeRegion === 'gangwon' ? '강원도' :
+                                      activeRegion === 'chungbuk' ? '충청북도' :
+                                        activeRegion === 'chungnam' ? '충청남도' :
+                                          activeRegion === 'jeonbuk' ? '전라북도' :
+                                            activeRegion === 'jeonnam' ? '전라남도' :
+                                              activeRegion === 'gyeongbuk' ? '경상북도' :
+                                                activeRegion === 'gyeongnam' ? '경상남도' :
+                                                  activeRegion === 'jeju' ? '제주도' : '선택 지역'}의
                 관광지 ({attractions.length}개)
               </h3>
               <p>페이지 {currentPage} / {totalPages}</p>
@@ -222,20 +206,20 @@ export default function Home() {
                       )}
                       {attraction.type && (
                         <p className={styles.type}>
-                          유형: {attraction.type === 'indoor' ? '실내' : 
-                                attraction.type === 'outdoor' ? '야외' : '실내/야외'}
+                          유형: {attraction.type === 'indoor' ? '실내' :
+                            attraction.type === 'outdoor' ? '야외' : '실내/야외'}
                         </p>
                       )}
                       {attraction.tags && (
                         <div className={styles.tags}>
-                          {Array.isArray(attraction.tags) 
+                          {Array.isArray(attraction.tags)
                             ? attraction.tags.map((tag, i) => (
-                                <span key={i} className={styles.tag}>{tag}</span>
-                              ))
-                            : typeof attraction.tags === 'string' 
+                              <span key={i} className={styles.tag}>{tag}</span>
+                            ))
+                            : typeof attraction.tags === 'string'
                               ? attraction.tags.split(',').map((tag, i) => (
-                                  <span key={i} className={styles.tag}>{tag.trim()}</span>
-                                ))
+                                <span key={i} className={styles.tag}>{tag.trim()}</span>
+                              ))
                               : null
                           }
                         </div>
@@ -246,23 +230,46 @@ export default function Home() {
                   <p className={styles.noAttractions}>선택한 지역의 관광지 정보가 없습니다.</p>
                 )}
               </div>
-              
+
               {attractions.length > attractionsPerPage && (
                 <div className={styles.pagination}>
+                  {/* 처음 버튼 */}
+                  <button
+                    className={styles.paginationButton}
+                    onClick={() => handlePageChange(1)}
+                    disabled={currentPage === 1}
+                  >
+                    처음
+                  </button>
+
+                  {/* 이전 버튼 */}
                   <button
                     className={styles.paginationButton}
                     onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}>
+                    disabled={currentPage === 1}
+                  >
                     이전
                   </button>
-                  
+
+                  {/* 숫자 버튼들 */}
                   {renderPaginationButtons()}
-                  
+
+                  {/* 다음 버튼 */}
                   <button
                     className={styles.paginationButton}
                     onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}>
+                    disabled={currentPage === totalPages}
+                  >
                     다음
+                  </button>
+
+                  {/* 마지막 버튼 */}
+                  <button
+                    className={styles.paginationButton}
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={currentPage === totalPages}
+                  >
+                    마지막
                   </button>
                 </div>
               )}
