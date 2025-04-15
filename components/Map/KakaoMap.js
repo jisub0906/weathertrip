@@ -346,8 +346,12 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
       {selectedAttraction && (
         <AttractionDetail
           attraction={selectedAttraction}
-          onClose={handleCloseDetail}
+          onCloseDetail={() => {
+            setSelectedAttraction(null);
+            setShowSidebar(true); // 이건 "닫기 버튼 누른 뒤에도 여전히 목록은 열어두기"를 의미
+          }}
         />
+        
       )}
     </div>
   );
