@@ -7,7 +7,7 @@ import axios from 'axios';
 export default function WeatherBanner() {
   const [weather, setWeather] = useState(null);
   const router = useRouter();
-  const { location, loading, error } = useLocation(); 
+  const { location, loading, error } = useLocation();
 
   useEffect(() => {
     if (!location || loading) return;
@@ -23,7 +23,7 @@ export default function WeatherBanner() {
         });
 
         if (!cancelled && response.data?.success) {
-          setWeather(response.data.data); // ✅ 여기서 .data.data 형식이 중요함
+          setWeather(response.data.data);
         }
       } catch (error) {
         console.error('🌩️ 날씨 API 호출 실패:', error);
@@ -85,17 +85,18 @@ export default function WeatherBanner() {
       };
     }
   };
+
   if (!weather) return null;
 
   const { temperature, condition } = weather;
   const { emoji, jsx } = getBannerMessage(temperature, condition);
 
   return (
-    <div className={styles.weatherBanner}>
+    <div className={styles.weatherBanner} onClick={() => router.push('/recommend')}>
       <div className={styles.weatherIcon}>{emoji}</div>
       <div className={styles.textContent}>
         <h3>{jsx}</h3>
-        <p className={styles.cta} onClick={() => router.push('/recommend')}>
+        <p className={styles.cta}>
           👉 가장 가까운 여행지가 궁금하다면, 지금 확인해보세요!
         </p>
       </div>
