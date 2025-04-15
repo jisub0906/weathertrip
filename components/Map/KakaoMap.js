@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, forwardRef } from 'react';
+import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import axios from 'axios';
 import styles from '../../styles/Map.module.css';
 import AttractionDetail from '../Attractions/AttractionDetail';
@@ -326,6 +326,37 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
   // 부모 컴포넌트에서 호출할 수 있도록 함수 노출  // 0414 searchBar 지도중심이동 및 임의마커생성
   const searchMarkerRef = useRef(null); // 🔸 추가: 검색 마커 저장용
 
+  useImperativeHandle(ref, () => ({
+    handleAttractionClick,
+
+    // 🔄 중심 이동
+    moveToCoords: (lat, lng) => {
+      if (!mapInstanceRef.current) return;
+      const center = new window.kakao.maps.LatLng(lat, lng);
+      mapInstanceRef.current.setCenter(center);
+    },
+
+    // 📍 임의 마커 추가
+    addSearchMarker: (lat, lng) => {
+      if (!mapInstanceRef.current) return;
+
+      // 기존 마커 제거
+      if (searchMarkerRef.current) {
+        searchMarkerRef.current.setMap(null);
+      }
+
+      // 새 마커 생성
+      const position = new window.kakao.maps.LatLng(lat, lng);
+      const marker = new window.kakao.maps.Marker({
+        position,
+        map: mapInstanceRef.current,
+        title: '검색 위치'
+      });
+
+      searchMarkerRef.current = marker;
+    }
+  }), [handleAttractionClick]);
+
   return (
     <div className={styles.mapContainer}>
       <div ref={mapRef} className={styles.mapContent}></div>
@@ -346,12 +377,8 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
       {selectedAttraction && (
         <AttractionDetail
           attraction={selectedAttraction}
-          onCloseDetail={() => {
-            setSelectedAttraction(null);
-            setShowSidebar(true); // 이건 "닫기 버튼 누른 뒤에도 여전히 목록은 열어두기"를 의미
-          }}
+          onClose={handleCloseDetail}
         />
-        
       )}
     </div>
   );
