@@ -28,6 +28,20 @@ export default function Recommend() {
     category: '전체'
   });
 
+  // 검색 필터 적용 함수
+  const applySearchFilter = useCallback((term) => {
+    if (!term) {
+      setFilteredAttractions(attractions);
+      return;
+    }
+
+    const filtered = attractions.filter(item => 
+      item.name.toLowerCase().includes(term.toLowerCase()) ||
+      (item.description && item.description.toLowerCase().includes(term.toLowerCase()))
+    );
+    setFilteredAttractions(filtered);
+  }, [attractions]);
+
   // 위치 정보 디버깅
   useEffect(() => {
     if (location) {
@@ -277,38 +291,6 @@ export default function Recommend() {
         return '다양한 활동';
     }
   };
-
-// 0414 searchBar 관련
-const applySearchFilter = useCallback((term) => {
-  let filtered = [...attractions];
-
-  if (term && term.trim()) {
-    filtered = filtered.filter(item => {
-      const name = item.name?.toLowerCase() || '';
-      const desc = item.description?.toLowerCase() || '';
-      return name.includes(term.toLowerCase()) || desc.includes(term.toLowerCase());
-    });
-  }
-
-  if (activeFilters.type !== '전체') {
-    const typeMap = { '실내': 'indoor', '야외': 'outdoor' };
-    const filterType = typeMap[activeFilters.type];
-    filtered = filtered.filter(item => item.type === filterType);
-  }
-
-  if (activeFilters.category !== '전체') {
-    filtered = filtered.filter(item => {
-      if (!item.tags || !Array.isArray(item.tags)) return false;
-      return item.tags.some(tag =>
-        tag === activeFilters.category ||
-        tag.includes(activeFilters.category)
-      );
-    });
-  }
-
-  setFilteredAttractions(filtered);
-  setPage(1);
-}, [attractions, activeFilters]);
 
   return (
     <Layout hideFooter={true}>
