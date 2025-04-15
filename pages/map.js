@@ -1,18 +1,66 @@
-import { useState, useEffect, useRef } from 'react';
-import Head from 'next/head';
-import Layout from '../components/Layout/Layout';
-import KakaoMap from '../components/Map/KakaoMap';
-import SearchBar from '../components/Search/SearchBar'
-import useLocation from '../hooks/useLocation';
-import styles from '../styles/Map.module.css';
+import { useState, useEffect, useRef } from "react";
+import Head from "next/head";
+import Layout from "../components/Layout/Layout";
+import KakaoMap from "../components/Map/KakaoMap";
+import SearchBar from "../components/Search/SearchBar";
+import useLocation from "../hooks/useLocation";
+import styles from "../styles/Map.module.css";
 
 export default function Map() {
-  const { location, error: locationError, loading: locationLoading } = useLocation();
+  const {
+    location,
+    error: locationError,
+    loading: locationLoading,
+  } = useLocation();
   const [nearbyAttractions, setNearbyAttractions] = useState([]);
   const [selectedAttraction, setSelectedAttraction] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
   const mapRef = useRef(null);
   const [filteredAttractions, setFilteredAttractions] = useState([]); // 0414 searchBar 관련
+
+
+    // rollingBanner 에서 검색어로 이동
+    const router = useRouter();
+    const keyword = router.query.keyword || "";
+  
+    useEffect(() => {
+      if (!keyword) return;
+  
+      const fetchKeywordLocation = async () => {
+        try {
+          const res = await fetch(
+            `/api/attractions/search?name=${encodeURIComponent(keyword)}`
+          );
+          const data = await res.json();
+  
+          if (data && data.attraction) {
+            const lat =
+              data.attraction["위도(도)"] ||
+              data.attraction.location?.coordinates?.[1];
+            const lng =
+              data.attraction["경도(도)"] ||
+              data.attraction.location?.coordinates?.[0];
+  
+            // 📍 지도 이동
+            if (mapRef.current?.moveToCoords) {
+              mapRef.current.moveToCoords(lat, lng);
+            }
+  
+            // 🧭 검색 마커 표시
+            if (mapRef.current?.addSearchMarker) {
+              mapRef.current.addSearchMarker(lat, lng);
+            }
+  
+            // 👉 리스트에서도 강조해주고 싶다면:
+            setSelectedAttraction(data.attraction);
+          }
+        } catch (err) {
+          console.error("키워드 기반 관광지 검색 실패:", err);
+        }
+      };
+  
+      fetchKeywordLocation();
+    }, [keyword]);
 
   // 주변 관광지 정보 업데이트 핸들러
   const handleNearbyAttractionsLoad = (attractions) => {
@@ -61,30 +109,40 @@ export default function Map() {
         }
 
         // 📋 3. 관광지 리스트 필터링
-        const results = nearbyAttractions.filter(item =>
-          (item.name || '').includes(searchTerm) ||
-          (item.description || '').includes(searchTerm)
+        const results = nearbyAttractions.filter(
+          (item) =>
+            (item.name || "").includes(searchTerm) ||
+            (item.description || "").includes(searchTerm)
         );
         setFilteredAttractions(results);
       } else {
-        alert('해당 장소를 찾을 수 없어요!');
+        alert("해당 장소를 찾을 수 없어요!");
       }
     });
-  }
+  };
+
+
+
   return (
     <Layout hideFooter={true}>
       <Head>
         <title>지도로 관광지 찾기 | 날씨 관광 앱</title>
-        <meta name="description" content="현재 위치 주변의 관광지를 지도에서 찾아보세요." />
+        <meta
+          name="description"
+          content="현재 위치 주변의 관광지를 지도에서 찾아보세요."
+        />
       </Head>
       <div className={styles.mapPageContainer}>
-        <div id="attractions-sidebar" className={`${styles.attractionsSidebar} ${showSidebar ? styles.open : ''}`}>
+        <div
+          id="attractions-sidebar"
+          className={`${styles.attractionsSidebar} ${
+            showSidebar ? styles.open : ""
+          }`}
+        >
           <div className={styles.sidebarHeader}>
             <h2>주변 관광지</h2>
           </div>
-
-          <SearchBar onSearch={handleSearch} />  {/* 서치바 */}
-
+          <SearchBar onSearch={handleSearch} /> {/* 서치바 */}
           {nearbyAttractions.length === 0 ? (
             <div className={styles.emptyMessage}>
               <p>주변 관광지가 로드되지 않았습니다.</p>
@@ -92,31 +150,54 @@ export default function Map() {
             </div>
           ) : (
             <div className={styles.attractionsList}>
-              {(filteredAttractions.length > 0 ? filteredAttractions : nearbyAttractions).map((attraction, index) => ( // 0414 searchBar관련 마커이동동
-                <div
-                  key={index}
-                  className={`${styles.attractionItem} ${selectedAttraction === attraction ? styles.selected : ''}`}
-                  onClick={() => handleAttractionClick(attraction)}
-                >
-                  <h3>{attraction.name || attraction.title || '이름 없음'}</h3>
-                  <div className={styles.attractionDetails}>
-                    <span>{attraction.address || attraction.location || '주소 정보 없음'}</span>
-                    <span>{attraction.distance ? `${(attraction.distance / 1000).toFixed(1)}km` : ''}</span>
-                  </div>
-                  {attraction.tags && attraction.tags.length > 0 && (
-                    <div className={styles.tags}>
-                      {typeof attraction.tags === 'string'
-                        ? attraction.tags.split(',').map((tag, i) => (
-                          <span key={i} className={styles.tag}>{tag.trim()}</span>
-                        ))
-                        : attraction.tags.map((tag, i) => (
-                          <span key={i} className={styles.tag}>{tag}</span>
-                        ))
-                      }
+              {(filteredAttractions.length > 0
+                ? filteredAttractions
+                : nearbyAttractions
+              ).map(
+                (
+                  attraction,
+                  index // 0414 searchBar관련 마커이동동
+                ) => (
+                  <div
+                    key={index}
+                    className={`${styles.attractionItem} ${
+                      selectedAttraction === attraction ? styles.selected : ""
+                    }`}
+                    onClick={() => handleAttractionClick(attraction)}
+                  >
+                    <h3>
+                      {attraction.name || attraction.title || "이름 없음"}
+                    </h3>
+                    <div className={styles.attractionDetails}>
+                      <span>
+                        {attraction.address ||
+                          attraction.location ||
+                          "주소 정보 없음"}
+                      </span>
+                      <span>
+                        {attraction.distance
+                          ? `${(attraction.distance / 1000).toFixed(1)}km`
+                          : ""}
+                      </span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {attraction.tags && attraction.tags.length > 0 && (
+                      <div className={styles.tags}>
+                        {typeof attraction.tags === "string"
+                          ? attraction.tags.split(",").map((tag, i) => (
+                              <span key={i} className={styles.tag}>
+                                {tag.trim()}
+                              </span>
+                            ))
+                          : attraction.tags.map((tag, i) => (
+                              <span key={i} className={styles.tag}>
+                                {tag}
+                              </span>
+                            ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              )}
             </div>
           )}
         </div>
@@ -138,7 +219,7 @@ export default function Map() {
           {!locationLoading && (
             <KakaoMap
               ref={mapRef}
-              center={location || { latitude: 37.5665, longitude: 126.9780 }}
+              center={location || { latitude: 37.5665, longitude: 126.978 }}
               onMarkerClick={handleAttractionClick}
               onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
             />
@@ -149,7 +230,7 @@ export default function Map() {
           className={styles.toggleSidebarBtn}
           onClick={() => setShowSidebar(!showSidebar)}
         >
-          {showSidebar ? '사이드바 닫기' : '관광지 목록 보기'}
+          {showSidebar ? "사이드바 닫기" : "관광지 목록 보기"}
         </button>
       </div>
     </Layout>

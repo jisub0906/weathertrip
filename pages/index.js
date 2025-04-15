@@ -6,6 +6,7 @@ import useLocation from '../hooks/useLocation';
 import Link from 'next/link';
 import axios from 'axios';
 import styles from '../styles/Home.module.css';
+import RollingBanner from '../Banner/RollingBanner';
 
 // 컴포넌트 외부로 이동
 const REGION_COORDINATES = {
