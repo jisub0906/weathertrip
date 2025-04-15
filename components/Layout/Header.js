@@ -7,7 +7,7 @@ export default function Header() {
       {/* 상단 바: 로고 + 상태내역역 */}
       <div className={styles.topBar}>
         <div className={styles.logo}>
-          <Link href="/">weather-trip</Link>
+          <Link href="/">weather trip</Link>
         </div>
         <div className={styles.auth}>
           <Link href="/login">로그인</Link>
