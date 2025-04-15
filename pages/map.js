@@ -14,59 +14,90 @@ export default function Map() {
     loading: locationLoading,
   } = useLocation();
   const [nearbyAttractions, setNearbyAttractions] = useState([]);
+  const [allAttractions, setAllAttractions] = useState([]);
   const [selectedAttraction, setSelectedAttraction] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
   const mapRef = useRef(null);
-  const [filteredAttractions, setFilteredAttractions] = useState([]); // 0414 searchBar 관련
+  const [filteredAttractions, setFilteredAttractions] = useState([]);
+  const [isNearbyMode, setIsNearbyMode] = useState(false);
 
+  // rollingBanner 에서 검색어로 이동
+  const router = useRouter();
+  const keyword = router.query.keyword || "";
 
-    // rollingBanner 에서 검색어로 이동
-    const router = useRouter();
-    const keyword = router.query.keyword || "";
-  
-    useEffect(() => {
-      if (!keyword) return;
-  
-      const fetchKeywordLocation = async () => {
-        try {
-          const res = await fetch(
-            `/api/attractions/search?name=${encodeURIComponent(keyword)}`
-          );
-          const data = await res.json();
-  
-          if (data && data.attraction) {
-            const lat =
-              data.attraction["위도(도)"] ||
-              data.attraction.location?.coordinates?.[1];
-            const lng =
-              data.attraction["경도(도)"] ||
-              data.attraction.location?.coordinates?.[0];
-  
-            // 📍 지도 이동
-            if (mapRef.current?.moveToCoords) {
-              mapRef.current.moveToCoords(lat, lng);
-            }
-  
-            // 🧭 검색 마커 표시
-            if (mapRef.current?.addSearchMarker) {
-              mapRef.current.addSearchMarker(lat, lng);
-            }
-  
-            // 👉 리스트에서도 강조해주고 싶다면:
-            setSelectedAttraction(data.attraction);
+  useEffect(() => {
+    if (!keyword) return;
+
+    const fetchKeywordLocation = async () => {
+      try {
+        const res = await fetch(
+          `/api/attractions/search?name=${encodeURIComponent(keyword)}`
+        );
+        const data = await res.json();
+
+        if (data && data.attraction) {
+          const lat =
+            data.attraction["위도(도)"] ||
+            data.attraction.location?.coordinates?.[1];
+          const lng =
+            data.attraction["경도(도)"] ||
+            data.attraction.location?.coordinates?.[0];
+
+          // 📍 지도 이동
+          if (mapRef.current?.moveToCoords) {
+            mapRef.current.moveToCoords(lat, lng);
           }
-        } catch (err) {
-          console.error("키워드 기반 관광지 검색 실패:", err);
+
+          // 🧭 검색 마커 표시
+          if (mapRef.current?.addSearchMarker) {
+            mapRef.current.addSearchMarker(lat, lng);
+          }
+
+          // �� 리스트에서도 강조해주고 싶다면:
+          setSelectedAttraction(data.attraction);
         }
-      };
-  
-      fetchKeywordLocation();
-    }, [keyword]);
+      } catch (err) {
+        console.error("키워드 기반 관광지 검색 실패:", err);
+      }
+    };
+
+    fetchKeywordLocation();
+  }, [keyword]);
 
   // 주변 관광지 정보 업데이트 핸들러
   const handleNearbyAttractionsLoad = (attractions) => {
     setNearbyAttractions(attractions || []);
-    setFilteredAttractions(attractions || []); // 초기 검색 결과도 전체 데이터로 설정
+    if (!isNearbyMode) {
+      setFilteredAttractions(attractions || []);
+    }
+  };
+
+  // 전체 관광지 정보 업데이트 핸들러
+  const handleAllAttractionsLoad = (attractions) => {
+    setAllAttractions(attractions || []);
+    if (!isNearbyMode) {
+      setFilteredAttractions(attractions || []);
+    }
+  };
+
+  // 내 주변 관광지 보기 버튼 클릭 핸들러
+  const handleShowNearby = () => {
+    if (mapRef.current?.moveToCurrentLocation) {
+      mapRef.current.moveToCurrentLocation();
+      setIsNearbyMode(true);
+      setFilteredAttractions(nearbyAttractions);
+    }
+  };
+
+  // 전체 관광지 보기 버튼 클릭 핸들러
+  const handleShowAll = () => {
+    setIsNearbyMode(false);
+    // 즉시 전체 관광지 목록으로 변경
+    setFilteredAttractions(allAttractions);
+    // 전체 관광지 데이터 다시 로드
+    if (mapRef.current?.fetchAllAttractions) {
+      mapRef.current.fetchAllAttractions();
+    }
   };
 
   // 마커 클릭 핸들러
@@ -102,7 +133,7 @@ export default function Map() {
   // 0414 searchBar 관련 - 검색어로 지도 이동 + 관광지 필터링
   const handleSearch = async (searchTerm) => {
     if (!searchTerm.trim()) {
-      setFilteredAttractions(nearbyAttractions); // 검색어 없으면 전체 표시
+      setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
     }
 
@@ -125,8 +156,9 @@ export default function Map() {
           mapRef.current.addSearchMarker(lat, lng);
         }
 
-        // 📋 3. 관광지 리스트 필터링 - 전체 데이터에서 검색
-        const results = nearbyAttractions.filter(
+        // 📋 3. 관광지 리스트 필터링 - 현재 모드에 따라 다른 데이터에서 검색
+        const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
+        const results = searchData.filter(
           (item) =>
             (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
             (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,8 +166,9 @@ export default function Map() {
         );
         setFilteredAttractions(results);
       } else {
-        // 검색 결과가 없을 경우 전체 데이터에서 필터링
-        const results = nearbyAttractions.filter(
+        // 검색 결과가 없을 경우 현재 모드의 데이터에서 필터링
+        const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
+        const results = searchData.filter(
           (item) =>
             (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
             (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -145,8 +178,6 @@ export default function Map() {
       }
     });
   };
-
-
 
   return (
     <Layout hideFooter={true}>
@@ -166,73 +197,69 @@ export default function Map() {
         >
           <div className={styles.sidebarHeader}>
             <h2>관광지</h2>
-            <button
-              className={styles.currentLocationBtn}
-              onClick={() => {
-                if (mapRef.current?.moveToCurrentLocation) {
-                  mapRef.current.moveToCurrentLocation();
-                }
-              }}
-            >
-              내 주변 관광지 보기
-            </button>
+            <div className={styles.buttonGroup}>
+              <button
+                className={`${styles.modeButton} ${!isNearbyMode ? styles.active : ''}`}
+                onClick={handleShowAll}
+              >
+                전체 관광지
+              </button>
+              <button
+                className={`${styles.modeButton} ${isNearbyMode ? styles.active : ''}`}
+                onClick={handleShowNearby}
+              >
+                내 주변 관광지
+              </button>
+            </div>
           </div>
-          <SearchBar onSearch={handleSearch} />
-          {nearbyAttractions.length === 0 ? (
+          <div className={styles.searchBarContainer}>
+            {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
+          </div>
+          {filteredAttractions.length === 0 ? (
             <div className={styles.emptyMessage}>
-              <p>주변 관광지가 로드되지 않았습니다.</p>
-              <p>지도를 움직여 주변 관광지를 찾아보세요.</p>
+              <p>관광지가 로드되지 않았습니다.</p>
+              <p>지도를 움직여 관광지를 찾아보세요.</p>
             </div>
           ) : (
             <div className={styles.attractionsList}>
-              {(filteredAttractions.length > 0
-                ? filteredAttractions
-                : nearbyAttractions
-              ).map(
-                (
-                  attraction,
-                  index // 0414 searchBar관련 마커이동동
-                ) => (
-                  <div
-                    key={index}
-                    className={`${styles.attractionItem} ${
-                      selectedAttraction === attraction ? styles.selected : ""
-                    }`}
-                    onClick={() => handleAttractionClick(attraction)}
-                  >
-                    <h3>
-                      {attraction.name || attraction.title || "이름 없음"}
-                    </h3>
-                    <div className={styles.attractionDetails}>
-                      <span>
-                        {attraction.address ||
-                          attraction.location ||
-                          "주소 정보 없음"}
-                      </span>
-                      <span>
-                        {attraction.distance
-                          ? `${(attraction.distance / 1000).toFixed(1)}km`
-                          : ""}
-                      </span>
-                    </div>
-                    {attraction.tags && attraction.tags.length > 0 && (
-                      <div className={styles.tags}>
-                        {typeof attraction.tags === "string"
-                          ? attraction.tags.split(",").map((tag, i) => (
-                              <span key={i} className={styles.tag}>
-                                {tag.trim()}
-                              </span>
-                            ))
-                          : attraction.tags.map((tag, i) => (
-                              <span key={i} className={styles.tag}>
-                                {tag}
-                              </span>
-                            ))}
-                      </div>
-                    )}
+              {filteredAttractions.map((attraction, index) => (
+                <div
+                  key={index}
+                  className={`${styles.attractionItem} ${
+                    selectedAttraction === attraction ? styles.selected : ""
+                  }`}
+                  onClick={() => handleAttractionClick(attraction)}
+                >
+                  <h3>{attraction.name || attraction.title || "이름 없음"}</h3>
+                  <div className={styles.attractionDetails}>
+                    <span>
+                      {attraction.address ||
+                        attraction.location ||
+                        "주소 정보 없음"}
+                    </span>
+                    <span>
+                      {attraction.distance
+                        ? `${(attraction.distance / 1000).toFixed(1)}km`
+                        : ""}
+                    </span>
                   </div>
-                )
-              )}
+                  {attraction.tags && attraction.tags.length > 0 && (
+                    <div className={styles.tags}>
+                      {typeof attraction.tags === "string"
+                        ? attraction.tags.split(",").map((tag, i) => (
+                            <span key={i} className={styles.tag}>
+                              {tag.trim()}
+                            </span>
+                          ))
+                        : attraction.tags.map((tag, i) => (
+                            <span key={i} className={styles.tag}>
+                              {tag}
+                            </span>
+                          ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -257,10 +284,12 @@ export default function Map() {
               center={location || { latitude: 37.5665, longitude: 126.978 }}
               onMarkerClick={handleAttractionClick}
               onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
+              onAllAttractionsLoad={handleAllAttractionsLoad}
               onCloseDetail={() => {
                 setSelectedAttraction(null);
                 setShowSidebar(true);
               }}
+              isNearbyMode={isNearbyMode}
             />
           )}
         </div>
