@@ -141,42 +141,97 @@ const AttractionListSection = ({
 
       {!loading && !error && (
         <>
-          <div className={styles.attractionsGrid}>
-            {currentAttractions.length > 0 ? (
-              currentAttractions.map((attraction, index) => (
+          <div className={styles.attractionsContainer}>
+            {/* 데스크톱 가로형 카드 뷰 */}
+            <div className={styles.attractionsHorizontal}>
+              {currentAttractions.map((attraction, index) => (
+                <div key={attraction._id || index} className={styles.horizontalCard}>
+                  <div className={styles.cardMain}>
+                    <div className={styles.cardHeader}>
+                      <h3>{attraction.name}</h3>
+                      <p className={styles.address}>
+                        <span className={styles.icon}>📍</span>
+                        {attraction.address}
+                      </p>
+                    </div>
+                    <p className={styles.description}>{attraction.description}</p>
+                  </div>
+                  <div className={styles.cardDetails}>
+                    <div className={styles.detailsRow}>
+                      {attraction.distanceKm && (
+                        <p className={styles.distance}>
+                          <span className={styles.icon}>🚗</span>
+                          {attraction.distanceKm.toFixed(1)}km
+                        </p>
+                      )}
+                      {attraction.type && (
+                        <p className={styles.type}>
+                          <span className={styles.icon}>🏛️</span>
+                          {attraction.type === 'indoor' ? '실내' :
+                            attraction.type === 'outdoor' ? '야외' : '실내/야외'}
+                        </p>
+                      )}
+                    </div>
+                    {attraction.tags && (
+                      <div className={styles.tags}>
+                        {Array.isArray(attraction.tags)
+                          ? attraction.tags.map((tag, i) => (
+                            <span key={i} className={styles.tag}>{tag}</span>
+                          ))
+                          : typeof attraction.tags === 'string'
+                            ? attraction.tags.split(',').map((tag, i) => (
+                              <span key={i} className={styles.tag}>{tag.trim()}</span>
+                            ))
+                            : null
+                        }
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 모바일 카드형 뷰 */}
+            <div className={styles.attractionsGrid}>
+              {currentAttractions.map((attraction, index) => (
                 <div key={attraction._id || index} className={styles.attractionCard}>
                   <div className={styles.attractionInfo}>
                     <h3>{attraction.name}</h3>
-                    <p>{attraction.description}</p>
+                    <p className={styles.address}>{attraction.address}</p>
+                    <p className={styles.description}>{attraction.description}</p>
                   </div>
-                  {attraction.distanceKm && (
-                    <p className={styles.distance}>거리: {attraction.distanceKm.toFixed(1)}km</p>
-                  )}
-                  {attraction.type && (
-                    <p className={styles.type}>
-                      유형: {attraction.type === 'indoor' ? '실내' :
-                        attraction.type === 'outdoor' ? '야외' : '실내/야외'}
-                    </p>
-                  )}
-                  {attraction.tags && (
-                    <div className={styles.tags}>
-                      {Array.isArray(attraction.tags)
-                        ? attraction.tags.map((tag, i) => (
-                          <span key={i} className={styles.tag}>{tag}</span>
-                        ))
-                        : typeof attraction.tags === 'string'
-                          ? attraction.tags.split(',').map((tag, i) => (
-                            <span key={i} className={styles.tag}>{tag.trim()}</span>
+                  <div className={styles.attractionDetails}>
+                    {attraction.distanceKm && (
+                      <p className={styles.distance}>
+                        <span className={styles.icon}>📍</span>
+                        {attraction.distanceKm.toFixed(1)}km
+                      </p>
+                    )}
+                    {attraction.type && (
+                      <p className={styles.type}>
+                        <span className={styles.icon}>🏛️</span>
+                        {attraction.type === 'indoor' ? '실내' :
+                          attraction.type === 'outdoor' ? '야외' : '실내/야외'}
+                      </p>
+                    )}
+                    {attraction.tags && (
+                      <div className={styles.tags}>
+                        {Array.isArray(attraction.tags)
+                          ? attraction.tags.map((tag, i) => (
+                            <span key={i} className={styles.tag}>{tag}</span>
                           ))
-                          : null
-                      }
-                    </div>
-                  )}
+                          : typeof attraction.tags === 'string'
+                            ? attraction.tags.split(',').map((tag, i) => (
+                              <span key={i} className={styles.tag}>{tag.trim()}</span>
+                            ))
+                            : null
+                        }
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ))
-            ) : (
-              <p className={styles.noAttractions}>선택한 지역의 관광지 정보가 없습니다.</p>
-            )}
+              ))}
+            </div>
           </div>
 
           {attractions.length > attractionsPerPage && (

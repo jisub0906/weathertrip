@@ -812,69 +812,133 @@ a.secondary {
 
 .attractionsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin: 24px 0;
 }
 
 .attractionCard {
   background: #fff;
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
 .attractionCard:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.attractionCard h3 {
-  margin: 0 0 0.5rem 0;
-  color: #333;
-  font-size: 1.2rem;
+.attractionInfo {
+  flex: 1;
 }
 
-.attractionCard p {
+.attractionInfo h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.address {
+  font-size: 0.9rem;
   color: #666;
-  margin: 0.5rem 0;
-  flex-grow: 1;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.description {
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.attractionDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: auto;
 }
 
 .distance, .type {
   font-size: 0.9rem;
-  color: #555;
-  margin: 0.3rem 0;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.icon {
+  font-size: 1.1rem;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.8rem;
+  gap: 8px;
+  width: 100%;
 }
 
 .tag {
-  display: inline-block;
-  padding: 0.3rem 0.7rem;
-  background-color: #f1f8e9;
-  color: #558b2f;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  background: #f0f0f0;
+  color: #555;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
 }
 
-.noAttractions {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-  background: #f9f9f9;
-  border-radius: 8px;
+.tag:hover {
+  background: #e5e5e5;
+}
+
+@media (max-width: 768px) {
+  .attractionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    padding: 0 12px;
+  }
+
+  .attractionCard {
+    padding: 16px;
+  }
+
+  .attractionInfo h3 {
+    font-size: 1.1rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .attractionsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .tags {
+    gap: 6px;
+  }
+
+  .tag {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+  }
 }
 
 /* 페이지네이션 스타일 */
@@ -1159,5 +1223,219 @@ a.secondary {
   
   .mobileOnly {
     display: inline;
+  }
+}
+
+.attractionsContainer {
+  width: 100%;
+}
+
+.attractionsTable {
+  display: block;
+  width: 100%;
+  margin: 24px 0;
+}
+
+.attractionsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.attractionsTable th {
+  background: #f8f9fa;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.attractionsTable td {
+  padding: 16px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
+}
+
+.attractionsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.attractionsTable tr:hover {
+  background: #f8f9fa;
+}
+
+.attractionsTable h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.attractionsTable .description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.attractionsTable .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.attractionsTable .tag {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+}
+
+/* 모바일에서는 테이블 숨기고 그리드 표시 */
+@media (max-width: 768px) {
+  .attractionsTable {
+    display: none;
+  }
+  
+  .attractionsGrid {
+    display: grid;
+  }
+}
+
+/* 데스크톱에서는 그리드 숨기고 테이블 표시 */
+@media (min-width: 769px) {
+  .attractionsGrid {
+    display: none;
+  }
+  
+  .attractionsTable {
+    display: block;
+  }
+}
+
+.attractionsHorizontal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.horizontalCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  display: flex;
+  gap: 24px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.horizontalCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cardMain {
+  flex: 1;
+  min-width: 0; /* 텍스트 오버플로우 방지 */
+}
+
+.cardHeader {
+  margin-bottom: 12px;
+}
+
+.cardHeader h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.cardHeader .address {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cardDetails {
+  width: 280px;
+  border-left: 1px solid #eee;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detailsRow {
+  display: flex;
+  gap: 16px;
+}
+
+.horizontalCard .description {
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.horizontalCard .distance,
+.horizontalCard .type {
+  font-size: 0.95rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.horizontalCard .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.horizontalCard .tag {
+  background: #f0f0f0;
+  color: #555;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.horizontalCard .tag:hover {
+  background: #e5e5e5;
+}
+
+/* 모바일에서는 가로형 카드 숨기고 그리드 표시 */
+@media (max-width: 768px) {
+  .attractionsHorizontal {
+    display: none;
+  }
+  
+  .attractionsGrid {
+    display: grid;
+  }
+}
+
+/* 데스크톱에서는 그리드 숨기고 가로형 카드 표시 */
+@media (min-width: 769px) {
+  .attractionsGrid {
+    display: none;
+  }
+  
+  .attractionsHorizontal {
+    display: flex;
   }
 }
