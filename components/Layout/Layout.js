@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import TopBanner from './TopBanner';
 import Header from './Header';
 import Footer from './Footer';
 import styles from '../../styles/Layout.module.css';
 
-export default function Layout({ children,  hideFooter = false }) {
+export default function Layout({ children }) {
   const [scrolled, setScrolled] = useState(false);
 
   // 스크롤 감지 효과
@@ -27,7 +28,7 @@ export default function Layout({ children,  hideFooter = false }) {
       <main className={styles.main}>
         {children}
       </main>
-      {!hideFooter && <Footer />}
+      <Footer />
     </div>
   );
 } 
