@@ -251,16 +251,6 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
         const mapTypeControl = new window.kakao.maps.MapTypeControl();
         map.addControl(mapTypeControl, window.kakao.maps.ControlPosition.TOPRIGHT);
 
-        // 지도 이동 완료 이벤트 - 새로운 관광지 로딩 (디바운스 처리)
-        window.kakao.maps.event.addListener(map, 'dragend', function () {
-          // 이제 드래그 시에는 API 호출하지 않음
-        });
-
-        // 줌 변경 이벤트
-        window.kakao.maps.event.addListener(map, 'zoom_changed', function () {
-          // 이제 줌 변경 시에는 API 호출하지 않음
-        });
-
         // 초기화 완료 표시
         isMapInitializedRef.current = true;
 
@@ -280,15 +270,17 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
           infoWindow.open(map, locationMarker);
         }
 
-        // 전체 관광지 정보 로드
-        fetchAllAttractions(map);
+        // 전체 관광지 정보 로드 - 지도 초기화 후 약간의 지연을 두고 실행
+        setTimeout(() => {
+          fetchAllAttractions(map);
+        }, 1000);
 
         // 현재 위치 표시 버튼 활성화
         if (center) {
           setShowNearbyButton(true);
         }
       } catch (error) {
-        console.error('카카오맵 초기화 오류:', error);
+        console.error('카카오맵 초기화 중 오류 발생:', error);
       }
     });
 

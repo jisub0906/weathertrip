@@ -66,6 +66,7 @@ export default function Map() {
   // 주변 관광지 정보 업데이트 핸들러
   const handleNearbyAttractionsLoad = (attractions) => {
     setNearbyAttractions(attractions || []);
+    setFilteredAttractions(attractions || []); // 초기 검색 결과도 전체 데이터로 설정
   };
 
   // 마커 클릭 핸들러
@@ -75,6 +76,15 @@ export default function Map() {
     // 지도 컴포넌트의 함수 호출하여 상세 정보 표시
     if (mapRef.current?.handleAttractionClick) {
       mapRef.current.handleAttractionClick(attraction);
+    }
+
+    // 관광지 위치로 지도 이동
+    if (mapRef.current?.moveToCoords) {
+      const lat = attraction.location?.coordinates?.[1] || attraction["위도(도)"];
+      const lng = attraction.location?.coordinates?.[0] || attraction["경도(도)"];
+      if (lat && lng) {
+        mapRef.current.moveToCoords(lat, lng);
+      }
     }
 
     // 모바일에서 사이드바 자동 열기
@@ -115,15 +125,23 @@ export default function Map() {
           mapRef.current.addSearchMarker(lat, lng);
         }
 
-        // 📋 3. 관광지 리스트 필터링
+        // 📋 3. 관광지 리스트 필터링 - 전체 데이터에서 검색
         const results = nearbyAttractions.filter(
           (item) =>
-            (item.name || "").includes(searchTerm) ||
-            (item.description || "").includes(searchTerm)
+            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.address || "").toLowerCase().includes(searchTerm.toLowerCase())
         );
         setFilteredAttractions(results);
       } else {
-        alert("해당 장소를 찾을 수 없어요!");
+        // 검색 결과가 없을 경우 전체 데이터에서 필터링
+        const results = nearbyAttractions.filter(
+          (item) =>
+            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.address || "").toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredAttractions(results);
       }
     });
   };
