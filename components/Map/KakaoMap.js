@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, forwardRef } from 'react';
+import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import axios from 'axios';
 import styles from '../../styles/Map.module.css';
 import AttractionDetail from '../Attractions/AttractionDetail';
@@ -251,16 +251,6 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
         const mapTypeControl = new window.kakao.maps.MapTypeControl();
         map.addControl(mapTypeControl, window.kakao.maps.ControlPosition.TOPRIGHT);
 
-        // 지도 이동 완료 이벤트 - 새로운 관광지 로딩 (디바운스 처리)
-        window.kakao.maps.event.addListener(map, 'dragend', function () {
-          // 이제 드래그 시에는 API 호출하지 않음
-        });
-
-        // 줌 변경 이벤트
-        window.kakao.maps.event.addListener(map, 'zoom_changed', function () {
-          // 이제 줌 변경 시에는 API 호출하지 않음
-        });
-
         // 초기화 완료 표시
         isMapInitializedRef.current = true;
 
@@ -280,15 +270,17 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
           infoWindow.open(map, locationMarker);
         }
 
-        // 전체 관광지 정보 로드
-        fetchAllAttractions(map);
+        // 전체 관광지 정보 로드 - 지도 초기화 후 약간의 지연을 두고 실행
+        setTimeout(() => {
+          fetchAllAttractions(map);
+        }, 1000);
 
         // 현재 위치 표시 버튼 활성화
         if (center) {
           setShowNearbyButton(true);
         }
       } catch (error) {
-        console.error('카카오맵 초기화 오류:', error);
+        console.error('카카오맵 초기화 중 오류 발생:', error);
       }
     });
 
@@ -326,17 +318,37 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
   // 부모 컴포넌트에서 호출할 수 있도록 함수 노출  // 0414 searchBar 지도중심이동 및 임의마커생성
   const searchMarkerRef = useRef(null); // 🔸 추가: 검색 마커 저장용
 
+  useImperativeHandle(ref, () => ({
+    handleAttractionClick,
+    moveToCurrentLocation,
+    moveToCoords: (lat, lng) => {
+      if (!mapInstanceRef.current) return;
+      const center = new window.kakao.maps.LatLng(lat, lng);
+      mapInstanceRef.current.setCenter(center);
+    },
+    addSearchMarker: (lat, lng) => {
+      if (!mapInstanceRef.current) return;
+
+      // 기존 마커 제거
+      if (searchMarkerRef.current) {
+        searchMarkerRef.current.setMap(null);
+      }
+
+      // 새 마커 생성
+      const position = new window.kakao.maps.LatLng(lat, lng);
+      const marker = new window.kakao.maps.Marker({
+        position,
+        map: mapInstanceRef.current,
+        title: '검색 위치'
+      });
+
+      searchMarkerRef.current = marker;
+    }
+  }), [handleAttractionClick, moveToCurrentLocation]);
+
   return (
     <div className={styles.mapContainer}>
       <div ref={mapRef} className={styles.mapContent}></div>
-      {showNearbyButton && (
-        <button
-          className={styles.currentLocationBtn}
-          onClick={moveToCurrentLocation}
-        >
-          내 주변 관광지 보기
-        </button>
-      )}
       {isLoading && (
         <div className={styles.mapLoadingOverlay}>
           <div className={styles.mapLoadingSpinner}></div>
@@ -346,12 +358,8 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
       {selectedAttraction && (
         <AttractionDetail
           attraction={selectedAttraction}
-          onCloseDetail={() => {
-            setSelectedAttraction(null);
-            setShowSidebar(true); // 이건 "닫기 버튼 누른 뒤에도 여전히 목록은 열어두기"를 의미
-          }}
+          onClose={handleCloseDetail}
         />
-        
       )}
     </div>
   );
