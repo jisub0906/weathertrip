@@ -7,6 +7,7 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [attractions, setAttractions] = useState([]);
+  const [allAttractionsCached, setAllAttractionsCached] = useState([]); // 전체 관광지 데이터 캐시
   const [isLoading, setIsLoading] = useState(false);
   const debounceTimerRef = useRef(null);
   const markersRef = useRef([]);
@@ -38,92 +39,124 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
     setIsLoading(true);
 
     try {
-      // 이전 마커 제거
-      clearMarkers();
+      // 캐시된 데이터가 있으면 재사용
+      if (allAttractionsCached.length > 0) {
+        setAttractions(allAttractionsCached);
+        
+        // 부모 컴포넌트에 관광지 목록 전달
+        if (onAllAttractionsLoad) {
+          onAllAttractionsLoad(allAttractionsCached);
+        }
 
+        // 마커 생성
+        allAttractionsCached.forEach(attraction => {
+          const coords = attraction.location.coordinates;
+          const position = new window.kakao.maps.LatLng(coords[1], coords[0]);
+
+          // 마커 생성
+          const marker = new window.kakao.maps.Marker({
+            position: position,
+            map: map,
+            title: attraction.name
+          });
+
+          // 마커 참조 저장
+          markersRef.current.push(marker);
+
+          // 마커 클릭 이벤트
+          window.kakao.maps.event.addListener(marker, 'click', function () {
+            if (onMarkerClick) {
+              onMarkerClick(attraction);
+            }
+            setSelectedAttraction(attraction);
+
+            const content = `
+              <div style="padding:8px;width:220px;">
+                <h3 style="margin:0 0 8px 0;font-size:14px;font-weight:bold;">${attraction.name}</h3>
+                <p style="margin:0;font-size:12px;color:#666;">
+                  ${attraction.type === 'indoor' ? '실내' :
+                attraction.type === 'outdoor' ? '야외' : '실내/야외'}
+                </p>
+              </div>
+            `;
+
+            const infoWindow = new window.kakao.maps.InfoWindow({
+              content: content,
+              removable: true
+            });
+
+            infoWindow.open(map, marker);
+          });
+        });
+        
+        setIsLoading(false);
+        return;
+      }
+
+      // 캐시된 데이터가 없을 경우에만 API 호출
       const response = await axios.get('/api/attractions/all');
 
       if (response.data.attractions) {
         const allAttractions = response.data.attractions;
         setAttractions(allAttractions);
+        setAllAttractionsCached(allAttractions); // 데이터 캐시
 
         // 부모 컴포넌트에 관광지 목록 전달
         if (onAllAttractionsLoad) {
           onAllAttractionsLoad(allAttractions);
         }
 
-        // 주변 관광지 모드가 아닐 때만 마커 생성
-        if (!isNearbyMode) {
-          // 관광지 마커 생성
-          allAttractions.forEach(attraction => {
-            const coords = attraction.location.coordinates;
-            const position = new window.kakao.maps.LatLng(coords[1], coords[0]);
+        // 관광지 마커 생성
+        allAttractions.forEach(attraction => {
+          const coords = attraction.location.coordinates;
+          const position = new window.kakao.maps.LatLng(coords[1], coords[0]);
 
-            // 마커 생성
-            const marker = new window.kakao.maps.Marker({
-              position: position,
-              map: map,
-              title: attraction.name
-            });
-
-            // 마커 참조 저장
-            markersRef.current.push(marker);
-
-            // 마커 클릭 이벤트
-            window.kakao.maps.event.addListener(marker, 'click', function () {
-              if (onMarkerClick) {
-                onMarkerClick(attraction);
-              }
-              // 상세 정보 표시
-              setSelectedAttraction(attraction);
-
-              // 간단한 인포윈도우 생성
-              const content = `
-                <div style="padding:8px;width:220px;">
-                  <h3 style="margin:0 0 8px 0;font-size:14px;font-weight:bold;">${attraction.name}</h3>
-                  <p style="margin:0;font-size:12px;color:#666;">
-                    ${attraction.type === 'indoor' ? '실내' :
-                  attraction.type === 'outdoor' ? '야외' : '실내/야외'}
-                  </p>
-                </div>
-              `;
-
-              const infoWindow = new window.kakao.maps.InfoWindow({
-                content: content,
-                removable: true
-              });
-
-              infoWindow.open(map, marker);
-            });
+          // 마커 생성
+          const marker = new window.kakao.maps.Marker({
+            position: position,
+            map: map,
+            title: attraction.name
           });
-        }
+
+          // 마커 참조 저장
+          markersRef.current.push(marker);
+
+          // 마커 클릭 이벤트
+          window.kakao.maps.event.addListener(marker, 'click', function () {
+            if (onMarkerClick) {
+              onMarkerClick(attraction);
+            }
+            setSelectedAttraction(attraction);
+
+            const content = `
+              <div style="padding:8px;width:220px;">
+                <h3 style="margin:0 0 8px 0;font-size:14px;font-weight:bold;">${attraction.name}</h3>
+                <p style="margin:0;font-size:12px;color:#666;">
+                  ${attraction.type === 'indoor' ? '실내' :
+                attraction.type === 'outdoor' ? '야외' : '실내/야외'}
+                </p>
+              </div>
+            `;
+
+            const infoWindow = new window.kakao.maps.InfoWindow({
+              content: content,
+              removable: true
+            });
+
+            infoWindow.open(map, marker);
+          });
+        });
       }
     } catch (error) {
       console.error('관광지 정보 가져오기 오류:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [clearMarkers, onMarkerClick, onAllAttractionsLoad, isNearbyMode]);
+  }, [clearMarkers, onMarkerClick, onAllAttractionsLoad, allAttractionsCached]);
 
   // 주변 관광지 정보 가져오기
   const fetchNearbyAttractions = useCallback(async (location, map, radius = 3) => {
     if (!location || !map) return;
-
-    // 이전에 동일한 위치로 이미 요청한 경우 중복 요청 방지
-    if (previousCenterRef.current) {
-      const prevLat = previousCenterRef.current.latitude;
-      const prevLng = previousCenterRef.current.longitude;
-      const currLat = location.latitude;
-      const currLng = location.longitude;
-
-      // 위치가 정확히 같으면 요청 중복 방지
-      if (prevLat === currLat && prevLng === currLng) {
-        return;
-      }
-    }
-
-    // 현재 위치 기록
-    previousCenterRef.current = { ...location };
 
     setIsLoading(true);
 
@@ -149,6 +182,16 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
           onNearbyAttractionsLoad(newAttractions);
         }
 
+        // 현재 위치 마커 표시
+        const locationMarker = new window.kakao.maps.Marker({
+          position: new window.kakao.maps.LatLng(location.latitude, location.longitude),
+          map: map,
+          title: '현재 위치'
+        });
+
+        // 마커 참조 저장 (현재 위치 마커도 포함)
+        markersRef.current.push(locationMarker);
+
         // 관광지 마커 생성
         newAttractions.forEach(attraction => {
           const coords = attraction.location.coordinates;
@@ -169,10 +212,8 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
             if (onMarkerClick) {
               onMarkerClick(attraction);
             }
-            // 상세 정보 표시
             setSelectedAttraction(attraction);
 
-            // 간단한 인포윈도우 생성
             const content = `
               <div style="padding:8px;width:220px;">
                 <h3 style="margin:0 0 8px 0;font-size:14px;font-weight:bold;">${attraction.name}</h3>
@@ -194,6 +235,13 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
             infoWindow.open(map, marker);
           });
         });
+
+        // 현재 위치 정보 창
+        const infoContent = '<div style="padding:5px;width:150px;text-align:center;"><strong>현재 위치</strong></div>';
+        const infoWindow = new window.kakao.maps.InfoWindow({
+          content: infoContent
+        });
+        infoWindow.open(map, locationMarker);
       }
     } catch (error) {
       console.error('관광지 정보 가져오기 오류:', error);
@@ -366,95 +414,25 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
 
   // isNearbyMode가 변경될 때 마커 업데이트
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    const updateMarkers = async () => {
+      if (!mapInstanceRef.current) return;
 
-    // 이전 마커 제거
-    clearMarkers();
+      // 이전 마커 제거
+      clearMarkers();
 
-    // 현재 모드에 따라 마커 생성
-    if (isNearbyMode) {
-      // 주변 관광지 마커 생성
-      attractions.forEach(attraction => {
-        if (attraction.distanceKm) { // 주변 관광지만 표시
-          const coords = attraction.location.coordinates;
-          const position = new window.kakao.maps.LatLng(coords[1], coords[0]);
-
-          const marker = new window.kakao.maps.Marker({
-            position: position,
-            map: mapInstanceRef.current,
-            title: attraction.name
-          });
-
-          markersRef.current.push(marker);
-
-          window.kakao.maps.event.addListener(marker, 'click', function () {
-            if (onMarkerClick) {
-              onMarkerClick(attraction);
-            }
-            setSelectedAttraction(attraction);
-
-            const content = `
-              <div style="padding:8px;width:220px;">
-                <h3 style="margin:0 0 8px 0;font-size:14px;font-weight:bold;">${attraction.name}</h3>
-                <p style="margin:0;font-size:12px;color:#666;">
-                  ${attraction.type === 'indoor' ? '실내' :
-                attraction.type === 'outdoor' ? '야외' : '실내/야외'}
-                </p>
-                <p style="margin:4px 0 0 0;font-size:12px;color:#333;">
-                  ${(attraction.distanceKm || 0).toFixed(1)}km
-                </p>
-              </div>
-            `;
-
-            const infoWindow = new window.kakao.maps.InfoWindow({
-              content: content,
-              removable: true
-            });
-
-            infoWindow.open(mapInstanceRef.current, marker);
-          });
+      if (isNearbyMode) {
+        if (center) {
+          // 주변 관광지 데이터 가져오기
+          await fetchNearbyAttractions(center, mapInstanceRef.current);
         }
-      });
-    } else {
-      // 전체 관광지 마커 생성
-      attractions.forEach(attraction => {
-        const coords = attraction.location.coordinates;
-        const position = new window.kakao.maps.LatLng(coords[1], coords[0]);
+      } else {
+        // 전체 관광지 데이터 가져오기 (캐시된 데이터 사용)
+        await fetchAllAttractions(mapInstanceRef.current);
+      }
+    };
 
-        const marker = new window.kakao.maps.Marker({
-          position: position,
-          map: mapInstanceRef.current,
-          title: attraction.name
-        });
-
-        markersRef.current.push(marker);
-
-        window.kakao.maps.event.addListener(marker, 'click', function () {
-          if (onMarkerClick) {
-            onMarkerClick(attraction);
-          }
-          setSelectedAttraction(attraction);
-
-          const content = `
-            <div style="padding:8px;width:220px;">
-              <h3 style="margin:0 0 8px 0;font-size:14px;font-weight:bold;">${attraction.name}</h3>
-              <p style="margin:0;font-size:12px;color:#666;">
-                ${attraction.type === 'indoor' ? '실내' :
-              attraction.type === 'outdoor' ? '야외' : '실내/야외'}
-              </p>
-            </div>
-          `;
-
-          const infoWindow = new window.kakao.maps.InfoWindow({
-            content: content,
-            removable: true
-          });
-
-          infoWindow.open(mapInstanceRef.current, marker);
-        });
-      });
-    }
-  }, [isNearbyMode, attractions, clearMarkers, onMarkerClick]);
+    updateMarkers();
+  }, [isNearbyMode, center]);
 
   return (
     <div className={styles.mapContainer}>
