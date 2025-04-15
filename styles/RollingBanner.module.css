@@ -1,15 +1,19 @@
 .banner {
     position: relative;
     width: 100%;
-    max-height: 500px;
+    padding-bottom: 42.85%; /* 21:9 비율 */
     overflow: hidden;
   }
   
   .banner img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
-    height: auto;
-    display: block;
+    height: 100%;
     object-fit: cover;
+    display: block;
   }
   
   .overlay {
@@ -22,6 +26,7 @@
     border-radius: 8px;
     font-size: 2rem;
     font-weight: bold;
+    z-index: 2;
   }
   
   .prev,
@@ -36,6 +41,7 @@
     padding: 0.5rem 1rem;
     cursor: pointer;
     z-index: 100;
+    transition: all 0.3s ease;
   }
   
   .prev {
@@ -49,5 +55,55 @@
   .prev:hover,
   .next:hover {
     background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  /* 반응형 스타일 */
+  @media (max-width: 1440px) {
+    .banner {
+      padding-bottom: 46.25%; /* 16:7.4 비율 */
+    }
+  }
+  
+  @media (max-width: 1024px) {
+    .banner {
+      padding-bottom: 50%; /* 2:1 비율 */
+    }
+    
+    .overlay {
+      font-size: 1.5rem;
+      padding: 0.8rem 1.5rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .banner {
+      padding-bottom: 56.25%; /* 16:9 비율 */
+    }
+    
+    .overlay {
+      font-size: 1.2rem;
+      padding: 0.6rem 1.2rem;
+      bottom: 20px;
+      left: 20px;
+    }
+    
+    .prev,
+    .next {
+      font-size: 2rem;
+      padding: 0.3rem 0.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .banner {
+      padding-bottom: 66.67%; /* 3:2 비율 */
+    }
+    
+    .overlay {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      bottom: 15px;
+      left: 15px;
+    }
   }
   
