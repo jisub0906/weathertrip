@@ -14,7 +14,7 @@
   overflow: hidden;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
   background-color: var(--card-bg);
-  margin-bottom: 3rem;
+  margin-top: 113px;
 }
 
 .mapPageContainer {
@@ -272,7 +272,7 @@
   z-index: 20;
   transition: transform 0.3s ease;
   position: fixed;
-  margin-top: 62px;
+  margin-top: 113px;
 }
 
 .sidebarHeader {
