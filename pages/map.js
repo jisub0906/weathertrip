@@ -236,13 +236,6 @@ export default function Map() {
             />
           )}
         </div>
-
-        <button
-          className={styles.toggleSidebarBtn}
-          onClick={() => setShowSidebar(!showSidebar)}
-        >
-          {showSidebar ? "사이드바 닫기" : "관광지 목록 보기"}
-        </button>
       </div>
     </Layout>
   );
