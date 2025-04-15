@@ -421,7 +421,7 @@ export default function Recommend() {
 
                     <div className={styles.postImage}>
                     <Image 
-                      src={attraction.images?.[0] || `https://via.placeholder.com/600x600?text=${attraction.name}`} 
+                      src={attraction.images?.[0] || '/images/default-attraction.jpg'} 
                       alt={attraction.name}
                       width={600}
                       height={600}

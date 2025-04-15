@@ -39,6 +39,16 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const attractionsPerPage = 8;
+  const [popularAttractions, setPopularAttractions] = useState([]);
+  const [popularLoading, setPopularLoading] = useState(false);
+
+  // 임시 인기 관광지 데이터
+  const tempPopularAttractions = [
+    { _id: 'temp1', name: '경복궁', likeCount: 1250, address: '서울특별시 종로구', type: 'outdoor', tags: ['역사', '문화', '전통'] },
+    { _id: 'temp2', name: '해운대 해수욕장', likeCount: 1100, address: '부산광역시 해운대구', type: 'outdoor', tags: ['자연', '힐링'] },
+    { _id: 'temp3', name: '남산서울타워', likeCount: 980, address: '서울특별시 용산구', type: 'indoor', tags: ['랜드마크', '전망대'] },
+    // ... 추가 임시 데이터
+  ];
 
   const fetchAttractions = useCallback(async (region) => {
     setLoading(true);
@@ -78,6 +88,35 @@ export default function Home() {
   useEffect(() => {
     fetchAttractions('seoul');
   }, [fetchAttractions]);
+
+  // 인기 관광지 가져오기
+  const fetchPopularAttractions = useCallback(async () => {
+    setPopularLoading(true);
+    try {
+      const response = await axios.get('/api/attractions/popular', {
+        params: {
+          limit: 20
+        }
+      });
+
+      if (response.data && response.data.attractions && response.data.attractions.length > 0) {
+        setPopularAttractions(response.data.attractions);
+      } else {
+        // 데이터가 없을 경우 임시 데이터 사용
+        setPopularAttractions(tempPopularAttractions);
+      }
+    } catch (err) {
+      console.error('인기 관광지 데이터 로딩 오류:', err);
+      // 에러 발생 시 임시 데이터 사용
+      setPopularAttractions(tempPopularAttractions);
+    } finally {
+      setPopularLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPopularAttractions();
+  }, [fetchPopularAttractions]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -269,6 +308,36 @@ export default function Home() {
                 </div>
               )}
             </>
+          )}
+        </div>
+      </section>
+
+      {/* Popular Attractions Section */}
+      <section className={styles.popularSection}>
+        <div className={styles.container}>
+          <h2 className={styles.sectionTitle}>인기 여행지</h2>
+          {popularLoading ? (
+            <div className={styles.loading}>로딩 중...</div>
+          ) : (
+            <div className={styles.popularGrid}>
+              {popularAttractions.map((attraction, index) => (
+                <div key={attraction._id} className={styles.popularCard}>
+                  <div className={styles.rankBadge}>#{index + 1}</div>
+                  <h3>{attraction.name}</h3>
+                  <div className={styles.likeCount}>
+                    ❤️ {attraction.likeCount}
+                  </div>
+                  <div className={styles.address}>{attraction.address}</div>
+                  <div className={styles.tags}>
+                    {attraction.tags.map((tag, i) => (
+                      <span key={i} className={styles.tag}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </section>
