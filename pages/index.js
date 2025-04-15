@@ -320,10 +320,13 @@ export default function Home() {
                   <div className={styles.rankBadge}>#{index + 1}</div>
                   <div className={styles.imageContainer}>
                     {Array.isArray(attraction.images) && attraction.images.length > 0 ? (
-                      <img
+                      <Image
                         src={attraction.images[0]}
                         alt={attraction.name}
-                        className={styles.attractionImage}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: 'cover' }}
+                        priority={index < 2}
                       />
                     ) : (
                       <div className={styles.noImage}>이미지 없음</div>
@@ -334,7 +337,7 @@ export default function Home() {
                     ❤️ {attraction.likeCount || 0}
                   </div>
                   <div className={styles.rating}>
-                    ⭐ {attraction.averageRating?.toFixed(1) || '0.0'} ({attraction.reviewCount || 0} 리뷰)
+                    ⭐ {attraction.averageRating?.toFixed(1) || '0.0'}
                   </div>
                   <div className={styles.address}>{attraction.address}</div>
                   <div className={styles.description}>
