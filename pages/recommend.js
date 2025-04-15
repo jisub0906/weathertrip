@@ -302,6 +302,16 @@ export default function Recommend() {
       <section className="section">
         <div className="container">
           <h1 className={styles.pageTitle}>맞춤형 관광지 추천</h1>
+          <div className={styles.heroSection}>
+            <p className={styles.heroText}>현재 위치와 날씨를 기반으로<br />맞춤형 여행지를 추천해드려요</p>
+            <div className={styles.heroIcons}>
+              <span>📍</span>
+              <span>+</span>
+              <span>🌤️</span>
+              <span>=</span>
+              <span>✨</span>
+            </div>
+          </div>
 
           {/* 위치 정보 로딩/오류 상태 표시 */}
           {locationLoading && (
@@ -421,7 +431,7 @@ export default function Recommend() {
 
                     <div className={styles.postImage}>
                     <Image 
-                      src={attraction.images?.[0] || '/images/default-attraction.jpg'} 
+                      src={attraction.images?.[0] || '/images/logo.png'} 
                       alt={attraction.name}
                       width={600}
                       height={600}

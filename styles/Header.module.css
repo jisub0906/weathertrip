@@ -22,20 +22,15 @@
 }
 
 .auth {
-  font-size: 0.95rem;
+  font-size: 1.5rem;
 }
 
 .auth a {
-  color: #0070f3;
+  color:rgb(0, 0, 0);
   text-decoration: none;
-  margin-left: 0.5rem;
+  margin-left: 2rem;
   font-weight: 500;
 }
-
-.auth span {
-  color: #ccc;
-}
-
 /* 하단: 네비게이션 바 */
 .navBar {
   border-top: 1px solid #eee;

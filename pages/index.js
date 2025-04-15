@@ -7,6 +7,7 @@ import useLocation from '../hooks/useLocation';
 import Link from 'next/link';
 import axios from 'axios';
 import styles from '../styles/Home.module.css';
+import Image from 'next/image';
 
 
 // 컴포넌트 외부로 이동
@@ -41,14 +42,6 @@ export default function Home() {
   const attractionsPerPage = 8;
   const [popularAttractions, setPopularAttractions] = useState([]);
   const [popularLoading, setPopularLoading] = useState(false);
-
-  // 임시 인기 관광지 데이터
-  const tempPopularAttractions = [
-    { _id: 'temp1', name: '경복궁', likeCount: 1250, address: '서울특별시 종로구', type: 'outdoor', tags: ['역사', '문화', '전통'] },
-    { _id: 'temp2', name: '해운대 해수욕장', likeCount: 1100, address: '부산광역시 해운대구', type: 'outdoor', tags: ['자연', '힐링'] },
-    { _id: 'temp3', name: '남산서울타워', likeCount: 980, address: '서울특별시 용산구', type: 'indoor', tags: ['랜드마크', '전망대'] },
-    // ... 추가 임시 데이터
-  ];
 
   const fetchAttractions = useCallback(async (region) => {
     setLoading(true);
@@ -90,33 +83,31 @@ export default function Home() {
   }, [fetchAttractions]);
 
   // 인기 관광지 가져오기
-  const fetchPopularAttractions = useCallback(async () => {
-    setPopularLoading(true);
-    try {
-      const response = await axios.get('/api/attractions/popular', {
-        params: {
-          limit: 20
-        }
-      });
-
-      if (response.data && response.data.attractions && response.data.attractions.length > 0) {
-        setPopularAttractions(response.data.attractions);
-      } else {
-        // 데이터가 없을 경우 임시 데이터 사용
-        setPopularAttractions(tempPopularAttractions);
-      }
-    } catch (err) {
-      console.error('인기 관광지 데이터 로딩 오류:', err);
-      // 에러 발생 시 임시 데이터 사용
-      setPopularAttractions(tempPopularAttractions);
-    } finally {
-      setPopularLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
+    const fetchPopularAttractions = async () => {
+      setPopularLoading(true);
+      try {
+        console.log('인기 관광지 데이터 요청 시작');
+        const response = await axios.get('/api/attractions/popular');
+        console.log('인기 관광지 API 응답:', response.data);
+        
+        if (response.data.success && response.data.data.attractions) {
+          console.log('설정할 인기 관광지 데이터:', response.data.data.attractions);
+          setPopularAttractions(response.data.data.attractions);
+        } else {
+          console.log('인기 관광지 데이터 없음');
+          setPopularAttractions([]);
+        }
+      } catch (error) {
+        console.error('인기 관광지 데이터 로딩 실패:', error);
+        setPopularAttractions([]);
+      } finally {
+        setPopularLoading(false);
+      }
+    };
+
     fetchPopularAttractions();
-  }, [fetchPopularAttractions]);
+  }, []); // 빈 의존성 배열 유지
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -318,18 +309,43 @@ export default function Home() {
           <h2 className={styles.sectionTitle}>인기 여행지</h2>
           {popularLoading ? (
             <div className={styles.loading}>로딩 중...</div>
+          ) : popularAttractions.length === 0 ? (
+            <div className={styles.noAttractions}>
+              아직 인기 여행지가 없습니다. 여행지에 좋아요를 눌러주세요!
+            </div>
           ) : (
             <div className={styles.popularGrid}>
               {popularAttractions.map((attraction, index) => (
                 <div key={attraction._id} className={styles.popularCard}>
                   <div className={styles.rankBadge}>#{index + 1}</div>
+                  <div className={styles.imageContainer}>
+                    {Array.isArray(attraction.images) && attraction.images.length > 0 ? (
+                      <Image
+                        src={attraction.images[0]}
+                        alt={attraction.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: 'cover' }}
+                        priority={index < 2}
+                      />
+                    ) : (
+                      <div className={styles.noImage}>이미지 없음</div>
+                    )}
+                  </div>
                   <h3>{attraction.name}</h3>
                   <div className={styles.likeCount}>
-                    ❤️ {attraction.likeCount}
+                    ❤️ {attraction.likeCount || 0}
+                  </div>
+                  <div className={styles.rating}>
+                    ⭐ {attraction.averageRating?.toFixed(1) || '0.0'}
                   </div>
                   <div className={styles.address}>{attraction.address}</div>
+                  <div className={styles.description}>
+                    {attraction.description?.slice(0, 100)}
+                    {attraction.description?.length > 100 ? '...' : ''}
+                  </div>
                   <div className={styles.tags}>
-                    {attraction.tags.map((tag, i) => (
+                    {attraction.tags?.map((tag, i) => (
                       <span key={i} className={styles.tag}>
                         {tag}
                       </span>
