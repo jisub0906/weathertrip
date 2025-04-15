@@ -165,9 +165,19 @@ export default function Map() {
           }`}
         >
           <div className={styles.sidebarHeader}>
-            <h2>주변 관광지</h2>
+            <h2>관광지</h2>
+            <button
+              className={styles.currentLocationBtn}
+              onClick={() => {
+                if (mapRef.current?.moveToCurrentLocation) {
+                  mapRef.current.moveToCurrentLocation();
+                }
+              }}
+            >
+              내 주변 관광지 보기
+            </button>
           </div>
-          <SearchBar onSearch={handleSearch} /> {/* 서치바 */}
+          <SearchBar onSearch={handleSearch} />
           {nearbyAttractions.length === 0 ? (
             <div className={styles.emptyMessage}>
               <p>주변 관광지가 로드되지 않았습니다.</p>

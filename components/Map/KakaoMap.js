@@ -320,15 +320,12 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
 
   useImperativeHandle(ref, () => ({
     handleAttractionClick,
-
-    // 🔄 중심 이동
+    moveToCurrentLocation,
     moveToCoords: (lat, lng) => {
       if (!mapInstanceRef.current) return;
       const center = new window.kakao.maps.LatLng(lat, lng);
       mapInstanceRef.current.setCenter(center);
     },
-
-    // 📍 임의 마커 추가
     addSearchMarker: (lat, lng) => {
       if (!mapInstanceRef.current) return;
 
@@ -347,19 +344,11 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
 
       searchMarkerRef.current = marker;
     }
-  }), [handleAttractionClick]);
+  }), [handleAttractionClick, moveToCurrentLocation]);
 
   return (
     <div className={styles.mapContainer}>
       <div ref={mapRef} className={styles.mapContent}></div>
-      {showNearbyButton && (
-        <button
-          className={styles.currentLocationBtn}
-          onClick={moveToCurrentLocation}
-        >
-          내 주변 관광지 보기
-        </button>
-      )}
       {isLoading && (
         <div className={styles.mapLoadingOverlay}>
           <div className={styles.mapLoadingSpinner}></div>
