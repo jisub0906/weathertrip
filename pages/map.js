@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
 import Head from "next/head";
 import Layout from "../components/Layout/Layout";
 import KakaoMap from "../components/Map/KakaoMap";

@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Head from 'next/head';
 import Layout from '../components/Layout/Layout';
 import KoreaMap from '../components/Map/KoreaMap';
+import RollingBanner from '../components/Banner/RollingBanner';
 import useLocation from '../hooks/useLocation';
 import Link from 'next/link';
 import axios from 'axios';
 import styles from '../styles/Home.module.css';
-import RollingBanner from '../Banner/RollingBanner';
+
 
 // 컴포넌트 외부로 이동
 const REGION_COORDINATES = {
@@ -135,18 +136,9 @@ export default function Home() {
         <title>관광지 추천 서비스</title>
         <meta name="description" content="대한민국의 다양한 관광지를 찾아보세요." />
       </Head>
-      <section className={`${styles.hero} ${styles.greenHero}`}>
-        <div className="container">
-          <div className={styles.heroContent}>
-            <h1 className={styles.heroTitle}>대한민국의<br />추천 관광지를 찾아보세요</h1>
-            <p className={styles.heroSubtitle}>지역별 인기 관광지와 숨겨진 명소를 발견하세요.</p>
-            <div className={styles.heroCta}>
-              <Link href="/recommend" className="btn">맞춤 추천 받기</Link>
-              <Link href="/map" className="btn btn-outline">지도로 보기</Link>
-            </div>
-          </div>
-        </div>
-      </section>
+
+      <RollingBanner />
+
       <section className="section">
         <div className="container">
           <h2 className={styles.sectionTitle}>대한민국 관광지 둘러보기</h2>
