@@ -25,7 +25,7 @@ export default function Recommend() {
 
   const [activeFilters, setActiveFilters] = useState({
     type: '전체',
-    category: '전체'
+    tag: '전체'
   });
 
   // 검색 필터 적용 함수
@@ -135,35 +135,32 @@ export default function Recommend() {
   // 필터 적용
   useEffect(() => {
     if (!attractions.length) return;
-
+  
     let filtered = [...attractions];
-
+  
+    // 실내/야외 필터
     if (activeFilters.type !== '전체') {
       const typeMap = {
         '실내': 'indoor',
         '야외': 'outdoor'
       };
-      const filterType = typeMap[activeFilters.type];
+      const filterType = typeMap[activeFilters.type] || '';
       filtered = filtered.filter(item => item.type === filterType);
     }
-
-    if (activeFilters.category !== '전체') {
+  
+    // 카테고리 필터 (대분류) → tags 기반으로 변경
+    if (activeFilters.categoryGroup !== '전체') {
       filtered = filtered.filter(item => {
-        // 태그가 없는 경우 처리
-        if (!item.tags || !Array.isArray(item.tags)) return false;
-
-        // 정확한 태그 일치 또는 태그 내에 해당 카테고리 텍스트가 포함된 경우 (부분 일치)
-        return item.tags.some(tag =>
-          tag === activeFilters.category ||
-          tag.includes(activeFilters.category)
-        );
+        if (!Array.isArray(item.tags)) return false;
+        return item.tags.some(tag => tag.includes(activeFilters.categoryGroup));
       });
     }
-
+  
     setFilteredAttractions(filtered);
     setPage(1);
     setHasMore(true);
   }, [attractions, activeFilters]);
+
 
   // 무작위 스크롤 구현을 위한 페이지네이션 효과
   useEffect(() => {
@@ -223,21 +220,12 @@ export default function Recommend() {
   // 필터 UI 부분
   const locationTypes = ['전체', '실내', '야외'];
   const categories = [
-    '전체',
-    '힐링',
-    '자연',
-    '전통',
-    '역사',
-    '종교',
-    '체험',
-    '산업',
-    '학습',
-    '문화',
-    '예술',
-    '스포츠',
-    '캠핑',
-    '놀이',
-    '쇼핑'
+  '전체',
+  '자연/힐링',
+  '종교/역사/전통',
+  '체험/학습/산업',
+  '문화/예술',
+  '캠핑/스포츠'
   ];
 
   // 날씨 상태를 서버 응답과 일치하게 변환하는 유틸리티 함수
@@ -387,8 +375,8 @@ export default function Recommend() {
                 {categories.map(option => (
                   <div
                     key={option}
-                    className={`${styles.filterOption} ${activeFilters.category === option ? styles.active : ''}`}
-                    onClick={() => handleFilterChange('category', option)}
+                    className={`${styles.filterOption} ${activeFilters.tag === option ? styles.active : ''}`}
+                    onClick={() => handleFilterChange('categoryGroup', option)}
                   >
                     {option}
                   </div>

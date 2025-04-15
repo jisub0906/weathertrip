@@ -79,7 +79,7 @@ export default function WeatherBanner() {
         emoji: '🌤️',
         jsx: (
           <>
-            오늘 같이 적당한 날엔 <span className={styles.outdoor}>야외 여행지</span>로 떠나보세요! 기분 전환에 딱이에요.
+            오늘 같이 적당한 날엔 <span className={styles.outdoor}>야외 여행지</span>로 떠나보세요! 기분 전환에 딱이에요!
           </>
         ),
       };

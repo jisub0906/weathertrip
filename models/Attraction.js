@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+
 const AttractionSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -25,10 +26,23 @@ const AttractionSchema = new mongoose.Schema({
       required: true
     }
   },
+
+  // 대분류 관광지 카테고리
+  categoryGroup: {
+    type: String,
+    required: true,
+    enum: ['자연/힐링', '종교/역사/전통', '체험/학습/산업', '문화/예술', '캠핑/스포츠']
+  },
+
+  // 소분류 관광지 카테고리
   category: {
     type: String,
     required: true,
-    enum: ['역사', '자연', '문화', '레저', '쇼핑', '음식', '기타']
+    enum: [ '자연', '힐링',
+      '종교', '역사', '전통',
+      '체험', '학습', '산업',
+      '문화', '예술',
+      '캠핑', '스포츠']
   },
   tags: [{
     type: String,
