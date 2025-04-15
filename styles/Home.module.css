@@ -643,7 +643,7 @@ a.secondary {
 /* 지도 컨테이너 */
 .koreaMapContainer {
   margin: 2rem auto;
-  max-width: 800px;
+  max-width: 1200px;
   background: transparent;
   border-radius: 12px;
   position: relative;
