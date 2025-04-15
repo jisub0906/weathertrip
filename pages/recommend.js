@@ -138,7 +138,7 @@ export default function Recommend() {
   
     let filtered = [...attractions];
   
-    // 실내/야외 필터
+    // 실내/야외 필터 적용
     if (activeFilters.type !== '전체') {
       const typeMap = {
         '실내': 'indoor',
@@ -148,12 +148,12 @@ export default function Recommend() {
       filtered = filtered.filter(item => item.type === filterType);
     }
   
-    // 카테고리 필터 (대분류) → tags 기반으로 변경
-    if (activeFilters.categoryGroup !== '전체') {
-      filtered = filtered.filter(item => {
-        if (!Array.isArray(item.tags)) return false;
-        return item.tags.some(tag => tag.includes(activeFilters.categoryGroup));
-      });
+    // 태그 기반 대분류 필터 적용
+    if (activeFilters.tag !== '전체') {
+      filtered = filtered.filter(item =>
+        Array.isArray(item.tags) &&
+        item.tags.some(tag => tag === activeFilters.tag)
+      );
     }
   
     setFilteredAttractions(filtered);
@@ -376,7 +376,7 @@ export default function Recommend() {
                   <div
                     key={option}
                     className={`${styles.filterOption} ${activeFilters.tag === option ? styles.active : ''}`}
-                    onClick={() => handleFilterChange('categoryGroup', option)}
+                    onClick={() => handleFilterChange('tag', option)}
                   >
                     {option}
                   </div>
