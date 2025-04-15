@@ -6,6 +6,8 @@ import KakaoMap from "../components/Map/KakaoMap";
 import SearchBar from "../components/Search/SearchBar";
 import useLocation from "../hooks/useLocation";
 import styles from "../styles/Map.module.css";
+import { handleSearchKeyword } from "../utils/mapHelper";
+import { fetchKeywordLocation } from "../utils/mapHelper";
 
 export default function Map() {
   const {
@@ -20,48 +22,14 @@ export default function Map() {
   const [filteredAttractions, setFilteredAttractions] = useState([]); // 0414 searchBar 관련
 
 
-    // rollingBanner 에서 검색어로 이동
-    const router = useRouter();
-    const keyword = router.query.keyword || "";
-  
-    useEffect(() => {
-      if (!keyword) return;
-  
-      const fetchKeywordLocation = async () => {
-        try {
-          const res = await fetch(
-            `/api/attractions/search?name=${encodeURIComponent(keyword)}`
-          );
-          const data = await res.json();
-  
-          if (data && data.attraction) {
-            const lat =
-              data.attraction["위도(도)"] ||
-              data.attraction.location?.coordinates?.[1];
-            const lng =
-              data.attraction["경도(도)"] ||
-              data.attraction.location?.coordinates?.[0];
-  
-            // 📍 지도 이동
-            if (mapRef.current?.moveToCoords) {
-              mapRef.current.moveToCoords(lat, lng);
-            }
-  
-            // 🧭 검색 마커 표시
-            if (mapRef.current?.addSearchMarker) {
-              mapRef.current.addSearchMarker(lat, lng);
-            }
-  
-            // 👉 리스트에서도 강조해주고 싶다면:
-            setSelectedAttraction(data.attraction);
-          }
-        } catch (err) {
-          console.error("키워드 기반 관광지 검색 실패:", err);
-        }
-      };
-  
-      fetchKeywordLocation();
-    }, [keyword]);
+  // rollingBanner 에서 검색어로 이동
+  const router = useRouter();
+  const keyword = router.query.keyword || "";
+
+  // utils/mapHelper; -MH
+  useEffect(() => {
+    fetchKeywordLocation({ keyword, mapRef, setSelectedAttraction });
+  }, [keyword]);
 
   // 주변 관광지 정보 업데이트 핸들러
   const handleNearbyAttractionsLoad = (attractions) => {
@@ -89,46 +57,14 @@ export default function Map() {
     setShowSidebar(false);
   };
 
-  // 0414 searchBar 관련 - 검색어로 지도 이동 + 관광지 필터링
-  const handleSearch = async (searchTerm) => {
-    if (!searchTerm.trim()) {
-      setFilteredAttractions(nearbyAttractions); // 검색어 없으면 전체 표시
-      return;
-    }
-
-    // 🔍 1. 카카오맵 장소 검색 API 사용
-    const places = new window.kakao.maps.services.Places();
-
-    places.keywordSearch(searchTerm, (data, status) => {
-      if (status === window.kakao.maps.services.Status.OK && data.length > 0) {
-        const match = data[0];
-        const lat = parseFloat(match.y);
-        const lng = parseFloat(match.x);
-
-        // 📍 2. 지도 중심 이동
-        if (mapRef.current?.moveToCoords) {
-          mapRef.current.moveToCoords(lat, lng);
-        }
-
-        // 📍 2-1. 검색 마커 추가
-        if (mapRef.current?.addSearchMarker) {
-          mapRef.current.addSearchMarker(lat, lng);
-        }
-
-        // 📋 3. 관광지 리스트 필터링
-        const results = nearbyAttractions.filter(
-          (item) =>
-            (item.name || "").includes(searchTerm) ||
-            (item.description || "").includes(searchTerm)
-        );
-        setFilteredAttractions(results);
-      } else {
-        alert("해당 장소를 찾을 수 없어요!");
-      }
+  const handleSearch = (searchTerm) => {
+    handleSearchKeyword({
+      searchTerm,
+      mapRef,
+      nearbyAttractions,
+      setFilteredAttractions,
     });
   };
-
-
 
   return (
     <Layout hideFooter={true}>
@@ -142,9 +78,8 @@ export default function Map() {
       <div className={styles.mapPageContainer}>
         <div
           id="attractions-sidebar"
-          className={`${styles.attractionsSidebar} ${
-            showSidebar ? styles.open : ""
-          }`}
+          className={`${styles.attractionsSidebar} ${showSidebar ? styles.open : ""
+            }`}
         >
           <div className={styles.sidebarHeader}>
             <h2>주변 관광지</h2>
@@ -167,9 +102,8 @@ export default function Map() {
                 ) => (
                   <div
                     key={index}
-                    className={`${styles.attractionItem} ${
-                      selectedAttraction === attraction ? styles.selected : ""
-                    }`}
+                    className={`${styles.attractionItem} ${selectedAttraction === attraction ? styles.selected : ""
+                      }`}
                     onClick={() => handleAttractionClick(attraction)}
                   >
                     <h3>
@@ -191,15 +125,15 @@ export default function Map() {
                       <div className={styles.tags}>
                         {typeof attraction.tags === "string"
                           ? attraction.tags.split(",").map((tag, i) => (
-                              <span key={i} className={styles.tag}>
-                                {tag.trim()}
-                              </span>
-                            ))
+                            <span key={i} className={styles.tag}>
+                              {tag.trim()}
+                            </span>
+                          ))
                           : attraction.tags.map((tag, i) => (
-                              <span key={i} className={styles.tag}>
-                                {tag}
-                              </span>
-                            ))}
+                            <span key={i} className={styles.tag}>
+                              {tag}
+                            </span>
+                          ))}
                       </div>
                     )}
                   </div>
