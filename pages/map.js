@@ -147,7 +147,10 @@ export default function Map() {
               center={location || { latitude: 37.5665, longitude: 126.9780 }}
               onMarkerClick={handleAttractionClick}
               onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
-              onCloseDetail={handleCloseDetail}
+              onCloseDetail={() => {
+                setSelectedAttraction(null);
+                setShowSidebar(true);
+              }}
             />
           )}
         </div>

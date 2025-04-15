@@ -318,7 +318,10 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
   // 선택한 관광지 상세 정보 닫기
   const handleCloseDetail = useCallback(() => {
     setSelectedAttraction(null);
-  }, []);
+    if (onCloseDetail) {
+      onCloseDetail();
+    }
+  }, [onCloseDetail]);
 
   // 부모 컴포넌트에서 호출할 수 있도록 함수 노출  // 0414 searchBar 지도중심이동 및 임의마커생성
   const searchMarkerRef = useRef(null); // 🔸 추가: 검색 마커 저장용
@@ -374,7 +377,7 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
       {selectedAttraction && (
         <AttractionDetail
           attraction={selectedAttraction}
-          onClose={onCloseDetail || handleCloseDetail}
+          onClose={handleCloseDetail}
         />
       )}
     </div>
