@@ -34,6 +34,12 @@ export default function Map() {
     }
   };
 
+  // 관광지 상세 정보 닫기 핸들러
+  const handleCloseDetail = () => {
+    setSelectedAttraction(null);
+    setShowSidebar(false);
+  };
+
   // 0414 searchBar 관련 - 검색어로 지도 이동 + 관광지 필터링
   const handleSearch = async (searchTerm) => {
     if (!searchTerm.trim()) {
@@ -141,6 +147,7 @@ export default function Map() {
               center={location || { latitude: 37.5665, longitude: 126.9780 }}
               onMarkerClick={handleAttractionClick}
               onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
+              onCloseDetail={handleCloseDetail}
             />
           )}
         </div>

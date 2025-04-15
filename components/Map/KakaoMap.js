@@ -3,7 +3,7 @@ import axios from 'axios';
 import styles from '../../styles/Map.module.css';
 import AttractionDetail from '../Attractions/AttractionDetail';
 
-const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyAttractionsLoad }, ref) {
+const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyAttractionsLoad, onCloseDetail }, ref) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [attractions, setAttractions] = useState([]);
@@ -374,7 +374,7 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
       {selectedAttraction && (
         <AttractionDetail
           attraction={selectedAttraction}
-          onClose={handleCloseDetail}
+          onClose={onCloseDetail || handleCloseDetail}
         />
       )}
     </div>
