@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Layout from '../components/Layout/Layout';
 import KoreaMap from '../components/Map/KoreaMap';
 import RollingBanner from '../components/Banner/RollingBanner';
+import WeatherBanner from '../components/Banner/WeatherBanner';
 import useLocation from '../hooks/useLocation';
 import Link from 'next/link';
 import axios from 'axios';
@@ -371,6 +372,8 @@ export default function Home() {
       </Head>
 
       <RollingBanner />
+
+      <WeatherBanner />
 
       <div className={styles.mainContent}>
         {/* 지도 섹션 */}
