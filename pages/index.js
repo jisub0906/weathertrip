@@ -225,7 +225,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const attractionsPerPage = 11;
+  const attractionsPerPage = 5;
   const [popularAttractions, setPopularAttractions] = useState([]);
   const [popularLoading, setPopularLoading] = useState(false);
 
