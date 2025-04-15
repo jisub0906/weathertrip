@@ -224,8 +224,10 @@ export default function Home() {
                 {currentAttractions.length > 0 ? (
                   currentAttractions.map((attraction, index) => (
                     <div key={attraction._id || index} className={styles.attractionCard}>
-                      <h3>{attraction.name}</h3>
-                      <p>{attraction.description || attraction.address || '설명 없음'}</p>
+                      <div className={styles.attractionInfo}>
+                        <h3>{attraction.name}</h3>
+                        <p>{attraction.description}</p>
+                      </div>
                       {attraction.distanceKm && (
                         <p className={styles.distance}>거리: {attraction.distanceKm.toFixed(1)}km</p>
                       )}
@@ -335,9 +337,6 @@ export default function Home() {
                   <h3>{attraction.name}</h3>
                   <div className={styles.likeCount}>
                     ❤️ {attraction.likeCount || 0}
-                  </div>
-                  <div className={styles.rating}>
-                    ⭐ {attraction.averageRating?.toFixed(1) || '0.0'}
                   </div>
                   <div className={styles.address}>{attraction.address}</div>
                   <div className={styles.description}>

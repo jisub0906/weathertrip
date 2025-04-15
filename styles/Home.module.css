@@ -1087,3 +1087,18 @@ a.secondary {
   padding: 2rem;
   color: #666;
 }
+
+.attractionInfo {
+  padding: 1rem;
+}
+
+.attractionInfo h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.attractionInfo p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
