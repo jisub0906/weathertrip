@@ -12,15 +12,14 @@ export default function Header() {
             <Image 
               src="/logo.png" 
               alt="logo" 
-              width={180} 
+              width={350} 
               height={60} 
               priority
               quality={100}
               style={{
                 objectFit: 'contain',
                 maxWidth: '100%',
-                height: 'auto',
-                padding: '10px 0'
+                height: '100%'               
               }}
             />
           </Link>
