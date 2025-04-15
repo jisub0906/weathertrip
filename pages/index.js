@@ -353,10 +353,6 @@ export default function Home() {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({
-      top: document.querySelector(`.${styles.attractionsGrid}`).offsetTop - 100,
-      behavior: 'smooth'
-    });
   };
 
   const indexOfLastAttraction = currentPage * attractionsPerPage;
