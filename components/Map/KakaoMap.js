@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import axios from 'axios';
-import styles from '../../styles/Map.module.css';
+import styles from '../../styles/KakaoMap.module.css';
 import AttractionDetail from '../Attractions/AttractionDetail';
 
 const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyAttractionsLoad, onAllAttractionsLoad, onCloseDetail, isNearbyMode }, ref) {

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Head from 'next/head';
-import Layout from '../components/Layout/Layout';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
+import TopBanner from '../components/Banner/TopBanner';
 import useLocation from '../hooks/useLocation';
 import axios from 'axios';
 import styles from '../styles/Recommend.module.css';
@@ -281,12 +283,14 @@ export default function Recommend() {
   };
 
   return (
-    <Layout hideFooter={true}>
+    <>
       <Head>
         <title>맞춤형 관광지 추천 - 날씨별 관광지 추천 서비스</title>
         <meta name="description" content="나에게 맞는 관광지를 추천받아보세요." />
       </Head>
 
+      <TopBanner />
+      <Header />
       <section className="section">
         <div className="container">
           <h1 className={styles.pageTitle}>맞춤형 관광지 추천</h1>
@@ -462,6 +466,7 @@ export default function Recommend() {
           )}
         </div>
       </section>
-    </Layout>
+      <Footer />
+    </>
   );
 } 

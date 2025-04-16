@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaArrowLeft } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
 import styles from '../../styles/AttractionDetail.module.css';
-import mapStyles from '../../styles/Map.module.css';
 import axios from 'axios';
 
 export default function AttractionDetail({ attraction, onClose }) {

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
-import Layout from '../components/Layout/Layout';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
+import TopBanner from '../components/Banner/TopBanner';
 import KoreaMap from '../components/Map/KoreaMap';
 import RollingBanner from '../components/Banner/RollingBanner';
 import WeatherBanner from '../components/Banner/WeatherBanner';
@@ -165,12 +167,14 @@ export default function Home() {
   }, []);
 
   return (
-    <Layout>
+    <>
       <Head>
         <title>weather trip</title>
         <meta name="description" content="대한민국의 다양한 관광지를 찾아보세요." />
       </Head>
 
+      <TopBanner />
+      <Header />
       <main className={styles.main}>
         <RollingBanner />
         <WeatherBanner />
@@ -235,6 +239,7 @@ export default function Home() {
           )}
         </div>
       </section>
-    </Layout>
+      <Footer />
+    </>
   );
 }
