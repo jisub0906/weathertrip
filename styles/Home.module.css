@@ -1,32 +1,79 @@
+/* 기본 페이지 스타일 */
 .page {
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
   --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
-
   --button-primary-hover: #383838;
   --button-secondary-hover: #f2f2f2;
-
-  display: grid;
-  grid-template-rows: 20px 1fr 20px;
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-items: center;
-  min-height: 100svh;
-  padding: 80px;
-  gap: 64px;
+  gap: 32px;
   font-family: var(--font-geist-sans);
 }
 
+/* 다크 모드 */
 @media (prefers-color-scheme: dark) {
   .page {
     --gray-rgb: 255, 255, 255;
     --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
     --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
-
     --button-primary-hover: #ccc;
     --button-secondary-hover: #1a1a1a;
   }
+  .logo {
+    filter: invert();
+  }
 }
 
+/* 지도 섹션 */
+.mapTitle {
+  position: relative;
+  color: black;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 10px 0;
+  text-align: center;
+  width: 100%;
+}
+
+/* 지도 컨테이너 */
+.koreaMapContainer {
+  width: 100%;
+  max-width: 1024px;
+  height: 1100px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  padding: 40px;
+}
+
+.koreaMap {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 98%;
+  height: 98%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.koreaMap svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 일반 스타일 */
 .main {
   display: flex;
   flex-direction: column;
@@ -126,51 +173,10 @@ a.secondary {
   }
 }
 
-@media (max-width: 600px) {
-  .page {
-    padding: 32px;
-    padding-bottom: 80px;
-  }
-
-  .main {
-    align-items: center;
-  }
-
-  .main ol {
-    text-align: center;
-  }
-
-  .ctas {
-    flex-direction: column;
-  }
-
-  .ctas a {
-    font-size: 14px;
-    height: 40px;
-    padding: 0 16px;
-  }
-
-  a.secondary {
-    min-width: auto;
-  }
-
-  .footer {
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-}
-
 .container {
-  max-width: 1200px;
+  max-width: 1020px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 0 20px;
 }
 
 .title {
@@ -313,7 +319,6 @@ a.secondary {
   z-index: -1;
 }
 
-/* 기존 heroVisual 스타일 유지 (사용하지 않지만 나중에 참조할 경우를 대비) */
 .heroVisual {
   position: absolute;
   top: 0;
@@ -483,47 +488,6 @@ a.secondary {
   font-weight: 500;
 }
 
-@media (max-width: 768px) {
-  .heroTitle {
-    font-size: 3rem;
-  }
-  
-  .weatherCard {
-    flex-direction: column;
-  }
-  
-  .weatherVisual {
-    height: 200px;
-  }
-  
-  .heroCta {
-    flex-direction: column;
-  }
-
-  .container {
-    padding: 20px;
-  }
-
-  .serviceLinks {
-    flex-direction: column;
-    padding: 0 20px;
-  }
-
-  .serviceLink {
-    width: 100%;
-  }
-}
-
-@media (max-width: 576px) {
-  .heroTitle {
-    font-size: 2.5rem;
-  }
-  
-  .weatherTemperature {
-    font-size: 4rem;
-  }
-}
-
 /* 광고 슬라이더 스타일 */
 .adSliderContainer {
   margin-bottom: 3rem;
@@ -634,26 +598,10 @@ a.secondary {
 
 /* 섹션 스타일 */
 .sectionTitle {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
   text-align: center;
-}
-
-/* 지도 컨테이너 */
-.koreaMapContainer {
-  margin: 2rem auto;
-  max-width: 1200px;
-  background: transparent;
-  border-radius: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-.koreaMap {
-  width: 100%;
-  height: 100%;
-  background-color: #e8f4f8;
 }
 
 /* 지역 필터 버튼 */
@@ -687,16 +635,6 @@ a.secondary {
 }
 
 /* 인기 관광지 목록 */
-.popularAttractions {
-  margin-bottom: 3rem;
-}
-
-.popularAttractions h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-}
-
 .attractionListTable {
   width: 100%;
   border-collapse: collapse;
@@ -754,62 +692,7 @@ a.secondary {
   display: none;
 }
 
-/* 반응형 스타일 */
-@media (max-width: 992px) {
-  .heroTitle {
-    font-size: 3rem;
-  }
-  
-  .adSlide {
-    height: 350px;
-  }
-  
-  .adContent h3 {
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .heroTitle {
-    font-size: 2.5rem;
-  }
-  
-  .heroSubtitle {
-    font-size: 1.1rem;
-  }
-  
-  .heroCta {
-    flex-direction: column;
-  }
-  
-  .adSlide {
-    height: 300px;
-  }
-  
-  .adContent {
-    padding: 1.5rem;
-  }
-  
-  .adContent h3 {
-    font-size: 1.3rem;
-  }
-  
-  .koreaMapContainer {
-    height: 400px;
-  }
-  
-  .regionFilterBtn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-  }
-  
-  .attractionListTable th,
-  .attractionListTable td {
-    padding: 0.8rem;
-    font-size: 0.9rem;
-  }
-}
-
+/* 관광지 카드 그리드 */
 .attractionsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -904,43 +787,6 @@ a.secondary {
   background: #e5e5e5;
 }
 
-@media (max-width: 768px) {
-  .attractionsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 16px;
-    padding: 0 12px;
-  }
-
-  .attractionCard {
-    padding: 16px;
-  }
-
-  .attractionInfo h3 {
-    font-size: 1.1rem;
-  }
-
-  .description {
-    font-size: 0.9rem;
-    -webkit-line-clamp: 2;
-  }
-}
-
-@media (max-width: 480px) {
-  .attractionsGrid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .tags {
-    gap: 6px;
-  }
-
-  .tag {
-    font-size: 0.8rem;
-    padding: 3px 8px;
-  }
-}
-
 /* 페이지네이션 스타일 */
 .pagination {
   display: flex;
@@ -981,32 +827,6 @@ a.secondary {
   border-color: var(--primary);
 }
 
-@media (max-width: 480px) {
-  .pagination {
-    gap: 0.2rem;
-  }
-
-  .paginationButton {
-    min-width: 28px;
-    height: 28px;
-    font-size: 0.85rem;
-  }
-}
-
-/* 로딩 및 에러 메시지 스타일 */
-.loading, .error {
-  text-align: center;
-  padding: 2rem;
-  background: #f9f9f9;
-  border-radius: 8px;
-  margin: 2rem 0;
-}
-
-.error {
-  color: #d32f2f;
-  background: #ffebee;
-}
-
 /* 선택된 지역 및 결과 수 표시 스타일 */
 .resultsInfo {
   background-color: #f8f9fa;
@@ -1032,17 +852,27 @@ a.secondary {
   font-size: 0.9rem;
 }
 
-.popularSection {
-  padding: 4rem 0;
-  background-color: #f8f9fa;
+/* 메인 레이아웃 */
+.mainContent {
+  position: relative;
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 800px;
+  gap: 32px;
 }
 
-.sectionTitle {
-  font-size: 2rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #333;
+/* 관광지 목록 섹션 */
+.popularSection {
+  position: relative;
+  background-color:rgb(255, 255, 255);
+  padding: 4rem 0;
+  border-top: 1px solid #eee;
+  width: 100%;
 }
 
 .popularGrid {
@@ -1050,6 +880,8 @@ a.secondary {
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
   padding: 0 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .popularCard {
@@ -1120,114 +952,91 @@ a.secondary {
   margin-right: 1rem;
 }
 
-.rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: #ffa41b;
-  font-weight: 600;
-}
-
-.address {
-  color: #666;
-  font-size: 0.9rem;
-  margin: 0.5rem 0;
-}
-
-.description {
-  color: #444;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin: 0.5rem 0;
-  height: 3.6em;
-  overflow: hidden;
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.tag {
-  background: #f0f0f0;
-  color: #666;
-  padding: 0.3rem 0.8rem;
-  border-radius: 15px;
-  font-size: 0.8rem;
-}
-
-.loading {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-}
-
-.attractionInfo {
-  padding: 1rem;
-}
-
-.attractionInfo h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-}
-
-.attractionInfo p {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.mainContent {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  padding: 2rem 0;
-}
-
-.mapSection {
-  background-color: var(--background-color);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
 .attractionListSection {
-  background-color: var(--background-color);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  max-height: 70vh;
+  width: 100%;
+  padding: 1rem;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  overflow-y: auto;
 }
 
-@media (max-width: 768px) {
-  .mainContent {
-    gap: 1rem;
-    padding: 1rem 0;
-  }
+.attractionListSection.open {
+  transform: translateY(0);
+}
 
-  .mapSection,
-  .attractionListSection {
-    padding: 1rem;
-  }
+.listHeader {
+  position: sticky;
+  top: 0;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  margin: -1rem -1rem 1rem -1rem;
+  z-index: 1;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.slideButton {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--primary, #4CAF50);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.slideButton:hover {
+  background-color: var(--primary-dark, #388E3C);
+  transform: translateY(-2px);
 }
 
 .mobileOnly {
   display: none;
 }
 
-@media (max-width: 768px) {
-  .mobileHidden {
-    display: none;
-  }
-  
-  .mobileOnly {
-    display: inline;
-  }
-}
-
 .attractionsContainer {
   width: 100%;
+  margin-top: 24px;
 }
 
 .attractionsTable {
@@ -1295,28 +1104,6 @@ a.secondary {
   padding: 2px 8px;
 }
 
-/* 모바일에서는 테이블 숨기고 그리드 표시 */
-@media (max-width: 768px) {
-  .attractionsTable {
-    display: none;
-  }
-  
-  .attractionsGrid {
-    display: grid;
-  }
-}
-
-/* 데스크톱에서는 그리드 숨기고 테이블 표시 */
-@media (min-width: 769px) {
-  .attractionsGrid {
-    display: none;
-  }
-  
-  .attractionsTable {
-    display: block;
-  }
-}
-
 .attractionsHorizontal {
   display: flex;
   flex-direction: column;
@@ -1331,7 +1118,7 @@ a.secondary {
   padding: 24px;
   display: flex;
   gap: 24px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .horizontalCard:hover {
@@ -1341,7 +1128,7 @@ a.secondary {
 
 .cardMain {
   flex: 1;
-  min-width: 0; /* 텍스트 오버플로우 방지 */
+  min-width: 0;
 }
 
 .cardHeader {
@@ -1418,24 +1205,286 @@ a.secondary {
   background: #e5e5e5;
 }
 
-/* 모바일에서는 가로형 카드 숨기고 그리드 표시 */
+.weatherBanner {
+  margin-bottom: 2rem;
+}
+
+/* 반응형 미디어 쿼리 */
+@media (max-width: 1024px) {
+  .slideButton {
+    display: flex;
+  }
+  
+  .mainContent {
+    height: auto;
+  }
+  
+  .heroTitle {
+    font-size: 3rem;
+  }
+  
+  .adSlide {
+    height: 350px;
+  }
+  
+  .adContent h3 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .heroTitle {
+    font-size: 3rem;
+  }
+  
+  .adSlide {
+    height: 350px;
+  }
+  
+  .adContent h3 {
+    font-size: 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
+  /* 페이지 기본 */
+  .page {
+    padding: 16px;
+    padding-bottom: 60px;
+  }
+  
+  .main {
+    align-items: center;
+  }
+  
+  .main ol {
+    text-align: center;
+  }
+  
+  /* 헤더와 히어로 섹션 */
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+  
+  .heroSubtitle {
+    font-size: 1.1rem;
+  }
+  
+  .heroCta {
+    flex-direction: column;
+  }
+  
+  /* 광고 슬라이드 */
+  .adSlide {
+    height: 300px;
+  }
+  
+  .adContent {
+    padding: 1.5rem;
+  }
+  
+  .adContent h3 {
+    font-size: 1.3rem;
+  }
+  
+  /* 날씨 카드 */
+  .weatherCard {
+    flex-direction: column;
+  }
+  
+  .weatherVisual {
+    height: 200px;
+  }
+  
+  .weatherTemperature {
+    font-size: 4rem;
+  }
+  
+  /* 메인 컨텐츠 */
+  .mainContent {
+    min-height: 400px;
+    height: 400px;
+    padding: 0;
+    gap: 8px;
+  }
+  
+  /* 지도 관련 */
+  .mapTitle {
+    font-size: 1.5rem;
+    margin: 20px 0;
+  }
+  
+  .koreaMapContainer {
+    max-width: 100%;
+    height: 850px;
+    padding: 20px;
+  }
+  
+  .koreaMap svg {
+    max-height: 400px;
+  }
+  
+  .mapOverlay {
+    padding: 10px 0;
+  }
+  
+  .regionFilterBtn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  /* 컨테이너 및 서비스 링크 */
+  .container {
+    padding: 20px;
+  }
+  
+  .serviceLinks {
+    flex-direction: column;
+    padding: 0 20px;
+  }
+  
+  .serviceLink {
+    width: 100%;
+  }
+  
+  /* 인기 섹션 */
+  .popularSection {
+    padding: 2rem 0;
+    margin-top: -1rem;
+  }
+  
+  .popularGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1.5rem;
+  }
+  
+  /* 표시/숨김 토글 */
+  .mobileHidden {
+    display: none;
+  }
+  
+  .mobileOnly {
+    display: inline;
+  }
+  
+  /* 어트랙션 표시 방식 */
+  .attractionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    padding: 0 12px;
+    display: grid;
+  }
+  
+  .attractionCard {
+    padding: 16px;
+  }
+  
+  .attractionInfo h3 {
+    font-size: 1.1rem;
+  }
+  
+  .description {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 2;
+  }
+  
+  .attractionsTable,
   .attractionsHorizontal {
     display: none;
   }
   
-  .attractionsGrid {
-    display: grid;
+  /* 테이블 관련 */
+  .attractionListTable th,
+  .attractionListTable td {
+    padding: 0.8rem;
+    font-size: 0.9rem;
   }
 }
 
-/* 데스크톱에서는 그리드 숨기고 가로형 카드 표시 */
+@media (max-width: 480px) {
+  /* 페이지 기본 */
+  .page {
+    padding: 16px;
+    padding-bottom: 60px;
+  }
+  
+  .koreaMapContainer {
+    max-width: 100%;
+    height: 530px;
+    padding: 12px;
+  }
+  
+  .koreaMap svg {
+    max-height: 600px;
+  }
+  
+  /* 메인 컨텐츠 */
+  .mainContent {
+    padding: 12px;
+    min-height: 450px;
+    gap: 16px;
+  }
+  
+  /* 어트랙션 그리드 */
+  .attractionsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .tags {
+    gap: 6px;
+  }
+  
+  .tag {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+  }
+  
+  /* 페이지네이션 */
+  .pagination {
+    gap: 0.2rem;
+  }
+  
+  .paginationButton {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+  
+  /* 히어로 섹션 */
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+  
+  .weatherTemperature {
+    font-size: 4rem;
+  }
+}
+
 @media (min-width: 769px) {
   .attractionsGrid {
     display: none;
   }
   
+  .attractionsTable {
+    display: block;
+  }
+  
   .attractionsHorizontal {
     display: flex;
+  }
+}
+
+@media (min-width: 1021px) {
+  .mainContent {
+    margin: 0 auto 2rem auto;
+  }
+  
+  .popularSection {
+    margin-top: 0;
   }
 }

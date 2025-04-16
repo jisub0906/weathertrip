@@ -45,6 +45,18 @@
   background-color: var(--card-bg);
 }
 
+.mapSection {
+  display: inline-block; /* 양옆으로 배치되도록 설정 */
+  vertical-align: top; /* 상단 정렬 */
+  width: 49%; /* 각 섹션의 너비 설정 */
+}
+
+.attractionListSection {
+  display: inline-block; /* 양옆으로 배치되도록 설정 */
+  vertical-align: top; /* 상단 정렬 */
+  width: 49%; /* 각 섹션의 너비 설정 */
+}
+
 .locationInfo {
   padding: 1.5rem;
   background-color: var(--primary-light);
