@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Layout from '../components/Layout/Layout';
 import KoreaMap from '../components/Map/KoreaMap';
 import RollingBanner from '../components/Banner/RollingBanner';
 import WeatherBanner from '../components/Banner/WeatherBanner';
 import useLocation from '../hooks/useLocation';
-import Link from 'next/link';
 import axios from 'axios';
 import styles from '../styles/Home.module.css';
 import Image from 'next/image';
+import { calculateAttractionsDistance } from '../utils/distance';
 
 
 // 컴포넌트 외부로 이동
@@ -33,102 +33,74 @@ const REGION_COORDINATES = {
   'all': { latitude: 36.5, longitude: 127.8 }
 };
 
-// 카테고리별 아이콘 매핑
-const CATEGORY_ICONS = {
-  '관광/명소': '🏛️',
-  '숙박': '🏨',
-  '음식점': '🍽️',
-  '문화/예술': '🎨',
-  '교육/역사/전통': '📚',
-  '쇼핑': '🛍️',
-  '레저/체육': '⚽',
-  '기타': '📍'
-};
-
-// 지도 섹션 컴포넌트
-const MapSection = ({ activeRegion, onRegionSelect }) => {
-  return (
-    <div className={styles.mapSection}>
-      <h2 className={styles.sectionTitle}>대한민국 관광지 둘러보기</h2>
-      <div className={styles.koreaMapContainer}>
-        <KoreaMap
-          onRegionSelect={onRegionSelect}
-          selectedRegion={activeRegion}
-        />
-      </div>
-    </div>
-  );
-};
 
 // 관광지 목록 섹션 컴포넌트
 const AttractionListSection = ({ 
   loading, 
   error, 
-  attractions, 
-  activeRegion,
+  attractions,
   isOpen,
-  onOpenChange 
+  onOpenChange,
+  userLocation 
 }) => {
+  const attractionsWithDistance = calculateAttractionsDistance(attractions, userLocation);
+
   return (
-    <>
-      <div className={`${styles.attractionListSection} ${isOpen ? styles.open : ''}`}>
-        <div className={styles.listHeader}>
-          <h2>관광지 목록</h2>
-          <button 
-            className={styles.closeButton}
-            onClick={() => onOpenChange(false)}
-            aria-label="관광지 목록 닫기"
-          >
-            ×
-          </button>
-        </div>
-
-        {loading && (
-          <div className={styles.loading}>
-            <p>관광지 정보를 불러오는 중...</p>
-          </div>
-        )}
-
-        {error && (
-          <div className={styles.error}>
-            <p>{error}</p>
-          </div>
-        )}
-
-        {!loading && !error && attractions.length > 0 && (
-          <div className={styles.attractionsList}>
-            {attractions.map((attraction, index) => (
-              <div key={attraction._id || index} className={styles.locationCard}>
-                <div className={styles.locationInfo}>
-                  <h4 className={styles.locationName}>{attraction.name}</h4>
-                  <p className={styles.locationAddress}>
-                    <span className={styles.icon}>📍</span>
-                    {attraction.address}
-                  </p>
-                  {attraction.distanceKm && (
-                    <span className={styles.distance}>
-                      <span className={styles.icon}>🚗</span>
-                      {attraction.distanceKm.toFixed(1)}km
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+    <div className={`${styles.attractionListSection} ${isOpen ? styles.open : ''}`}>
+      <div className={styles.listHeader}>
+        <h2>관광지 목록</h2>
+        <button 
+          className={styles.closeButton}
+          onClick={() => onOpenChange(false)}
+          aria-label="관광지 목록 닫기"
+        >
+          ×
+        </button>
       </div>
-    </>
+
+      {loading && (
+        <div className={styles.loading}>
+          <p>관광지 정보를 불러오는 중...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className={styles.error}>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && attractionsWithDistance.length > 0 && (
+        <div className={styles.attractionsList}>
+          {attractionsWithDistance.map((attraction, index) => (
+            <div key={attraction._id || index} className={styles.locationCard}>
+              <div className={styles.locationInfo}>
+                <h4 className={styles.locationName}>{attraction.name}</h4>
+                <p className={styles.locationAddress}>
+                  <span className={styles.icon}>📍</span>
+                  {attraction.address}
+                </p>
+                {attraction.distance && (
+                  <span className={styles.distance}>
+                    <span className={styles.icon}>🚗</span>
+                    {attraction.distance.toFixed(1)}km
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
 export default function Home() {
-  const { location } = useLocation();
+  const { location: userLocation } = useLocation();
   const [activeRegion, setActiveRegion] = useState('seoul');
   const [attractions, setAttractions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const attractionsPerPage = 5;
   const [popularAttractions, setPopularAttractions] = useState([]);
   const [popularLoading, setPopularLoading] = useState(false);
   const [isListOpen, setIsListOpen] = useState(false);
@@ -159,34 +131,26 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, []); // 종속성 제거
+  }, []);
 
   const handleRegionSelect = useCallback((region) => {
     setActiveRegion(region);
-    setCurrentPage(1);
-    setIsListOpen(true); // 지역 선택 시 목록 열기
+    setIsListOpen(true);
     fetchAttractions(region);
   }, [fetchAttractions]);
 
-  // 컴포넌트 마운트 시 한 번만 실행
   useEffect(() => {
     fetchAttractions('seoul');
   }, [fetchAttractions]);
 
-  // 인기 관광지 가져오기
   useEffect(() => {
     const fetchPopularAttractions = async () => {
       setPopularLoading(true);
       try {
-        console.log('인기 관광지 데이터 요청 시작');
         const response = await axios.get('/api/attractions/popular');
-        console.log('인기 관광지 API 응답:', response.data);
-        
         if (response.data.success && response.data.data.attractions) {
-          console.log('설정할 인기 관광지 데이터:', response.data.data.attractions);
           setPopularAttractions(response.data.data.attractions);
         } else {
-          console.log('인기 관광지 데이터 없음');
           setPopularAttractions([]);
         }
       } catch (error) {
@@ -198,16 +162,7 @@ export default function Home() {
     };
 
     fetchPopularAttractions();
-  }, []); // 빈 의존성 배열 유지
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const indexOfLastAttraction = currentPage * attractionsPerPage;
-  const indexOfFirstAttraction = indexOfLastAttraction - attractionsPerPage;
-  const currentAttractions = attractions.slice(indexOfFirstAttraction, indexOfLastAttraction);
-  const totalPages = Math.ceil(attractions.length / attractionsPerPage);
+  }, []);
 
   return (
     <Layout>
@@ -224,13 +179,12 @@ export default function Home() {
           loading={loading}
           error={error}
           attractions={attractions}
-          activeRegion={activeRegion}
           isOpen={isListOpen}
           onOpenChange={setIsListOpen}
+          userLocation={userLocation}
         />
       </main>
 
-      {/* Popular Attractions Section */}
       <section className={styles.popularSection}>
         <div className={styles.container}>
           <h2 className={styles.sectionTitle}>인기 여행지</h2>
