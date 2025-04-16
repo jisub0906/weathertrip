@@ -38,7 +38,7 @@
   bottom: 0;
   width: auto;
   height: auto;
-  z-index: 1;
+  z-index: 10;
 }
 
 .mapInfoPanel {
@@ -49,15 +49,15 @@
 }
 
 .mapSection {
-  display: inline-block; /* 양옆으로 배치되도록 설정 */
-  vertical-align: top; /* 상단 정렬 */
-  width: 49%; /* 각 섹션의 너비 설정 */
+  display: inline-block;
+  vertical-align: top;
+  width: 49%;
 }
 
 .attractionListSection {
-  display: inline-block; /* 양옆으로 배치되도록 설정 */
-  vertical-align: top; /* 상단 정렬 */
-  width: 49%; /* 각 섹션의 너비 설정 */
+  display: inline-block;
+  vertical-align: top;
+  width: 49%;
 }
 
 .locationInfo {
@@ -348,38 +348,6 @@
   color: #333;
 }
 
-.attractionDetails {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f8f9fa;
-}
-
-.attractionDetails h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.detailContent {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  color: #666;
-}
-
-.detailContent p {
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.itemDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
-}
 
 .buttonGroup {
   display: flex;
@@ -403,30 +371,6 @@
   border-color: #3498db;
 }
 
-.searchBarContainer {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
-  background: white;
-}
-
-.sidebarToggleButton {
-  position: fixed;
-  bottom: 2rem;
-  left: 2rem;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  background: #3498db;
-  color: white;
-  border: none;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  z-index: 90;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-}
 
 @media (max-width: 768px) {
   .mapArea {
@@ -447,9 +391,6 @@
     border-top-right-radius: 16px;
   }
 
-  .sidebarToggleButton {
-    display: flex;
-  }
 
   .sidebarHeader {
     padding: 1rem;
@@ -457,11 +398,10 @@
     border-top-right-radius: 16px;
   }
 
-  .searchBarContainer {
+  .attractionsList {
     padding: 1rem;
   }
-
-  .attractionsList {
+  .searchBarContainer {
     padding: 1rem;
   }
 }

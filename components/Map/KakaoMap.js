@@ -436,18 +436,18 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
 
   return (
     <div className={styles.mapContainer}>
+      {selectedAttraction && (
+        <AttractionDetail
+          attraction={selectedAttraction}
+          onClose={handleCloseDetail}
+        />
+      )}
       <div ref={mapRef} className={styles.mapContent}></div>
       {isLoading && (
         <div className={styles.mapLoadingOverlay}>
           <div className={styles.mapLoadingSpinner}></div>
           <p>관광지 불러오는 중...</p>
         </div>
-      )}
-      {selectedAttraction && (
-        <AttractionDetail
-          attraction={selectedAttraction}
-          onClose={handleCloseDetail}
-        />
       )}
     </div>
   );
