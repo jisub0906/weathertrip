@@ -106,3 +106,71 @@
       padding: 0;
     }
   }
+
+/* 지도 컨테이너 */
+.mapSection {
+  width: 100%;
+  max-width: 1024px;
+  height: 1100px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 40px;
+}
+
+.mapTitle {
+  position: relative;
+  color: black;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 10px 0;
+  text-align: center;
+  width: 100%;
+}
+
+/* 미디어 쿼리 */
+@media (max-width: 600px) {
+  .regionLabel {
+    font-size: 0;
+  }
+  
+  .islandLabel {
+    font-size: 6px;
+  }
+  
+  .countryLabel {
+    font-size: 10px;
+  }
+  
+  .mapContainer {
+    box-shadow: none;
+    padding: 0;
+  }
+  
+  .region:hover, .island:hover {
+    transform: none;
+  }
+
+  .mapSection {
+    height: 850px;
+    padding: 20px;
+  }
+
+  .mapTitle {
+    font-size: 1.5rem;
+    margin: 20px 0;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .regionLabel {
+    font-size: 8px;
+  }
+  
+  .mapContainer {
+    padding: 0;
+  }
+}
