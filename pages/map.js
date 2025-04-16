@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import Layout from "../components/Layout/Layout";
+import Header from "../components/Layout/Header";
 import KakaoMap from "../components/Map/KakaoMap";
 import SearchBar from "../components/Search/SearchBar";
 import useLocation from "../hooks/useLocation";
@@ -150,11 +150,14 @@ export default function Map() {
   };
 
   return (
-    <Layout hideFooter={true}>
+    <>
       <Head>
         <title>지도로 관광지 찾기 | 날씨 관광 앱</title>
         <meta name="description" content="현재 위치 주변의 관광지를 지도에서 찾아보세요." />
       </Head>
+
+      <Header />
+      
       <div className={styles.mapPageContainer}>
         <aside className={`${styles.attractionsSidebar} ${showSidebar ? styles.open : ""}`}>
           <div className={styles.sidebarHeader}>
@@ -174,9 +177,11 @@ export default function Map() {
               </button>
             </div>
           </div>
+
           <div className={styles.searchBarContainer}>
             {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
           </div>
+
           {filteredAttractions.length === 0 ? (
             <div className={styles.emptyMessage}>
               <p>관광지가 로드되지 않았습니다.</p>
@@ -186,7 +191,7 @@ export default function Map() {
             <div className={styles.attractionsList}>
               {filteredAttractions.map((attraction, index) => (
                 <div
-                  key={index}
+                  key={attraction._id || index}
                   className={`${styles.attractionItem} ${
                     selectedAttraction === attraction ? styles.selected : ""
                   }`}
@@ -239,7 +244,15 @@ export default function Map() {
             />
           )}
         </main>
+
+        <button
+          className={styles.sidebarToggleButton}
+          onClick={() => setShowSidebar(!showSidebar)}
+          aria-label={showSidebar ? "사이드바 닫기" : "사이드바 열기"}
+        >
+          {showSidebar ? "×" : "☰"}
+        </button>
       </div>
-    </Layout>
+    </>
   );
 }

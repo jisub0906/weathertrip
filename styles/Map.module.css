@@ -18,16 +18,24 @@
 }
 
 .mapPageContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
-  height: calc(100vh - 60px);
-  position: relative;
+  flex-direction: row;
   overflow: hidden;
+  background: white;
 }
 
 .mapArea {
   flex: 1;
   position: relative;
   height: 100%;
+  width: 100%;
 }
 
 .mapInfoPanel {
@@ -264,23 +272,29 @@
 }
 
 .attractionsSidebar {
-  width: 350px;
-  height: 100%;
+  position: fixed;
+  top: 113px;
+  left: 0;
+  bottom: 0;
+  width: 400px;
   background: white;
   border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
+  z-index: 100;
 }
 
 .sidebarHeader {
-  padding: 1rem;
+  padding: 1.5rem;
   border-bottom: 1px solid #e0e0e0;
+  background: white;
 }
 
 .sidebarHeader h2 {
   margin: 0 0 1rem 0;
   font-size: 1.5rem;
+  color: #333;
 }
 
 .weatherInfo {
@@ -302,20 +316,23 @@
 .attractionsList {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1rem 1.5rem;
+  background: white;
 }
 
 .attractionItem {
   padding: 1rem;
   border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border-radius: 8px;
   margin-bottom: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  background: white;
 }
 
 .attractionItem:hover {
-  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .attractionItem.selected {
@@ -326,12 +343,13 @@
 .attractionItem h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
+  color: #333;
 }
 
 .attractionDetails {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
   font-size: 0.9rem;
   color: #666;
 }
@@ -343,12 +361,13 @@
 
 .modeButton {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.9rem;
 }
 
 .modeButton.active {
@@ -358,78 +377,67 @@
 }
 
 .searchBarContainer {
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid #e0e0e0;
+  background: white;
 }
 
 .sidebarToggleButton {
-  display: none;
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 50px;
-  height: 50px;
+  bottom: 2rem;
+  left: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: 50%;
-  background-color: #4CAF50;
+  background: #3498db;
   color: white;
   border: none;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   cursor: pointer;
-  z-index: 30;
-  transition: transform 0.2s, background-color 0.2s;
+  z-index: 90;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
 }
 
-.sidebarToggleButton:hover {
-  background-color: #45a049;
-  transform: translateY(-2px);
-}
-
-/* 반응형 디자인 */
 @media (max-width: 768px) {
-  .pageTitle {
-    font-size: 2rem;
-  }
-  
-  .mapContainer {
-    flex-direction: column;
-    height: 380px;
-    margin-top: 113px;
-  }
-  
-  .mapInfoPanel {
-    width: 100%;
-    max-height: 300px;
-    border-right: none;
-    border-bottom: 1px solid var(--border-light);
-  }
-  
-  .kakaoMapContainer {
-    height: 400px;
-  }
-  
-  .mapPageContainer {
-    top: 56px;
-    height: calc(100vh - 56px);
-  }
-  
   .attractionsSidebar {
     position: fixed;
     bottom: 0;
     left: 0;
+    top: auto;
     width: 100%;
-    height: 60%;
-    transform: translateY(100%);
-    z-index: 1000;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    height: 40%;
+    border-right: none;
+    border-top: 1px solid #e0e0e0;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
   }
-  
-  .attractionsSidebar.open {
-    transform: translateY(0);
-  }
-  
+
+
   .sidebarToggleButton {
     display: flex;
-    align-items: center;
-    justify-content: center;
+  }
+
+  .sidebarHeader {
+    padding: 1rem;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+
+  .searchBarContainer {
+    padding: 1rem;
+  }
+
+  .attractionsList {
+    padding: 1rem;
+  }
+  
+  .mapArea {
+    flex: 1;
+    position: relative;
+    height: 100%;
+    width: 100%;
   }
 }
