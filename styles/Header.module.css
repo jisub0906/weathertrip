@@ -4,6 +4,7 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  width: 100%;
 }
 
 /* 상단: 로고 + 로그인/회원가입 */
@@ -15,22 +16,24 @@
 }
 
 .logo {
-  color: #1a1a1a;
-  font-size: 1.4rem;
-  font-weight: 700;
-  text-decoration: none;
+  height: 60px;
+  display: flex;
+  align-items: center;
 }
 
 .auth {
-  font-size: 1.5rem;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
 }
 
 .auth a {
-  color:rgb(0, 0, 0);
+  color: #000;
   text-decoration: none;
-  margin-left: 2rem;
   font-weight: 500;
+  font-size: 1.1rem;
 }
+
 /* 하단: 네비게이션 바 */
 .navBar {
   border-top: 1px solid #eee;
@@ -59,14 +62,19 @@
 
 /* 반응형 처리 */
 @media (max-width: 768px) {
-  .headerTop {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+  .topBar {
+    padding: 1rem;
   }
-
+  
+  .auth {
+    gap: 1rem;
+  }
+  
+  .auth a {
+    font-size: 1rem;
+  }
+  
   .navBar ul {
-    flex-direction: column;
-    align-items: center;
+    gap: 1rem;
   }
 }

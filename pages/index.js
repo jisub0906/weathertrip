@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Layout from '../components/Layout/Layout';
 import KoreaMap from '../components/Map/KoreaMap';
 import RollingBanner from '../components/Banner/RollingBanner';
 import WeatherBanner from '../components/Banner/WeatherBanner';
 import useLocation from '../hooks/useLocation';
-import Link from 'next/link';
 import axios from 'axios';
 import styles from '../styles/Home.module.css';
 import Image from 'next/image';
+import { calculateAttractionsDistance } from '../utils/distance';
 
 
 // 컴포넌트 외부로 이동
@@ -33,74 +33,31 @@ const REGION_COORDINATES = {
   'all': { latitude: 36.5, longitude: 127.8 }
 };
 
-// 지도 섹션 컴포넌트
-const MapSection = ({ activeRegion, onRegionSelect }) => {
-  return (
-    <div className={styles.mapSection}>
-      <h2 className={styles.sectionTitle}>대한민국 관광지 둘러보기</h2>
-      <div className={styles.koreaMapContainer}>
-        <KoreaMap
-          onRegionSelect={onRegionSelect}
-          selectedRegion={activeRegion}
-        />
-      </div>
-    </div>
-  );
-};
 
 // 관광지 목록 섹션 컴포넌트
 const AttractionListSection = ({ 
   loading, 
   error, 
-  attractions, 
-  activeRegion, 
-  currentPage, 
-  totalPages,
-  currentAttractions,
-  attractionsPerPage,
-  handlePageChange 
+  attractions,
+  isOpen,
+  onOpenChange,
+  userLocation 
 }) => {
-  // pagination 버튼 렌더링 함수를 컴포넌트 내부로 이동
-  const renderPaginationButtons = () => {
-    const buttons = [];
-    const maxVisibleButtons = 5;
-    let startPage, endPage;
-
-    if (totalPages <= maxVisibleButtons) {
-      startPage = 1;
-      endPage = totalPages;
-    } else {
-      const maxPagesBeforeCurrentPage = Math.floor(maxVisibleButtons / 2);
-      const maxPagesAfterCurrentPage = Math.ceil(maxVisibleButtons / 2) - 1;
-
-      if (currentPage <= maxPagesBeforeCurrentPage) {
-        startPage = 1;
-        endPage = maxVisibleButtons;
-      } else if (currentPage + maxPagesAfterCurrentPage >= totalPages) {
-        startPage = totalPages - maxVisibleButtons + 1;
-        endPage = totalPages;
-      } else {
-        startPage = currentPage - maxPagesBeforeCurrentPage;
-        endPage = currentPage + maxPagesAfterCurrentPage;
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      buttons.push(
-        <button
-          key={i}
-          className={`${styles.paginationButton} ${currentPage === i ? styles.activePage : ''}`}
-          onClick={() => handlePageChange(i)}>
-          {i}
-        </button>
-      );
-    }
-
-    return buttons;
-  };
+  const attractionsWithDistance = calculateAttractionsDistance(attractions, userLocation);
 
   return (
-    <div className={styles.attractionListSection}>
+    <div className={`${styles.attractionListSection} ${isOpen ? styles.open : ''}`}>
+      <div className={styles.listHeader}>
+        <h2>관광지 목록</h2>
+        <button 
+          className={styles.closeButton}
+          onClick={() => onOpenChange(false)}
+          aria-label="관광지 목록 닫기"
+        >
+          ×
+        </button>
+      </div>
+
       {loading && (
         <div className={styles.loading}>
           <p>관광지 정보를 불러오는 중...</p>
@@ -113,177 +70,40 @@ const AttractionListSection = ({
         </div>
       )}
 
-      {!loading && !error && attractions.length > 0 && (
-        <div className={styles.resultsInfo}>
-          <h3>
-            {activeRegion === 'all' ? '전국' :
-              activeRegion === 'seoul' ? '서울' :
-                activeRegion === 'busan' ? '부산' :
-                  activeRegion === 'daegu' ? '대구' :
-                    activeRegion === 'incheon' ? '인천' :
-                      activeRegion === 'gwangju' ? '광주' :
-                        activeRegion === 'daejeon' ? '대전' :
-                          activeRegion === 'ulsan' ? '울산' :
-                            activeRegion === 'sejong' ? '세종' :
-                              activeRegion === 'gyeonggi' ? '경기도' :
-                                activeRegion === 'gangwon' ? '강원도' :
-                                  activeRegion === 'chungbuk' ? '충청북도' :
-                                    activeRegion === 'chungnam' ? '충청남도' :
-                                      activeRegion === 'jeonbuk' ? '전라북도' :
-                                        activeRegion === 'jeonnam' ? '전라남도' :
-                                          activeRegion === 'gyeongbuk' ? '경상북도' :
-                                            activeRegion === 'gyeongnam' ? '경상남도' :
-                                              activeRegion === 'jeju' ? '제주도' : '선택 지역'}의
-            관광지 ({attractions.length}개)
-          </h3>
-          <p>페이지 {currentPage} / {totalPages}</p>
+      {!loading && !error && attractionsWithDistance.length > 0 && (
+        <div className={styles.attractionsList}>
+          {attractionsWithDistance.map((attraction, index) => (
+            <div key={attraction._id || index} className={styles.locationCard}>
+              <div className={styles.locationInfo}>
+                <h4 className={styles.locationName}>{attraction.name}</h4>
+                <p className={styles.locationAddress}>
+                  <span className={styles.icon}>📍</span>
+                  {attraction.address}
+                </p>
+                {attraction.distance && (
+                  <span className={styles.distance}>
+                    <span className={styles.icon}>🚗</span>
+                    {attraction.distance.toFixed(1)}km
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
-      )}
-
-      {!loading && !error && (
-        <>
-          <div className={styles.attractionsContainer}>
-            {/* 데스크톱 가로형 카드 뷰 */}
-            <div className={styles.attractionsHorizontal}>
-              {currentAttractions.map((attraction, index) => (
-                <div key={attraction._id || index} className={styles.horizontalCard}>
-                  <div className={styles.cardMain}>
-                    <div className={styles.cardHeader}>
-                      <h3>{attraction.name}</h3>
-                      <p className={styles.address}>
-                        <span className={styles.icon}>📍</span>
-                        {attraction.address}
-                      </p>
-                    </div>
-                    <p className={styles.description}>{attraction.description}</p>
-                  </div>
-                  <div className={styles.cardDetails}>
-                    <div className={styles.detailsRow}>
-                      {attraction.distanceKm && (
-                        <p className={styles.distance}>
-                          <span className={styles.icon}>🚗</span>
-                          {attraction.distanceKm.toFixed(1)}km
-                        </p>
-                      )}
-                      {attraction.type && (
-                        <p className={styles.type}>
-                          <span className={styles.icon}>🏛️</span>
-                          {attraction.type === 'indoor' ? '실내' :
-                            attraction.type === 'outdoor' ? '야외' : '실내/야외'}
-                        </p>
-                      )}
-                    </div>
-                    {attraction.tags && (
-                      <div className={styles.tags}>
-                        {Array.isArray(attraction.tags)
-                          ? attraction.tags.map((tag, i) => (
-                            <span key={i} className={styles.tag}>{tag}</span>
-                          ))
-                          : typeof attraction.tags === 'string'
-                            ? attraction.tags.split(',').map((tag, i) => (
-                              <span key={i} className={styles.tag}>{tag.trim()}</span>
-                            ))
-                            : null
-                        }
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* 모바일 카드형 뷰 */}
-            <div className={styles.attractionsGrid}>
-              {currentAttractions.map((attraction, index) => (
-                <div key={attraction._id || index} className={styles.attractionCard}>
-                  <div className={styles.attractionInfo}>
-                    <h3>{attraction.name}</h3>
-                    <p className={styles.address}>{attraction.address}</p>
-                    <p className={styles.description}>{attraction.description}</p>
-                  </div>
-                  <div className={styles.attractionDetails}>
-                    {attraction.distanceKm && (
-                      <p className={styles.distance}>
-                        <span className={styles.icon}>📍</span>
-                        {attraction.distanceKm.toFixed(1)}km
-                      </p>
-                    )}
-                    {attraction.type && (
-                      <p className={styles.type}>
-                        <span className={styles.icon}>🏛️</span>
-                        {attraction.type === 'indoor' ? '실내' :
-                          attraction.type === 'outdoor' ? '야외' : '실내/야외'}
-                      </p>
-                    )}
-                    {attraction.tags && (
-                      <div className={styles.tags}>
-                        {Array.isArray(attraction.tags)
-                          ? attraction.tags.map((tag, i) => (
-                            <span key={i} className={styles.tag}>{tag}</span>
-                          ))
-                          : typeof attraction.tags === 'string'
-                            ? attraction.tags.split(',').map((tag, i) => (
-                              <span key={i} className={styles.tag}>{tag.trim()}</span>
-                            ))
-                            : null
-                        }
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {attractions.length > attractionsPerPage && (
-            <div className={styles.pagination}>
-              <button
-                className={styles.paginationButton}
-                onClick={() => handlePageChange(1)}
-                disabled={currentPage === 1}
-              >
-                《
-              </button>
-              <button
-                className={styles.paginationButton}
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                〈
-              </button>
-              {renderPaginationButtons()}
-              <button
-                className={styles.paginationButton}
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                〉
-              </button>
-              <button
-                className={styles.paginationButton}
-                onClick={() => handlePageChange(totalPages)}
-                disabled={currentPage === totalPages}
-              >
-                》
-              </button>
-            </div>
-          )}
-        </>
       )}
     </div>
   );
 };
 
 export default function Home() {
-  const { location } = useLocation();
+  const { location: userLocation } = useLocation();
   const [activeRegion, setActiveRegion] = useState('seoul');
   const [attractions, setAttractions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const attractionsPerPage = 5;
   const [popularAttractions, setPopularAttractions] = useState([]);
   const [popularLoading, setPopularLoading] = useState(false);
+  const [isListOpen, setIsListOpen] = useState(false);
 
   const fetchAttractions = useCallback(async (region) => {
     setLoading(true);
@@ -311,33 +131,26 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, []); // 종속성 제거
+  }, []);
 
   const handleRegionSelect = useCallback((region) => {
     setActiveRegion(region);
-    setCurrentPage(1);
+    setIsListOpen(true);
     fetchAttractions(region);
   }, [fetchAttractions]);
 
-  // 컴포넌트 마운트 시 한 번만 실행
   useEffect(() => {
     fetchAttractions('seoul');
   }, [fetchAttractions]);
 
-  // 인기 관광지 가져오기
   useEffect(() => {
     const fetchPopularAttractions = async () => {
       setPopularLoading(true);
       try {
-        console.log('인기 관광지 데이터 요청 시작');
         const response = await axios.get('/api/attractions/popular');
-        console.log('인기 관광지 API 응답:', response.data);
-        
         if (response.data.success && response.data.data.attractions) {
-          console.log('설정할 인기 관광지 데이터:', response.data.data.attractions);
           setPopularAttractions(response.data.data.attractions);
         } else {
-          console.log('인기 관광지 데이터 없음');
           setPopularAttractions([]);
         }
       } catch (error) {
@@ -349,16 +162,7 @@ export default function Home() {
     };
 
     fetchPopularAttractions();
-  }, []); // 빈 의존성 배열 유지
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const indexOfLastAttraction = currentPage * attractionsPerPage;
-  const indexOfFirstAttraction = indexOfLastAttraction - attractionsPerPage;
-  const currentAttractions = attractions.slice(indexOfFirstAttraction, indexOfLastAttraction);
-  const totalPages = Math.ceil(attractions.length / attractionsPerPage);
+  }, []);
 
   return (
     <Layout>
@@ -367,32 +171,20 @@ export default function Home() {
         <meta name="description" content="대한민국의 다양한 관광지를 찾아보세요." />
       </Head>
 
-      <RollingBanner />
-
-      <WeatherBanner />
-
-      <div className={styles.mainContent}>
-        {/* 지도 섹션 */}
-        <MapSection 
-          activeRegion={activeRegion} 
-          onRegionSelect={handleRegionSelect} 
-        />
-
-        {/* 관광지 목록 섹션 */}
-        <AttractionListSection 
+      <main className={styles.main}>
+        <RollingBanner />
+        <WeatherBanner />
+        <KoreaMap selectedRegion={activeRegion} onRegionSelect={handleRegionSelect} />
+        <AttractionListSection
           loading={loading}
           error={error}
           attractions={attractions}
-          activeRegion={activeRegion}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          currentAttractions={currentAttractions}
-          attractionsPerPage={attractionsPerPage}
-          handlePageChange={handlePageChange}
+          isOpen={isListOpen}
+          onOpenChange={setIsListOpen}
+          userLocation={userLocation}
         />
-      </div>
+      </main>
 
-      {/* Popular Attractions Section */}
       <section className={styles.popularSection}>
         <div className={styles.container}>
           <h2 className={styles.sectionTitle}>인기 여행지</h2>
