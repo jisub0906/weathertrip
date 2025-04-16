@@ -26,7 +26,7 @@ export default function Header() {
         </div>
         <div className={styles.auth}>
           <Link href="/login">로그인</Link>
-          <Link href="Users/signup">회원가입</Link>
+          <Link href="users/register">회원가입</Link>
         </div>
       </div>
       {/* 내비게이션 바바 */}

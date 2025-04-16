@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
-import TopBanner from "../components/Banner/TopBanner";
 import KakaoMap from "../components/Map/KakaoMap";
 import SearchBar from "../components/Search/SearchBar";
 import useLocation from "../hooks/useLocation";
@@ -158,7 +157,6 @@ export default function Map() {
         <meta name="description" content="현재 위치 주변의 관광지를 지도에서 찾아보세요." />
       </Head>
 
-      <TopBanner />
       <Header />
       
       <aside className={styles.attractionsSidebar}>
