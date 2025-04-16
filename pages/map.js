@@ -6,6 +6,7 @@ import KakaoMap from "../components/Map/KakaoMap";
 import SearchBar from "../components/Search/SearchBar";
 import useLocation from "../hooks/useLocation";
 import styles from "../styles/Map.module.css";
+import detailStyles from "../styles/AttractionDetail.module.css";
 
 export default function Map() {
   const {
