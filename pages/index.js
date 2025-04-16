@@ -363,7 +363,7 @@ export default function Home() {
   return (
     <Layout>
       <Head>
-        <title>관광지 추천 서비스</title>
+        <title>weather trip</title>
         <meta name="description" content="대한민국의 다양한 관광지를 찾아보세요." />
       </Head>
 
