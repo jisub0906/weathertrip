@@ -5,7 +5,7 @@
     border-radius: 12px;
     padding: 12px 16px; /* 약간 줄임 */
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    margin-top: 40px;
+    margin-top: 24px;
     margin-bottom: 24px;
     cursor: pointer; /* 전체 클릭 가능하게 */
     transition: background-color 0.3s ease;
