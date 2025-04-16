@@ -40,29 +40,15 @@ export default function Signup() {
 
     const fullPhone = `${phone1}-${phone2}-${phone3}`;
 
-    console.log("🔥 최종 전송될 데이터", {
-      name,
-      email,
-      password,
-      nickname,
-      gender: gender || undefined,
-      birthdate: birthdate || undefined,
-      phone: fullPhone,
-      region: region?.country ? {
-        country: region.country,
-        city: region.city || undefined
-      } : undefined
-    });
-
     try {
       const res = await fetch('/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          email,
+          name: name.trim(),
+          email: email.trim(),
           password,
-          nickname,
+          nickname: nickname.trim(),
           gender: gender || undefined,
           birthdate: birthdate || undefined,
           phone: fullPhone,
@@ -107,6 +93,7 @@ export default function Signup() {
           <label htmlFor="password">* 비밀번호</label>
           <input id="password" type="password" value={formData.password}
             onChange={e => setFormData({ ...formData, password: e.target.value })} />
+          <small style={{ color: 'gray' }}>비밀번호는 최소 4자 이상이어야 합니다.</small>
         </div>
 
         <div>
@@ -172,7 +159,7 @@ export default function Signup() {
                 city: ''
               }
             })}>
-            <option value="">국가 선택</option> {/* ✅ 기본 옵션 추가 */}
+            <option value="">국가 선택</option>
             {countries.map((country) => (
               <option key={country} value={country}>{country}</option>
             ))}

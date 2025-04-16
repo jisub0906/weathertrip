@@ -14,29 +14,19 @@ const validPhonePrefixes = ['010', '011', '016', '017', '018', '019'];
 const startsWithNumber = (value) => /^\d/.test(value);
 
 const UserSchema = new mongoose.Schema({
-  // 1. 이름
   name: {
     type: String,
     required: [true, '이름은 필수입니다.'],
     trim: true
   },
 
-  // 2. 이메일
   email: {
     type: String,
     required: [true, '이메일은 필수입니다.'],
     unique: true,
-    trim: true,
-    validate: {
-      validator: async function (value) {
-        const existing = await mongoose.models.User.findOne({ email: value });
-        return !existing;
-      },
-      message: '이미 가입된 메일입니다.'
-    }
+    trim: true
   },
 
-  // 3. 비밀번호
   password: {
     type: String,
     required: [true, '비밀번호는 필수입니다.'],
@@ -49,7 +39,6 @@ const UserSchema = new mongoose.Schema({
     }
   },
 
-  // 4. 닉네임
   nickname: {
     type: String,
     required: [true, '닉네임은 필수입니다.'],
@@ -64,20 +53,17 @@ const UserSchema = new mongoose.Schema({
     }
   },
 
-  // 5. 성별 (선택사항)
   gender: {
     type: String,
     enum: ['male', 'female'],
     required: false
   },
 
-  // 6. 생년월일 (선택사항)
   birthdate: {
     type: Date,
     required: false
   },
 
-  // 7. 전화번호
   phone: {
     type: String,
     required: [true, '전화번호는 필수입니다.'],
@@ -93,18 +79,14 @@ const UserSchema = new mongoose.Schema({
       return raw;
     },
     validate: {
-      validator: async function (value) {
+      validator: function (value) {
         const match = value.match(/^(\d{3})-(\d{3,4})-(\d{4})$/);
-        if (!match) return false;
-        const prefix = match[1];
-        const existing = await mongoose.models.User.findOne({ phone: value });
-        return validPhonePrefixes.includes(prefix) && !existing;
+        return match && validPhonePrefixes.includes(match[1]);
       },
-      message: '이미 가입된 전화번호이거나 형식이 올바르지 않습니다. (예: 01012345678)'
+      message: '전화번호 형식이 올바르지 않습니다. (예: 01012345678)'
     }
   },
 
-  // 8. 지역
   region: {
     country: {
       type: String,
@@ -117,11 +99,10 @@ const UserSchema = new mongoose.Schema({
       required: false
     }
   }
-
 }, {
-  timestamps: true // createdAt, updatedAt 자동 관리
+  timestamps: true
 });
 
-// ✅ 안전한 캐시 방식 (Next.js에서 중복 선언 방지)
+// ✅ 캐시 방지 (Next.js 환경 대응)
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 export default User;
