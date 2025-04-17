@@ -135,7 +135,9 @@ export default function KoreaMap({ onRegionSelect, selectedRegion }) {
           className={`${styles.region} ${selectedRegion === mapping.code ? styles.selected : ''} ${styles[mapping.code]}`}
           onClick={() => onRegionSelect(mapping.code)}
           data-name={mapping.nameKo}
-        />
+        >
+          <title>{mapping.nameKo}</title>
+        </path>
       );
     });
   };
@@ -180,14 +182,14 @@ export default function KoreaMap({ onRegionSelect, selectedRegion }) {
           {Object.keys(pathData).length > 0 && renderRegions()}
           
           {/* 독도 명시적으로 추가 */}
-          <circle 
-            cx="790" 
-            cy="310" 
-            r="1.5" 
-            fill="#6495ED" 
-            stroke="#fff" 
-            strokeWidth="0.5" 
-            className={styles.dokdo} 
+          <circle
+            cx="790"
+            cy="290"
+            r="1.6"
+            fill="rgba(255, 180, 190, 1)"  /* 경상북도와 동일한 색상 */
+            stroke="#000000"
+            strokeWidth="0.5"
+            className={styles.dokdo}
           />
         </svg>
       </div>

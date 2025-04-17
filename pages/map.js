@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Header from "../components/Layout/Header";
@@ -57,37 +57,39 @@ export default function Map() {
     fetchKeywordLocation();
   }, [keyword]);
 
-  const handleNearbyAttractionsLoad = (attractions) => {
+  const handleNearbyAttractionsLoad = useCallback((attractions) => {
     setNearbyAttractions(attractions || []);
     if (!isNearbyMode) {
       setFilteredAttractions(attractions || []);
     }
-  };
+  }, [isNearbyMode]);
 
-  const handleAllAttractionsLoad = (attractions) => {
+  const handleAllAttractionsLoad = useCallback((attractions) => {
     setAllAttractions(attractions || []);
     if (!isNearbyMode) {
       setFilteredAttractions(attractions || []);
     }
-  };
+  }, [isNearbyMode]);
 
-  const handleShowNearby = () => {
+  const handleShowNearby = useCallback(() => {
     if (mapRef.current?.moveToCurrentLocation) {
       mapRef.current.moveToCurrentLocation();
       setIsNearbyMode(true);
-      setFilteredAttractions(nearbyAttractions);
     }
-  };
+  }, []);
 
-  const handleShowAll = () => {
+  const handleShowAll = useCallback(() => {
     setIsNearbyMode(false);
-    setFilteredAttractions(allAttractions);
     if (mapRef.current?.fetchAllAttractions) {
       mapRef.current.fetchAllAttractions();
     }
-  };
+  }, []);
 
-  const handleAttractionClick = (attraction) => {
+  useEffect(() => {
+    setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
+  }, [isNearbyMode, nearbyAttractions, allAttractions]);
+
+  const handleAttractionClick = useCallback((attraction) => {
     setSelectedAttraction(attraction);
 
     if (mapRef.current?.handleAttractionClick) {
@@ -105,9 +107,9 @@ export default function Map() {
     if (window.innerWidth <= 768) {
       setShowSidebar(true);
     }
-  };
+  }, []);
 
-  const handleSearch = async (searchTerm) => {
+  const handleSearch = useCallback(async (searchTerm) => {
     if (!searchTerm.trim()) {
       setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
@@ -148,7 +150,7 @@ export default function Map() {
         setFilteredAttractions(results);
       }
     });
-  };
+  }, [isNearbyMode, nearbyAttractions, allAttractions]);
 
   return (
     <>

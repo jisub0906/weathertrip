@@ -6,14 +6,11 @@ import AttractionDetail from '../Attractions/AttractionDetail';
 const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyAttractionsLoad, onAllAttractionsLoad, onCloseDetail, isNearbyMode }, ref) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const [attractions, setAttractions] = useState([]);
   const [allAttractionsCached, setAllAttractionsCached] = useState([]); // 전체 관광지 데이터 캐시
   const [isLoading, setIsLoading] = useState(false);
   const debounceTimerRef = useRef(null);
   const markersRef = useRef([]);
   const isMapInitializedRef = useRef(false);
-  const previousCenterRef = useRef(null);
-  const [showNearbyButton, setShowNearbyButton] = useState(false);
   const [selectedAttraction, setSelectedAttraction] = useState(null);
 
   // 이전 마커 제거 함수
@@ -24,14 +21,6 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
     }
   }, []);
 
-  // 지연 함수(debounce) - 지도 이동 시 과도한 API 호출 방지
-  const debounce = (callback, delay) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    debounceTimerRef.current = setTimeout(callback, delay);
-  };
-
   // 모든 관광지 정보 가져오기
   const fetchAllAttractions = useCallback(async (map) => {
     if (!map) return;
@@ -41,8 +30,6 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
     try {
       // 캐시된 데이터가 있으면 재사용
       if (allAttractionsCached.length > 0) {
-        setAttractions(allAttractionsCached);
-        
         // 부모 컴포넌트에 관광지 목록 전달
         if (onAllAttractionsLoad) {
           onAllAttractionsLoad(allAttractionsCached);
@@ -98,7 +85,6 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
 
       if (response.data.attractions) {
         const allAttractions = response.data.attractions;
-        setAttractions(allAttractions);
         setAllAttractionsCached(allAttractions); // 데이터 캐시
 
         // 부모 컴포넌트에 관광지 목록 전달
@@ -152,7 +138,7 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
     } finally {
       setIsLoading(false);
     }
-  }, [clearMarkers, onMarkerClick, onAllAttractionsLoad, allAttractionsCached]);
+  }, [onMarkerClick, onAllAttractionsLoad, allAttractionsCached]);
 
   // 주변 관광지 정보 가져오기
   const fetchNearbyAttractions = useCallback(async (location, map, radius = 3) => {
@@ -168,14 +154,13 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
         params: {
           latitude: location.latitude,
           longitude: location.longitude,
-          radius: radius, // 반경(km) - 줌 레벨에 따라 동적으로 변경
-          limit: 20 // 최대 20개만 가져오도록 제한
+          radius: radius,
+          limit: 20
         }
       });
 
       if (response.data.attractions) {
         const newAttractions = response.data.attractions;
-        setAttractions(newAttractions);
 
         // 부모 컴포넌트에 관광지 목록 전달
         if (onNearbyAttractionsLoad) {
@@ -197,17 +182,14 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
           const coords = attraction.location.coordinates;
           const position = new window.kakao.maps.LatLng(coords[1], coords[0]);
 
-          // 마커 생성
           const marker = new window.kakao.maps.Marker({
             position: position,
             map: map,
             title: attraction.name
           });
 
-          // 마커 참조 저장
           markersRef.current.push(marker);
 
-          // 마커 클릭 이벤트
           window.kakao.maps.event.addListener(marker, 'click', function () {
             if (onMarkerClick) {
               onMarkerClick(attraction);
@@ -291,6 +273,8 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
       return;
     }
 
+    const timer = debounceTimerRef.current;
+
     // 처음 초기화하는 경우에만 실행
     window.kakao.maps.load(() => {
       try {
@@ -300,7 +284,7 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
             center?.latitude || 37.5665,
             center?.longitude || 126.9780
           ),
-          level: 5 // 지도 확대 레벨
+          level: 5
         };
 
         // 지도 인스턴스 생성
@@ -308,18 +292,14 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
         mapInstanceRef.current = map;
 
         // 지도 컨트롤 추가
-        // 줌 컨트롤
         const zoomControl = new window.kakao.maps.ZoomControl();
         map.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT);
 
-        // 타입 컨트롤 (일반 지도, 스카이뷰)
         const mapTypeControl = new window.kakao.maps.MapTypeControl();
         map.addControl(mapTypeControl, window.kakao.maps.ControlPosition.TOPRIGHT);
 
-        // 초기화 완료 표시
         isMapInitializedRef.current = true;
 
-        // 현재 위치 마커 표시
         if (center) {
           const locationMarker = new window.kakao.maps.Marker({
             position: new window.kakao.maps.LatLng(center.latitude, center.longitude),
@@ -327,7 +307,6 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
             title: '현재 위치'
           });
 
-          // 현재 위치 정보 창
           const infoContent = '<div style="padding:5px;width:150px;text-align:center;"><strong>현재 위치</strong></div>';
           const infoWindow = new window.kakao.maps.InfoWindow({
             content: infoContent
@@ -335,37 +314,21 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
           infoWindow.open(map, locationMarker);
         }
 
-        // 전체 관광지 정보 로드 - 지도 초기화 후 약간의 지연을 두고 실행
         setTimeout(() => {
           fetchAllAttractions(map);
         }, 1000);
-
-        // 현재 위치 표시 버튼 활성화
-        if (center) {
-          setShowNearbyButton(true);
-        }
       } catch (error) {
         console.error('카카오맵 초기화 중 오류 발생:', error);
       }
     });
 
-    // 컴포넌트 언마운트 시 클린업 함수
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+      if (timer) {
+        clearTimeout(timer);
       }
       clearMarkers();
     };
-  }, [fetchAllAttractions, center, clearMarkers]);
-
-  // 중앙 위치 변경 시에만 현재 위치 마커 업데이트
-  useEffect(() => {
-    if (!isMapInitializedRef.current || !mapInstanceRef.current || !center) return;
-
-    // 현재 위치 버튼 표시
-    setShowNearbyButton(true);
-
-  }, [center]);
+  }, [center, clearMarkers, fetchAllAttractions]);
 
   // 관광지 목록 클릭 시 상세 정보 표시 (부모 컴포넌트에서 호출 가능)
   const handleAttractionClick = useCallback((attraction) => {
@@ -414,25 +377,22 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
 
   // isNearbyMode가 변경될 때 마커 업데이트
   useEffect(() => {
-    const updateMarkers = async () => {
-      if (!mapInstanceRef.current) return;
+    if (!mapInstanceRef.current) return;
 
-      // 이전 마커 제거
+    const updateMarkers = async () => {
       clearMarkers();
 
       if (isNearbyMode) {
         if (center) {
-          // 주변 관광지 데이터 가져오기
           await fetchNearbyAttractions(center, mapInstanceRef.current);
         }
       } else {
-        // 전체 관광지 데이터 가져오기 (캐시된 데이터 사용)
         await fetchAllAttractions(mapInstanceRef.current);
       }
     };
 
     updateMarkers();
-  }, [isNearbyMode, center]);
+  }, [isNearbyMode, center, clearMarkers, fetchAllAttractions, fetchNearbyAttractions]);
 
   return (
     <div className={styles.mapContainer}>
