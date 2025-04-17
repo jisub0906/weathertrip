@@ -9,7 +9,6 @@ export default async function handler(req, res) {
   await dbConnect();
 
   try {
-    // ✅ 모든 필드 받아오기
     const {
       name,
       email,
@@ -21,43 +20,73 @@ export default async function handler(req, res) {
       region
     } = req.body;
 
-    // ✅ 간단한 유효성 검사
-    if (!name || !email || !password || !nickname || !gender || !phone) {
-      return res.status(400).json({ message: '모든 항목을 입력해주세요.' });
+    if (!name || !email || !password || !nickname || !phone) {
+      return res.status(400).json({ message: '필수 항목을 모두 입력해주세요.' });
     }
 
-    // ✅ 유저 생성
-    const newUser = await User.create({
+    const userData = {
       name,
       email,
       password,
       nickname,
-      gender,
-      birthdate,
-      phone,
-      region
-    });
+      phone
+    };
 
-    return res.status(201).json({ message: '회원가입 되었습니다.', userId: newUser._id });
-
-  } catch (error) {
-    console.error('회원가입 오류:', error);
-
-    // ✅ 중복 에러 구분 처리
-    if (error.code === 11000) {
-      const duplicatedField = Object.keys(error.keyPattern)[0];
-
-      if (['email', 'phone'].includes(duplicatedField)) {
-        return res.status(409).json({ message: '이미 가입된 이메일이거나 전화번호입니다.' });
-      }
-
-      if (duplicatedField === 'nickname') {
-        return res.status(409).json({ message: '이미 사용 중인 닉네임입니다.' });
-      }
-
-      return res.status(409).json({ message: '중복된 항목이 있습니다.' });
+    if (typeof gender === 'string' && gender.trim() !== '') {
+      userData.gender = gender;
     }
 
-    return res.status(500).json({ message: '서버 오류입니다.' });
+    if (birthdate) {
+      userData.birthdate = birthdate;
+    }
+
+    if (region?.country) {
+      userData.region = {
+        country: region.country,
+        ...(region.city && { city: region.city })
+      };
+    }
+
+    const newUser = await User.create(userData);
+
+    return res.status(201).json({
+      message: '회원가입 되었습니다.',
+      userId: newUser._id
+    });
+
+  } catch (error) {
+    if (error.code === 11000 || error.name === 'ValidationError') {
+      const duplicatedFields = [
+        ...(error.keyPattern ? Object.keys(error.keyPattern) : []),
+        ...(error.errors ? Object.keys(error.errors) : [])
+      ];
+
+      const fullErrorString = JSON.stringify(error).toLowerCase();
+      if (fullErrorString.includes('nickname') && !duplicatedFields.includes('nickname')) {
+        duplicatedFields.push('nickname');
+      }
+
+      let messages = [];
+
+      if (duplicatedFields.includes('nickname')) {
+        messages.push('이미 사용 중인 닉네임입니다.');
+      }
+
+      if (duplicatedFields.includes('email') || duplicatedFields.includes('phone')) {
+        messages.push('이미 가입된 이메일 또는 전화번호입니다.');
+      }
+
+      if (duplicatedFields.includes('password')) {
+        messages.push('비밀번호는 최소 4자리 이상이어야 합니다.');
+      }
+
+      return res.status(409).json({
+        message: messages.join('\n')
+      });
+    }
+
+    return res.status(500).json({
+      message: '서버 오류입니다.'
+    });
   }
 }

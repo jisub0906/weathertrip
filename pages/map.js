@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Header from "../components/Layout/Header";
+import Footer from "../components/Layout/Footer";
 import KakaoMap from "../components/Map/KakaoMap";
 import SearchBar from "../components/Search/SearchBar";
 import SearchAutoTrigger from "../components/Search/SearchAutoTrigger";
 import useLocation from "../hooks/useLocation";
-import styles from "../styles/Map.module.css";
+import styles from "../styles/KakaoMap.module.css";
 
 export default function Map() {
   const {
@@ -35,37 +36,39 @@ export default function Map() {
   }, []);
 
 
-  const handleNearbyAttractionsLoad = (attractions) => {
+  const handleNearbyAttractionsLoad = useCallback((attractions) => {
     setNearbyAttractions(attractions || []);
     if (!isNearbyMode) {
       setFilteredAttractions(attractions || []);
     }
-  };
+  }, [isNearbyMode]);
 
-  const handleAllAttractionsLoad = (attractions) => {
+  const handleAllAttractionsLoad = useCallback((attractions) => {
     setAllAttractions(attractions || []);
     if (!isNearbyMode) {
       setFilteredAttractions(attractions || []);
     }
-  };
+  }, [isNearbyMode]);
 
-  const handleShowNearby = () => {
+  const handleShowNearby = useCallback(() => {
     if (mapRef.current?.moveToCurrentLocation) {
       mapRef.current.moveToCurrentLocation();
       setIsNearbyMode(true);
-      setFilteredAttractions(nearbyAttractions);
     }
-  };
+  }, []);
 
-  const handleShowAll = () => {
+  const handleShowAll = useCallback(() => {
     setIsNearbyMode(false);
-    setFilteredAttractions(allAttractions);
     if (mapRef.current?.fetchAllAttractions) {
       mapRef.current.fetchAllAttractions();
     }
-  };
+  }, []);
 
-  const handleAttractionClick = (attraction) => {
+  useEffect(() => {
+    setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
+  }, [isNearbyMode, nearbyAttractions, allAttractions]);
+
+  const handleAttractionClick = useCallback((attraction) => {
     setSelectedAttraction(attraction);
 
     if (mapRef.current?.handleAttractionClick) {
@@ -83,9 +86,9 @@ export default function Map() {
     if (window.innerWidth <= 768) {
       setShowSidebar(true);
     }
-  };
+  }, []);
 
-  const handleSearch = async (searchTerm) => {
+  const handleSearch = useCallback(async (searchTerm) => {
     if (!searchTerm.trim()) {
       setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
@@ -110,31 +113,17 @@ export default function Map() {
           mapRef.current.addSearchMarker(lat, lng);
         }
       } else {
-        console.warn('지도 검색 결과 없음:', searchTerm);
+        const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
+        const results = searchData.filter(
+          (item) =>
+            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.address || "").toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredAttractions(results);
       }
     });
-  
-    // 2. 리스트 필터링은 무조건 실행
-    const results = searchData.filter((item) => {
-      const name = (item.name || '').toLowerCase();
-      const desc = (item.description || '').toLowerCase();
-      const addr = (item.address || '').toLowerCase();
-      const tags = Array.isArray(item.tags) ? item.tags.map(tag => tag.toLowerCase()).join(' ') : '';
-      const type = (item.type || '').toLowerCase(); // indoor / outdoor
-  
-      return (
-        name.includes(term) ||
-        desc.includes(term) ||
-        addr.includes(term) ||
-        tags.includes(term) ||
-        type.includes(term)
-      );
-    });
-  
-    setFilteredAttractions(results);
-    
   };
-  
 
   return (
     <>
@@ -145,94 +134,88 @@ export default function Map() {
 
       <Header />
       
-      <div className={styles.mapPageContainer}>
-        <aside className={`${styles.attractionsSidebar} ${showSidebar ? styles.open : ""}`}>
-          <div className={styles.sidebarHeader}>
-            <h2>관광지</h2>
-            <div className={styles.buttonGroup}>
-              <button
-                className={`${styles.modeButton} ${!isNearbyMode ? styles.active : ''}`}
-                onClick={handleShowAll}
-              >
-                전체 관광지
-              </button>
-              <button
-                className={`${styles.modeButton} ${isNearbyMode ? styles.active : ''}`}
-                onClick={handleShowNearby}
-              >
-                내 주변 관광지
-              </button>
-            </div>
+      <aside className={styles.attractionsSidebar}>
+        <div className={styles.sidebarHeader}>
+          <h2>관광지</h2>
+          <div className={styles.buttonGroup}>
+            <button
+              className={`${styles.modeButton} ${!isNearbyMode ? styles.active : ''}`}
+              onClick={handleShowAll}
+            >
+              전체 관광지
+            </button>
+            <button
+              className={`${styles.modeButton} ${isNearbyMode ? styles.active : ''}`}
+              onClick={handleShowNearby}
+            >
+              내 주변 관광지
+            </button>
           </div>
+        </div>
 
           <div className={styles.searchBarContainer}>
-            {!isNearbyMode && <SearchBar key={searchKeyword} onSearch={handleSearch} initialValue={searchKeyword} />}
+            {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
           </div>
 
-          {filteredAttractions.length === 0 ? (
-            <div className={styles.emptyMessage}>
-              <p>관광지가 로드되지 않았습니다.</p>
-              <p>지도를 움직여 관광지를 찾아보세요.</p>
-            </div>
-          ) : (
-            <div className={styles.attractionsList}>
-              {filteredAttractions.map((attraction, index) => (
-                <div
-                  key={attraction._id || index}
-                  className={`${styles.attractionItem} ${
-                    selectedAttraction === attraction ? styles.selected : ""
-                  }`}
-                  onClick={() => handleAttractionClick(attraction)}
-                >
-                  <h3>{attraction.name || attraction.title || "이름 없음"}</h3>
-                  <div className={styles.attractionDetails}>
-                    <span>
-                      {attraction.address || attraction.location || "주소 정보 없음"}
-                    </span>
-                    <span>
-                      {attraction.distance
-                        ? `${(attraction.distance / 1000).toFixed(1)}km`
-                        : ""}
-                    </span>
-                  </div>
+        {filteredAttractions.length === 0 ? (
+          <div className={styles.emptyMessage}>
+            <p>관광지가 로드되지 않았습니다.</p>
+            <p>지도를 움직여 관광지를 찾아보세요.</p>
+          </div>
+        ) : (
+          <div className={styles.attractionsList}>
+            {filteredAttractions.map((attraction, index) => (
+              <div
+                key={attraction._id || index}
+                className={`${styles.attractionItem} ${
+                  selectedAttraction === attraction ? styles.selected : ""
+                }`}
+                onClick={() => handleAttractionClick(attraction)}
+              >
+                <h3>{attraction.name || attraction.title || "이름 없음"}</h3>
+                <div className={styles.attractionDetails}>
+                  <span>{attraction.address || attraction.location || "주소 정보 없음"}</span>
+                  <span>
+                    {attraction.distance
+                      ? `${(attraction.distance / 1000).toFixed(1)}km`
+                      : ""}
+                  </span>
                 </div>
-              ))}
-            </div>
-          )}
-        </aside>
+              </div>
+            ))}
+          </div>
+        )}
+      </aside>
 
-        <main className={styles.mapArea}>
-          {locationLoading && (
-            <div className={styles.mapLoadingOverlay}>
-              <div className={styles.mapLoadingSpinner} />
-              <p>위치 정보를 불러오는 중...</p>
-            </div>
-          )}
+      <main className={styles.mapArea}>
+        {locationLoading && (
+          <div className={styles.mapLoadingOverlay}>
+            <div className={styles.mapLoadingSpinner} />
+            <p>위치 정보를 불러오는 중...</p>
+          </div>
+        )}
 
-          {locationError && (
-            <div className={styles.mapLoadingOverlay}>
-              <p>위치 정보를 불러오는데 문제가 발생했습니다.</p>
-              <p>{locationError}</p>
-            </div>
-          )}
+        {locationError && (
+          <div className={styles.mapLoadingOverlay}>
+            <p>위치 정보를 불러오는데 문제가 발생했습니다.</p>
+            <p>{locationError}</p>
+          </div>
+        )}
 
-{!locationLoading && (
-  <>
-    <SearchAutoTrigger mapRef={mapRef} onSearch={handleSearch} keyword={searchKeyword} />  
-    <KakaoMap
-      ref={mapRef}
-      center={location || { latitude: 37.5665, longitude: 126.978 }}
-      onMarkerClick={handleAttractionClick}
-      onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
-      onAllAttractionsLoad={handleAllAttractionsLoad}
-      onCloseDetail={() => {
-        setSelectedAttraction(null);
-        setShowSidebar(true);
-      }}
-      isNearbyMode={isNearbyMode}
-    />
-  </>
-)}
+          {!locationLoading && (
+            <KakaoMap
+              ref={mapRef}
+              center={location || { latitude: 37.5665, longitude: 126.978 }}
+              onMarkerClick={handleAttractionClick}
+              onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
+              onAllAttractionsLoad={handleAllAttractionsLoad}
+              onCloseDetail={() => {
+                setSelectedAttraction(null);
+                setShowSidebar(true);
+              }}
+              isNearbyMode={isNearbyMode}
+            />
+          )}
         </main>
 
         <button

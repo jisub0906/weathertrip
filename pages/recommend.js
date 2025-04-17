@@ -2,11 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Head from 'next/head';
-import Layout from '../components/Layout/Layout';
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
 import useLocation from '../hooks/useLocation';
 import axios from 'axios';
 import styles from '../styles/Recommend.module.css';
-import SearchBar from '../components/Search/SearchBar'; // 0414 searchBar 관련
+import SearchBar from '../components/Search/SearchBar';
 
 export default function Recommend() {
   const { location, error: locationError, loading: locationLoading } = useLocation();
@@ -20,7 +21,7 @@ export default function Recommend() {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const observer = useRef();
-  const [searchTerm, setSearchTerm] = useState(''); // 0414 searchBar 관련
+  const [searchTerm, setSearchTerm] = useState('');
 
   const lastAttractionElementRef = useRef();
 
@@ -292,12 +293,13 @@ const handleCardClick = (attraction) => {
   };
 
   return (
-    <Layout hideFooter={true}>
+    <>
       <Head>
         <title>맞춤형 관광지 추천 - 날씨별 관광지 추천 서비스</title>
         <meta name="description" content="나에게 맞는 관광지를 추천받아보세요." />
       </Head>
 
+      <Header />
       <section className="section">
         <div className="container">
           <h1 className={styles.pageTitle}>맞춤형 관광지 추천</h1>
@@ -474,6 +476,7 @@ const handleCardClick = (attraction) => {
           )}
         </div>
       </section>
-    </Layout>
+      <Footer />
+    </>
   );
 } 
