@@ -4,6 +4,7 @@ import Head from "next/head";
 import Header from "../components/Layout/Header";
 import KakaoMap from "../components/Map/KakaoMap";
 import SearchBar from "../components/Search/SearchBar";
+import SearchAutoTrigger from "../components/Search/SearchAutoTrigger";
 import useLocation from "../hooks/useLocation";
 import styles from "../styles/Map.module.css";
 
@@ -20,41 +21,19 @@ export default function Map() {
   const mapRef = useRef(null);
   const [filteredAttractions, setFilteredAttractions] = useState([]);
   const [isNearbyMode, setIsNearbyMode] = useState(false);
-
+  const [searchKeyword, setSearchKeyword] = useState('');
+  
   const router = useRouter();
   const keyword = router.query.keyword || "";
 
   useEffect(() => {
-    if (!keyword) return;
+    const savedKeyword = localStorage.getItem('searchKeyword');
+    if (savedKeyword) {
+      setSearchKeyword(savedKeyword);
+      localStorage.removeItem('searchKeyword');
+    }
+  }, []);
 
-    const fetchKeywordLocation = async () => {
-      try {
-        const res = await fetch(
-          `/api/attractions/search?name=${encodeURIComponent(keyword)}`
-        );
-        const data = await res.json();
-
-        if (data && data.attraction) {
-          const lat = data.attraction["위도(도)"] || data.attraction.location?.coordinates?.[1];
-          const lng = data.attraction["경도(도)"] || data.attraction.location?.coordinates?.[0];
-
-          if (mapRef.current?.moveToCoords) {
-            mapRef.current.moveToCoords(lat, lng);
-          }
-
-          if (mapRef.current?.addSearchMarker) {
-            mapRef.current.addSearchMarker(lat, lng);
-          }
-
-          setSelectedAttraction(data.attraction);
-        }
-      } catch (err) {
-        console.error("키워드 기반 관광지 검색 실패:", err);
-      }
-    };
-
-    fetchKeywordLocation();
-  }, [keyword]);
 
   const handleNearbyAttractionsLoad = (attractions) => {
     setNearbyAttractions(attractions || []);
@@ -111,43 +90,51 @@ export default function Map() {
       setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
     }
-
+  
+    const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
+    const term = searchTerm.toLowerCase();
+  
+    // 1. 마커 및 지도 이동 시도
     const places = new window.kakao.maps.services.Places();
-
     places.keywordSearch(searchTerm, (data, status) => {
       if (status === window.kakao.maps.services.Status.OK && data.length > 0) {
         const match = data[0];
         const lat = parseFloat(match.y);
         const lng = parseFloat(match.x);
-
+  
         if (mapRef.current?.moveToCoords) {
           mapRef.current.moveToCoords(lat, lng);
         }
-
+  
         if (mapRef.current?.addSearchMarker) {
           mapRef.current.addSearchMarker(lat, lng);
         }
-
-        const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
-        const results = searchData.filter(
-          (item) =>
-            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.address || "").toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredAttractions(results);
       } else {
-        const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
-        const results = searchData.filter(
-          (item) =>
-            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.address || "").toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredAttractions(results);
+        console.warn('지도 검색 결과 없음:', searchTerm);
       }
     });
+  
+    // 2. 리스트 필터링은 무조건 실행
+    const results = searchData.filter((item) => {
+      const name = (item.name || '').toLowerCase();
+      const desc = (item.description || '').toLowerCase();
+      const addr = (item.address || '').toLowerCase();
+      const tags = Array.isArray(item.tags) ? item.tags.map(tag => tag.toLowerCase()).join(' ') : '';
+      const type = (item.type || '').toLowerCase(); // indoor / outdoor
+  
+      return (
+        name.includes(term) ||
+        desc.includes(term) ||
+        addr.includes(term) ||
+        tags.includes(term) ||
+        type.includes(term)
+      );
+    });
+  
+    setFilteredAttractions(results);
+    
   };
+  
 
   return (
     <>
@@ -179,7 +166,7 @@ export default function Map() {
           </div>
 
           <div className={styles.searchBarContainer}>
-            {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
+            {!isNearbyMode && <SearchBar key={searchKeyword} onSearch={handleSearch} initialValue={searchKeyword} />}
           </div>
 
           {filteredAttractions.length === 0 ? (
@@ -229,20 +216,23 @@ export default function Map() {
             </div>
           )}
 
-          {!locationLoading && (
-            <KakaoMap
-              ref={mapRef}
-              center={location || { latitude: 37.5665, longitude: 126.978 }}
-              onMarkerClick={handleAttractionClick}
-              onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
-              onAllAttractionsLoad={handleAllAttractionsLoad}
-              onCloseDetail={() => {
-                setSelectedAttraction(null);
-                setShowSidebar(true);
-              }}
-              isNearbyMode={isNearbyMode}
-            />
-          )}
+{!locationLoading && (
+  <>
+    <SearchAutoTrigger mapRef={mapRef} onSearch={handleSearch} keyword={searchKeyword} />  
+    <KakaoMap
+      ref={mapRef}
+      center={location || { latitude: 37.5665, longitude: 126.978 }}
+      onMarkerClick={handleAttractionClick}
+      onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
+      onAllAttractionsLoad={handleAllAttractionsLoad}
+      onCloseDetail={() => {
+        setSelectedAttraction(null);
+        setShowSidebar(true);
+      }}
+      isNearbyMode={isNearbyMode}
+    />
+  </>
+)}
         </main>
 
         <button
