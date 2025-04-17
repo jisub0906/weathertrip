@@ -1,279 +1,279 @@
 .tourismContainer {
-  padding: 40px 0;
-  background-color: var(--background);
-}
-
-.tourismHeader {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.tourismTitle {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 16px;
-}
-
-.tourismSubtitle {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.filterBar {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 40px;
-}
-
-.filterButton {
-  background-color: var(--card-bg);
-  color: var(--text-secondary);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s;
-  font-size: 14px;
-}
-
-.filterButton.active {
-  background-color: var(--primary);
-  color: var(--text-light);
-}
-
-.tourismGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.tourismCard {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.tourismCard:hover {
-  transform: translateY(-4px);
-}
-
-.tourismCardImage {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-}
-
-.tourismCardContent {
-  padding: 16px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.tourismCardCategory {
-  display: inline-block;
-  padding: 6px 12px;
-  background-color: var(--primary-light);
-  color: var(--primary);
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 50px;
-  margin-bottom: 16px;
-}
-
-.tourismCardTitle {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.tourismCardLocation {
-  display: flex;
-  align-items: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-
-.tourismCardLocation svg {
-  width: 16px;
-  height: 16px;
-  margin-right: 6px;
-  fill: var(--text-secondary);
-}
-
-.tourismCardDescription {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
-
-.tourismCardMeta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-}
-
-.tourismCardDistance {
-  font-size: 14px;
-  color: var(--primary);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-}
-
-.tourismCardDistance svg {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-  fill: var(--primary);
-}
-
-.tourismCardTags {
-  display: flex;
-  gap: 8px;
-}
-
-.tourismCardTag {
-  font-size: 12px;
-  background-color: var(--primary-light);
-  color: var(--primary);
-  padding: 4px 10px;
-  border-radius: 50px;
-}
-
-.tourismCardButton {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  background-color: var(--primary);
-  color: var(--text-light);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: background-color 0.2s;
-}
-
-.tourismCardButton:hover {
-  background-color: var(--primary-dark);
-}
-
-@media (max-width: 992px) {
-  .tourismGrid {
-    grid-template-columns: repeat(2, 1fr);
+    padding: 40px 0;
+    background-color: var(--background);
   }
-}
-
-@media (max-width: 768px) {
-  .tourismGrid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
+  
+  .tourismHeader {
+    text-align: center;
+    margin-bottom: 60px;
   }
   
   .tourismTitle {
-    font-size: 2rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .tourismGrid {
-    grid-template-columns: 1fr;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 16px;
   }
   
-  .tourismTitle {
-    font-size: 1.8rem;
+  .tourismSubtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  .filterBar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  
+  .filterButton {
+    background-color: var(--card-bg);
+    color: var(--text-secondary);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+    font-size: 14px;
+  }
+  
+  .filterButton.active {
+    background-color: var(--primary);
+    color: var(--text-light);
+  }
+  
+  .tourismGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .tourismCard {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .tourismCard:hover {
+    transform: translateY(-4px);
+  }
+  
+  .tourismCardImage {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+  
+  .tourismCardContent {
+    padding: 16px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .tourismCardCategory {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 50px;
+    margin-bottom: 16px;
   }
   
   .tourismCardTitle {
-    font-size: 1.3rem;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
   }
-}
-
-.serviceSection {
-  padding: 60px 0;
-  text-align: center;
-}
-
-.sectionTitle {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 16px;
-}
-
-.sectionDescription {
-  color: var(--text-secondary);
-  font-size: 16px;
-  max-width: 600px;
-  margin: 0 auto 32px;
-  line-height: 1.6;
-}
-
-.buttonGroup {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-}
-
-.button {
-  display: inline-flex;
-  align-items: center;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.primaryButton {
-  composes: button;
-  background-color: var(--primary);
-  color: var(--text-light);
-}
-
-.primaryButton:hover {
-  background-color: var(--primary-dark);
-}
-
-.secondaryButton {
-  composes: button;
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-.secondaryButton:hover {
-  background-color: var(--primary-dark);
-  color: var(--text-light);
-}
-
-@media (max-width: 768px) {
+  
+  .tourismCardLocation {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .tourismCardLocation svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    fill: var(--text-secondary);
+  }
+  
+  .tourismCardDescription {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  
+  .tourismCardMeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+  
+  .tourismCardDistance {
+    font-size: 14px;
+    color: var(--primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+  
+  .tourismCardDistance svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    fill: var(--primary);
+  }
+  
+  .tourismCardTags {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .tourismCardTag {
+    font-size: 12px;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    padding: 4px 10px;
+    border-radius: 50px;
+  }
+  
+  .tourismCardButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: var(--primary);
+    color: var(--text-light);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  
+  .tourismCardButton:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  @media (max-width: 992px) {
+    .tourismGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .tourismGrid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    
+    .tourismTitle {
+      font-size: 2rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .tourismGrid {
+      grid-template-columns: 1fr;
+    }
+    
+    .tourismTitle {
+      font-size: 1.8rem;
+    }
+    
+    .tourismCardTitle {
+      font-size: 1.3rem;
+    }
+  }
+  
+  .serviceSection {
+    padding: 60px 0;
+    text-align: center;
+  }
+  
+  .sectionTitle {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+  
+  .sectionDescription {
+    color: var(--text-secondary);
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto 32px;
+    line-height: 1.6;
+  }
+  
   .buttonGroup {
-    flex-direction: column;
-    gap: 12px;
-    padding: 0 20px;
-  }
-
-  .button {
-    width: 100%;
+    display: flex;
+    gap: 16px;
     justify-content: center;
   }
-} 
+  
+  .button {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  
+  .primaryButton {
+    composes: button;
+    background-color: var(--primary);
+    color: var(--text-light);
+  }
+  
+  .primaryButton:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  .secondaryButton {
+    composes: button;
+    background-color: var(--primary-light);
+    color: var(--primary);
+  }
+  
+  .secondaryButton:hover {
+    background-color: var(--primary-dark);
+    color: var(--text-light);
+  }
+  
+  @media (max-width: 768px) {
+    .buttonGroup {
+      flex-direction: column;
+      gap: 12px;
+      padding: 0 20px;
+    }
+  
+    .button {
+      width: 100%;
+      justify-content: center;
+    }
+  } 

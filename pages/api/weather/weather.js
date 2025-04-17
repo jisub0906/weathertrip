@@ -1,5 +1,5 @@
-import { convertToGrid } from '../../utils/coordinates';
-import { classifyWeatherCondition, getSkyStatusText, getPrecipitationText } from '../../utils/weather';
+import { convertToGrid } from '../../../utils/coordinates';
+import { classifyWeatherCondition, getSkyStatusText, getPrecipitationText } from '../../../utils/weather';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {

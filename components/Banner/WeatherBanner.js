@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import styles from '@/styles/WeatherBanner.module.css';
+import styles from '../../styles/WeatherBanner.module.css';
 import useLocation from '@/hooks/useLocation';
 import axios from 'axios';
 

@@ -3,6 +3,7 @@
     width: 100%;
     height: 400px;
     overflow: hidden;
+    background-color: #f0f0f0; /* 이미지 로딩 전 배경색 */
   }
   
   .imageWrapper {
@@ -20,6 +21,7 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: opacity 0.3s ease; /* 이미지 로딩 시 부드러운 전환 효과 */
   }
   
   .overlay {
@@ -32,6 +34,15 @@
     border-radius: 8px;
     z-index: 2;
     max-width: 60%;
+    opacity: 0; /* 기본적으로 숨겨진 상태 */
+    transform: translateY(10px); /* 약간 아래쪽에서 시작 */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* 부드러운 나타남 효과 */
+  }
+  
+  /* 이미지가 로드되면 오버레이 표시 */
+  .overlay.visible {
+    opacity: 1;
+    transform: translateY(0);
   }
   
   .overlay h2 {
@@ -85,6 +96,65 @@
     background-color: rgba(0, 0, 0, 0.7);
   }
   
+  /* 이미지 로딩 인디케이터 */
+  .imageLoading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(240, 240, 240, 0.5);
+    z-index: 1;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* 스켈레톤 로더 스타일 */
+  .skeletonLoader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+  }
+  
+  .skeletonImage {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
   /* 반응형 스타일 */
   @media (max-width: 1440px) {
     .banner {
@@ -108,9 +178,14 @@
     .overlay .address {
       font-size: 0.9rem;
     }
-
+  
     .overlay .description {
       font-size: 0.8rem;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
     }
   }
   
@@ -130,7 +205,7 @@
     .overlay .address {
       font-size: 0.8rem;
     }
-
+  
     .overlay .description {
       font-size: 0.7rem;
       -webkit-line-clamp: 1;
@@ -140,6 +215,12 @@
     .next {
       font-size: 2rem;
       padding: 0.3rem 0.8rem;
+    }
+    
+    .spinner {
+      width: 30px;
+      height: 30px;
+      border-width: 3px;
     }
   }
   
@@ -161,9 +242,14 @@
     .overlay .address {
       font-size: 0.7rem;
     }
-
+  
     .overlay .description {
       display: none;
     }
+    
+    .spinner {
+      width: 25px;
+      height: 25px;
+      border-width: 2px;
+    }
   }
-  

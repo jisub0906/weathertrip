@@ -29,12 +29,12 @@ export default function Header() {
           <Link href="users/register">회원가입</Link>
         </div>
       </div>
-      {/* 내비게이션 바바 */}
+      {/* 내비게이션 바 */}
       <nav className={styles.navBar}>
-        <ul>
-          <li><Link href="/">홈</Link></li>
-          <li><Link href="/recommend">맞춤 추천</Link></li>
-          <li><Link href="/map">지도</Link></li>
+        <ul className={styles.navList}>
+          <li className={styles.navItem}><Link href="/">홈</Link></li>
+          <li className={styles.navItem}><Link href="/recommend">맞춤 추천</Link></li>
+          <li className={styles.navItem}><Link href="/map">지도</Link></li>
         </ul>
       </nav>
     </header>

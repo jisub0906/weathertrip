@@ -1,4 +1,4 @@
-import { getDatabase } from '../../../lib/mongodb';
+import { getDatabase } from '../../../lib/db/mongodb';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {

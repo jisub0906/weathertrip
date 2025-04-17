@@ -5,8 +5,8 @@ import Head from 'next/head';
 import Header from '../components/Layout/Header';
 import Footer from '../components/Layout/Footer';
 import useLocation from '../hooks/useLocation';
-import axios from 'axios';
 import styles from '../styles/Recommend.module.css';
+import axios from 'axios';
 import SearchBar from '../components/Search/SearchBar';
 
 export default function Recommend() {
@@ -88,7 +88,7 @@ const handleCardClick = (attraction) => {
           longitude: location.longitude
         });
 
-        const response = await axios.get('/api/weather', {
+        const response = await axios.get('/api/weather/weather', {
           params: {
             latitude: location.latitude,
             longitude: location.longitude
@@ -123,7 +123,7 @@ const handleCardClick = (attraction) => {
 
     async function fetchAttractions() {
       try {
-        const response = await axios.get('/api/attractions', {
+        const response = await axios.get('/api/attractions/attractions', {
           params: {
             latitude: location.latitude,
             longitude: location.longitude,
@@ -481,4 +481,4 @@ const handleCardClick = (attraction) => {
       <Footer />
     </>
   );
-} 
+}
