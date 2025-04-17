@@ -1,11 +1,45 @@
 /* styles/TopBanner.module.css */
-.banner {
-    background-color: #ffefc2;
-    color: #333;
-    text-align: center;
-    padding: 0.75rem 1rem;
-    font-weight: bold;
-    font-size: 1rem;
-    border-bottom: 1px solid #ddd;
-    z-index: 50;
+.topBanner {
+  background:rgb(255, 245, 103);
+  color: #333;
+  text-align: center;
+  padding: 0.85rem 1.2rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.topBanner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shine 3s infinite;
+}
+
+.topBanner p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
   }
+  20% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}

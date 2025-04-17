@@ -15,7 +15,7 @@ export default function WeatherBanner() {
 
     const fetchWeather = async () => {
       try {
-        const response = await axios.get('/api/weather', {
+        const response = await axios.get('/api/weather/weather', {
           params: {
             latitude: location.latitude,
             longitude: location.longitude,

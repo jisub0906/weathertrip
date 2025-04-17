@@ -112,7 +112,7 @@ export default function Home() {
     setError(null);
     try {
       const coords = REGION_COORDINATES[region] || REGION_COORDINATES.all;
-      const response = await axios.get('/api/attractions', {
+      const response = await axios.get('/api/attractions/attractions', {
         params: {
           latitude: coords.latitude,
           longitude: coords.longitude,

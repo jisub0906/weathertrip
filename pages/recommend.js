@@ -437,10 +437,10 @@ const handleCardClick = (attraction) => {
                     <Image 
                       src={attraction.images?.[0] || '/images/logo.png'} 
                       alt={attraction.name}
-                      width={600}
-                      height={600}
-                      layout="responsive"
-                      objectFit="cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      style={{ objectFit: 'cover' }}
+                      priority={index === 0}
                     />
                     </div>
 

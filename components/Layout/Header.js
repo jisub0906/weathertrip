@@ -18,15 +18,15 @@ export default function Header() {
               quality={100}
               style={{
                 objectFit: 'contain',
-                maxWidth: '100%',
-                height: '100%'               
+                width: 'auto',
+                height: 'auto'
               }}
             />
           </Link>
         </div>
         <div className={styles.auth}>
-          <Link href="users/login">로그인</Link>
-          <Link href="users/register">회원가입</Link>
+          <Link href="/users/login">로그인</Link>
+          <Link href="/users/register">회원가입</Link>
         </div>
       </div>
       {/* 내비게이션 바 */}
