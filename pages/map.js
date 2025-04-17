@@ -29,11 +29,28 @@ export default function Map() {
   // localStorage에서 저장된 키워드 불러오기
   useEffect(() => {
     const savedKeyword = localStorage.getItem('searchKeyword');
+    console.log('저장된 검색 키워드:', savedKeyword);
+    
     if (savedKeyword) {
       setSearchKeyword(savedKeyword);
-      localStorage.removeItem('searchKeyword');
+      
+      // 지도와 관광지가 로드될 때까지 대기
+      const checkMapAndAttractionsReady = setInterval(() => {
+        if (mapRef.current?.mapReady && allAttractions.length > 0) {
+          clearInterval(checkMapAndAttractionsReady);
+          console.log('지도와 관광지 로드 완료, 검색 실행');
+          handleSearch(savedKeyword);
+          localStorage.removeItem('searchKeyword');
+        }
+      }, 500); // 0.5초마다 확인
+      
+      // 10초 후에도 로드되지 않으면 타임아웃
+      setTimeout(() => {
+        clearInterval(checkMapAndAttractionsReady);
+        console.log('지도와 관광지 로드 타임아웃');
+      }, 10000);
     }
-  }, []);
+  }, [allAttractions]); // allAttractions 상태 변경을 감지
 
   // 키워드 기반 위치 검색
   useEffect(() => {
@@ -120,48 +137,34 @@ export default function Map() {
     }
   }, []);
 
-  const handleSearch = useCallback(async (searchTerm) => {
-    if (!searchTerm.trim()) {
+  const handleSearch = (keyword) => {
+    console.log('검색 실행:', keyword);
+    if (!keyword) {
       setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
     }
-
-    const places = new window.kakao.maps.services.Places();
-
-    places.keywordSearch(searchTerm, (data, status) => {
-      if (status === window.kakao.maps.services.Status.OK && data.length > 0) {
-        const match = data[0];
-        const lat = parseFloat(match.y);
-        const lng = parseFloat(match.x);
-
-        if (mapRef.current?.moveToCoords) {
-          mapRef.current.moveToCoords(lat, lng);
-        }
-
-        if (mapRef.current?.addSearchMarker) {
-          mapRef.current.addSearchMarker(lat, lng);
-        }
-
-        const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
-        const results = searchData.filter(
-          (item) =>
-            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.address || "").toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredAttractions(results);
-      } else {
-        const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
-        const results = searchData.filter(
-          (item) =>
-            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.address || "").toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredAttractions(results);
+    
+    setSearchKeyword(keyword);
+    const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
+    const filtered = searchData.filter(attraction => 
+      (attraction.name || '').toLowerCase().includes(keyword.toLowerCase()) ||
+      (attraction.address || '').toLowerCase().includes(keyword.toLowerCase()) ||
+      (attraction.description || '').toLowerCase().includes(keyword.toLowerCase())
+    );
+    console.log('검색 결과:', filtered);
+    setFilteredAttractions(filtered);
+    
+    if (filtered.length > 0 && mapRef.current) {
+      const firstAttraction = filtered[0];
+      console.log('지도 이동:', firstAttraction);
+      const lat = firstAttraction.location?.coordinates?.[1] || firstAttraction.latitude;
+      const lng = firstAttraction.location?.coordinates?.[0] || firstAttraction.longitude;
+      if (lat && lng) {
+        mapRef.current.moveToCoords(lat, lng);
+        mapRef.current.addSearchMarker(lat, lng);
       }
-    });
-  }, [isNearbyMode, nearbyAttractions, allAttractions]);
+    }
+  };
 
   return (
     <>

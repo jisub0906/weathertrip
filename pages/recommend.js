@@ -34,9 +34,11 @@ const router = useRouter();
 
 const handleCardClick = (attraction) => {
   if (!attraction.name) return;
-
+  
+  // 검색 키워드를 localStorage에 저장
   localStorage.setItem('searchKeyword', attraction.name);
-  router.push('/map');
+  // 지도 페이지로 강제 이동
+  window.location.href = '/map';
 };
 
 
