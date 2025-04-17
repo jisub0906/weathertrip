@@ -19,7 +19,7 @@ export default function Login() {
 
         if (res.ok) {
             alert('로그인 성공!');
-            router.push('/');
+            window.location.href = '/';
         } else {
             alert(data.message || '로그인 실패');
         }

@@ -1,6 +1,6 @@
-// pages/api/users/login.js
 import dbConnect from '../../../lib/dbConnect';
 import User from '../../../models/User';
+import * as cookie from 'cookie';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,22 +11,26 @@ export default async function handler(req, res) {
 
   const { email, password } = req.body;
 
-  // 1️⃣ 필수값 체크
   if (!email || !password) {
     return res.status(400).json({ message: '이메일과 비밀번호를 모두 입력해주세요.' });
   }
 
   try {
-    // 2️⃣ 사용자 찾기
     const user = await User.findOne({ email });
 
     if (!user || user.password !== password) {
-      return res.status(401).json({
-        message: '이메일 또는 비밀번호가 틀렸습니다.',
-      });
+      return res.status(401).json({ message: '이메일 또는 비밀번호가 틀렸습니다.' });
     }
 
-    // 4️⃣ 로그인 성공
+    res.setHeader('Set-Cookie', cookie.serialize('userInfo', JSON.stringify({
+      nickname: user.nickname,
+      email: user.email,
+    }), {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    }));
+
     return res.status(200).json({
       message: '로그인 성공',
       user: {

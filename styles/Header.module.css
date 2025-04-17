@@ -7,12 +7,12 @@
   width: 100%;
 }
 
-/* 상단: 로고 + 로그인/회원가입 */
 .topBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1.2rem 2rem;
+  flex-wrap: wrap;
 }
 
 .logo {
@@ -23,18 +23,83 @@
 
 .auth {
   display: flex;
-  gap: 2rem;
   align-items: center;
+  gap: 1rem;
 }
 
-.auth a {
-  color: #000;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 1.1rem;
+.nickname {
+  font-size: 16px;
+  font-weight: 600;
+  color: black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 하단: 네비게이션 바 */
+.logoutBtn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.moreMenuWrapper {
+  position: relative;
+  margin-left: 0;
+}
+
+.moreButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 24px;
+  height: 24px;
+}
+
+.moreButton span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: #333;
+  border-radius: 1px;
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 2.2rem;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 0.5rem;
+  z-index: 1001;
+  min-width: 120px;
+}
+
+.dropdownItem {
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dropdownItem:hover {
+  background-color: #f2f2f2;
+}
+
 .navBar {
   border-top: 1px solid #eee;
   background-color: #f8f9fa;
@@ -60,21 +125,23 @@
   color: #0070f3;
 }
 
-/* 반응형 처리 */
+/* ✅ 모바일 반응형 */
 @media (max-width: 768px) {
-  .topBar {
-    padding: 1rem;
-  }
-  
   .auth {
-    gap: 1rem;
+    width: 100%;
+    justify-content: space-between;
   }
-  
-  .auth a {
-    font-size: 1rem;
+
+  .nickname {
+    font-size: 14px;
+    max-width: 40vw;
   }
-  
-  .navBar ul {
-    gap: 3rem;
+
+  .logoutBtn {
+    font-size: 14px;
+  }
+
+  .moreMenuWrapper {
+    margin-left: 0;
   }
 }
