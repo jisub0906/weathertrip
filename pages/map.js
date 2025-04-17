@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Header from "../components/Layout/Header";
+import Footer from "../components/Layout/Footer";
 import KakaoMap from "../components/Map/KakaoMap";
 import SearchBar from "../components/Search/SearchBar";
 import useLocation from "../hooks/useLocation";
@@ -25,6 +26,7 @@ export default function Map() {
   const router = useRouter();
   const keyword = router.query.keyword || "";
 
+  // localStorage에서 저장된 키워드 불러오기
   useEffect(() => {
     const savedKeyword = localStorage.getItem('searchKeyword');
     if (savedKeyword) {
@@ -33,6 +35,38 @@ export default function Map() {
     }
   }, []);
 
+  // 키워드 기반 위치 검색
+  useEffect(() => {
+    if (!keyword) return;
+
+    const fetchKeywordLocation = async () => {
+      try {
+        const res = await fetch(
+          `/api/attractions/search?name=${encodeURIComponent(keyword)}`
+        );
+        const data = await res.json();
+
+        if (data && data.attraction) {
+          const lat = data.attraction["위도(도)"] || data.attraction.location?.coordinates?.[1];
+          const lng = data.attraction["경도(도)"] || data.attraction.location?.coordinates?.[0];
+
+          if (mapRef.current?.moveToCoords) {
+            mapRef.current.moveToCoords(lat, lng);
+          }
+
+          if (mapRef.current?.addSearchMarker) {
+            mapRef.current.addSearchMarker(lat, lng);
+          }
+
+          setSelectedAttraction(data.attraction);
+        }
+      } catch (err) {
+        console.error("키워드 기반 관광지 검색 실패:", err);
+      }
+    };
+
+    fetchKeywordLocation();
+  }, [keyword]);
 
   const handleNearbyAttractionsLoad = useCallback((attractions) => {
     setNearbyAttractions(attractions || []);
@@ -86,7 +120,7 @@ export default function Map() {
     }
   }, []);
 
-  const handleSearch = async (searchTerm) => {
+  const handleSearch = useCallback(async (searchTerm) => {
     if (!searchTerm.trim()) {
       setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
@@ -127,7 +161,7 @@ export default function Map() {
         setFilteredAttractions(results);
       }
     });
-  };
+  }, [isNearbyMode, nearbyAttractions, allAttractions]);
 
   return (
     <>
@@ -198,14 +232,31 @@ export default function Map() {
             <p>위치 정보를 불러오는 중...</p>
           </div>
         )}
-        <KakaoMap
-          ref={mapRef}
-          initialLocation={location}
-          onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
-          onAllAttractionsLoad={handleAllAttractionsLoad}
-          initialKeyword={keyword}
-        />
+
+        {locationError && (
+          <div className={styles.mapLoadingOverlay}>
+            <p>위치 정보를 불러오는데 문제가 발생했습니다.</p>
+            <p>{locationError}</p>
+          </div>
+        )}
+
+        {!locationLoading && (
+          <KakaoMap
+            ref={mapRef}
+            center={location || { latitude: 37.5665, longitude: 126.978 }}
+            onMarkerClick={handleAttractionClick}
+            onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
+            onAllAttractionsLoad={handleAllAttractionsLoad}
+            onCloseDetail={() => {
+              setSelectedAttraction(null);
+              setShowSidebar(true);
+            }}
+            isNearbyMode={isNearbyMode}
+            initialKeyword={keyword || searchKeyword}
+          />
+        )}
       </main>
+      <Footer />
     </>
   );
 }
