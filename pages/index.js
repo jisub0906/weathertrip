@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Header from '../components/Layout/Header';
 import Footer from '../components/Layout/Footer';
@@ -43,7 +44,8 @@ const AttractionListSection = ({
   attractions,
   isOpen,
   onOpenChange,
-  userLocation 
+  userLocation,
+  onCardClic 
 }) => {
   const attractionsWithDistance = calculateAttractionsDistance(attractions, userLocation);
 
@@ -75,7 +77,11 @@ const AttractionListSection = ({
       {!loading && !error && attractionsWithDistance.length > 0 && (
         <div className={styles.attractionsList}>
           {attractionsWithDistance.map((attraction, index) => (
-            <div key={attraction._id || index} className={styles.locationCard}>
+            <div 
+            key={attraction._id || index} 
+            className={styles.locationCard}
+            onClick={() => onCardClic(attraction)}
+            >
               <div className={styles.locationInfo}>
                 <h4 className={styles.locationName}>{attraction.name}</h4>
                 <p className={styles.locationAddress}>
@@ -106,6 +112,13 @@ export default function Home() {
   const [popularAttractions, setPopularAttractions] = useState([]);
   const [popularLoading, setPopularLoading] = useState(false);
   const [isListOpen, setIsListOpen] = useState(false);
+  const router = useRouter();
+
+  const handleCardClick = (attraction) => {
+    if (!attraction?.name) return;
+    localStorage.setItem('searchKeyword', attraction.name);
+    window.location.href = '/map'; // 혹은 router.push('/map')로 SPA 방식 처리
+  };
 
   const fetchAttractions = useCallback(async (region) => {
     setLoading(true);
@@ -186,6 +199,7 @@ export default function Home() {
           isOpen={isListOpen}
           onOpenChange={setIsListOpen}
           userLocation={userLocation}
+          onCardClic={handleCardClick}
         />
       </main>
 
@@ -201,7 +215,10 @@ export default function Home() {
           ) : (
             <div className={styles.popularGrid}>
               {popularAttractions.map((attraction, index) => (
-                <div key={attraction._id} className={styles.popularCard}>
+                <div key={attraction._id} 
+                className={styles.popularCard} 
+                onClick={() => handleCardClick(attraction)}
+                >
                   <div className={styles.rankBadge}>#{index + 1}</div>
                   <div className={styles.imageContainer}>
                     {Array.isArray(attraction.images) && attraction.images.length > 0 ? (
