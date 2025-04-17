@@ -25,7 +25,7 @@ export default function Header() {
           </Link>
         </div>
         <div className={styles.auth}>
-          <Link href="/login">로그인</Link>
+          <Link href="users/login">로그인</Link>
           <Link href="users/register">회원가입</Link>
         </div>
       </div>
