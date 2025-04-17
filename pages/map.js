@@ -5,6 +5,7 @@ import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import KakaoMap from "../components/Map/KakaoMap";
 import SearchBar from "../components/Search/SearchBar";
+import SearchAutoTrigger from "../components/Search/SearchAutoTrigger";
 import useLocation from "../hooks/useLocation";
 import styles from "../styles/KakaoMap.module.css";
 
@@ -21,41 +22,19 @@ export default function Map() {
   const mapRef = useRef(null);
   const [filteredAttractions, setFilteredAttractions] = useState([]);
   const [isNearbyMode, setIsNearbyMode] = useState(false);
-
+  const [searchKeyword, setSearchKeyword] = useState('');
+  
   const router = useRouter();
   const keyword = router.query.keyword || "";
 
   useEffect(() => {
-    if (!keyword) return;
+    const savedKeyword = localStorage.getItem('searchKeyword');
+    if (savedKeyword) {
+      setSearchKeyword(savedKeyword);
+      localStorage.removeItem('searchKeyword');
+    }
+  }, []);
 
-    const fetchKeywordLocation = async () => {
-      try {
-        const res = await fetch(
-          `/api/attractions/search?name=${encodeURIComponent(keyword)}`
-        );
-        const data = await res.json();
-
-        if (data && data.attraction) {
-          const lat = data.attraction["위도(도)"] || data.attraction.location?.coordinates?.[1];
-          const lng = data.attraction["경도(도)"] || data.attraction.location?.coordinates?.[0];
-
-          if (mapRef.current?.moveToCoords) {
-            mapRef.current.moveToCoords(lat, lng);
-          }
-
-          if (mapRef.current?.addSearchMarker) {
-            mapRef.current.addSearchMarker(lat, lng);
-          }
-
-          setSelectedAttraction(data.attraction);
-        }
-      } catch (err) {
-        console.error("키워드 기반 관광지 검색 실패:", err);
-      }
-    };
-
-    fetchKeywordLocation();
-  }, [keyword]);
 
   const handleNearbyAttractionsLoad = useCallback((attractions) => {
     setNearbyAttractions(attractions || []);
@@ -114,31 +93,25 @@ export default function Map() {
       setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
     }
-
+  
+    const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
+    const term = searchTerm.toLowerCase();
+  
+    // 1. 마커 및 지도 이동 시도
     const places = new window.kakao.maps.services.Places();
-
     places.keywordSearch(searchTerm, (data, status) => {
       if (status === window.kakao.maps.services.Status.OK && data.length > 0) {
         const match = data[0];
         const lat = parseFloat(match.y);
         const lng = parseFloat(match.x);
-
+  
         if (mapRef.current?.moveToCoords) {
           mapRef.current.moveToCoords(lat, lng);
         }
-
+  
         if (mapRef.current?.addSearchMarker) {
           mapRef.current.addSearchMarker(lat, lng);
         }
-
-        const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
-        const results = searchData.filter(
-          (item) =>
-            (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.address || "").toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredAttractions(results);
       } else {
         const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
         const results = searchData.filter(
@@ -150,7 +123,7 @@ export default function Map() {
         setFilteredAttractions(results);
       }
     });
-  }, [isNearbyMode, nearbyAttractions, allAttractions]);
+  };
 
   return (
     <>
@@ -180,9 +153,9 @@ export default function Map() {
           </div>
         </div>
 
-        <div className={styles.searchBarContainer}>
-          {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
-        </div>
+          <div className={styles.searchBarContainer}>
+            {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
+          </div>
 
         {filteredAttractions.length === 0 ? (
           <div className={styles.emptyMessage}>
@@ -229,22 +202,30 @@ export default function Map() {
           </div>
         )}
 
-        {!locationLoading && (
-          <KakaoMap
-            ref={mapRef}
-            center={location || { latitude: 37.5665, longitude: 126.978 }}
-            onMarkerClick={handleAttractionClick}
-            onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
-            onAllAttractionsLoad={handleAllAttractionsLoad}
-            onCloseDetail={() => {
-              setSelectedAttraction(null);
-              setShowSidebar(true);
-            }}
-            isNearbyMode={isNearbyMode}
-          />
-        )}
-      </main>
-      <Footer />
+          {!locationLoading && (
+            <KakaoMap
+              ref={mapRef}
+              center={location || { latitude: 37.5665, longitude: 126.978 }}
+              onMarkerClick={handleAttractionClick}
+              onNearbyAttractionsLoad={handleNearbyAttractionsLoad}
+              onAllAttractionsLoad={handleAllAttractionsLoad}
+              onCloseDetail={() => {
+                setSelectedAttraction(null);
+                setShowSidebar(true);
+              }}
+              isNearbyMode={isNearbyMode}
+            />
+          )}
+        </main>
+
+        <button
+          className={styles.sidebarToggleButton}
+          onClick={() => setShowSidebar(!showSidebar)}
+          aria-label={showSidebar ? "사이드바 닫기" : "사이드바 열기"}
+        >
+          {showSidebar ? "×" : "☰"}
+        </button>
+      </div>
     </>
   );
 }

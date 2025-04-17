@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Head from 'next/head';
 import Header from '../components/Layout/Header';
@@ -28,6 +29,16 @@ export default function Recommend() {
     type: '전체',
     tag: '전체'
   });
+
+const router = useRouter();
+
+const handleCardClick = (attraction) => {
+  if (!attraction.name) return;
+
+  localStorage.setItem('searchKeyword', attraction.name);
+  router.push('/map');
+};
+
 
   // 검색 필터 적용 함수
   const applySearchFilter = useCallback((term) => {
@@ -412,6 +423,7 @@ export default function Recommend() {
                     key={attraction._id || index}
                     className={styles.instagramPost}
                     ref={isLastElement ? lastAttractionElementRef : null}
+                    onClick={() => handleCardClick(attraction)}
                   >
                     <div className={styles.postHeader}>
                       <div className={styles.postUser}>

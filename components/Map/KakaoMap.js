@@ -12,6 +12,7 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
   const markersRef = useRef([]);
   const isMapInitializedRef = useRef(false);
   const [selectedAttraction, setSelectedAttraction] = useState(null);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   // 이전 마커 제거 함수
   const clearMarkers = useCallback(() => {
@@ -372,7 +373,9 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
       });
 
       searchMarkerRef.current = marker;
-    }
+    },
+    mapInstance: mapInstanceRef.current, // ✅ 추가
+    mapReady: true  
   }), [handleAttractionClick, moveToCurrentLocation, fetchAllAttractions]);
 
   // isNearbyMode가 변경될 때 마커 업데이트
