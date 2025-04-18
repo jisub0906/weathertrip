@@ -22,7 +22,6 @@
   will-change: opacity, visibility;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  cursor: pointer;
 }
 
 .overlay {
