@@ -410,6 +410,18 @@
     color: #444;
   }
   
+  .reviewCounter {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .reviewCounter span {
+    font-weight: bold;
+  }
+  
   /* 반응형 스타일 */
   @media (max-width: 768px) {
     .detailContainer {
