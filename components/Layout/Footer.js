@@ -14,8 +14,9 @@ export default function Footer() {
           <h4>메뉴</h4>
           <ul>
             <li><Link href="/">홈</Link></li>
-            <li><Link href="/recommend">맞춤 추천</Link></li>
             <li><Link href="/map">지도</Link></li>
+            <li><Link href="/recommend">맞춤 추천</Link></li>
+            <li><Link href="/community">커뮤니티</Link></li>
           </ul>
         </div>
         

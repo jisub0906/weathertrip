@@ -1,0 +1,35 @@
+.dropdownContainer {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 9999;
+  }
+  
+  .globeButton {
+    background: white;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  }
+  
+  .dropdownMenu {
+    margin-top: 8px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 8px 0;
+    list-style: none;
+    font-size: 14px;
+  }
+  
+  .langItem {
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  .langItem:hover {
+    background-color: #f0f0f0;
+  }
+  

@@ -13,6 +13,7 @@ export default function AttractionDetail({ attraction, onClose }) {
   const [submitting, setSubmitting] = useState(false);
   const [likeCount, setLikeCount] = useState(attraction.likeCount || 0);
   const [loading, setLoading] = useState(true);
+  const MAX_REVIEW_LENGTH = 100;
 
   // 이미지 배열이 없거나 비어있는 경우 기본 이미지 사용
   const images = attraction.images && attraction.images.length > 0
@@ -65,6 +66,13 @@ export default function AttractionDetail({ attraction, onClose }) {
       // 오류 발생 시 원래 상태로 복구
       setLiked(liked);
       setLikeCount(likeCount);
+    }
+  };
+
+  const handleReviewChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= MAX_REVIEW_LENGTH) {
+      setReview(value);
     }
   };
 
@@ -147,11 +155,15 @@ export default function AttractionDetail({ attraction, onClose }) {
         <form onSubmit={handleSubmit} className={styles.reviewForm}>
           <textarea
             value={review}
-            onChange={(e) => setReview(e.target.value)}
-            placeholder={status === 'authenticated' ? "리뷰를 작성하세요..." : "리뷰를 작성하려면 로그인이 필요합니다."}
+            onChange={handleReviewChange}
+            placeholder={status === 'authenticated' ? "리뷰를 작성하세요 (최대 100자)" : "리뷰를 작성하려면 로그인이 필요합니다."}
             className={styles.reviewInput}
             disabled={status !== 'authenticated'}
+            maxLength={MAX_REVIEW_LENGTH}
           />
+          <div className={styles.reviewCounter}>
+            {review.length}/{MAX_REVIEW_LENGTH}자
+          </div>
           <button
             type="submit"
             className={styles.submitButton}

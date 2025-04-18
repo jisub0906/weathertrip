@@ -1,237 +1,383 @@
 .container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    position: relative;
-  }
-  
-  .title {
-    font-size: 2rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 2rem;
-    text-align: center;
-  }
-  
-  .reviewList {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-  
-  .reviewCard {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
-  }
-  
-  .reviewCard:hover {
-    transform: translateY(-2px);
-  }
-  
-  .reviewHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  
-  .userName {
-    font-weight: 600;
-    color: #333;
-    font-size: 1.3rem;
-  }
-  
-  .date {
-    color: #666;
-    font-size: 0.9rem;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.title::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3498db, #2980b9);
+  border-radius: 2px;
+}
+
+.reviewList {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.reviewCard {
+  background: white;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.reviewCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.userName {
+  font-weight: 700;
+  color: #222;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+}
+
+.userName::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background-color: #3498db;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.date {
+  color: #777;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.contentContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.attractionContainer {
+  margin-bottom: 1.25rem;
+  transition: transform 0.2s;
+}
+
+.attractionContainer:hover {
+  transform: scale(1.02);
+}
+
+.attractionLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+}
+
+.attractionInfo {
+  display: flex;
+  justify-content: space-between;
+  background: #f8f9fa;
+  padding: 1.25rem;
+  border-radius: 12px;
+  position: relative;
+  border: 1px solid #eaeaea;
+  align-items: center;
+}
+
+.attractionContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.locationRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.locationIcon {
+  width: 18px;
+  height: 18px;
+  color: #3498db;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.attractionName {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.viewDetailText {
+  font-size: 1rem;
+  color: #3498db;
+  margin-left: 28px;
+  font-weight: 500;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.attractionLink:hover .viewDetailText {
+  transform: translateX(5px);
+}
+
+.attractionImage {
+  border-radius: 10px;
+  object-fit: cover;
+  width: 120px;
+  height: 120px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 1rem;
+}
+
+.reviewContent {
+  color: #444;
+  line-height: 1.7;
+  font-size: 1.1rem;
+  background: #fafafa;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #eaeaea;
+}
+
+.loading, .noMore {
+  text-align: center;
+  padding: 1.5rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Pull to Refresh styles */
+.pullToRefresh {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(245, 245, 245, 0.95);
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+  z-index: 999;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.pullToRefresh.pulling {
+  transform: translateY(0);
+}
+
+.pullToRefresh.refreshing {
+  transform: translateY(0);
+}
+
+.pullIndicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.arrowIcon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+  color: #3498db;
+}
+
+.pulling .arrowIcon {
+  transform: rotate(180deg);
+}
+
+.refreshing .arrowIcon {
+  display: none;
+}
+
+.refreshSpinner {
+  display: none;
+  width: 24px;
+  height: 24px;
+  border: 3px solid transparent;
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.refreshing .refreshSpinner {
+  display: block;
+}
+
+/* Loading spinner */
+.loadingSpinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(52, 152, 219, 0.2);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  border-top-color: #3498db;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.refreshing .pullIndicator {
+  animation: bounce 1s infinite;
+}
+
+/* Web version layout - horizontal arrangement */
+@media (min-width: 769px) {
+  .contentContainer {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.5rem;
   }
   
   .attractionContainer {
-    margin-bottom: 1rem;
-  }
-  
-  .attractionLink {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    cursor: pointer;
-  }
-  
-  .attractionInfo {
-    display: flex;
-    justify-content: space-between;
-    background: #f5f5f5;
-    padding: 1rem;
-    border-radius: 8px;
-    position: relative;
-  }
-  
-  .attractionContent {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .locationRow {
-    display: flex;
-    align-items: center;
-    margin-bottom: 4px;
-  }
-  
-  .locationIcon {
-    width: 16px;
-    height: 16px;
-    color: #666;
-    margin-right: 8px;
-    flex-shrink: 0;
-  }
-  
-  .attractionName {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #333;
-    margin: 0;
-  }
-  
-  .viewDetailText {
-    font-size: 1rem;
-    color: #666;
-    margin-left: 24px; /* 아이콘 너비 + 여백 */
-  }
-  
-  .attractionImage {
-    border-radius: 8px;
-    object-fit: cover;
-    width: 100px;
-    height: 100px;
+    flex: 0 0 45%;
+    margin-bottom: 0;
   }
   
   .reviewContent {
-    color: #444;
-    line-height: 1.6;
-    margin-top: 1rem;
-  }
-  
-  .loading, .noMore {
-    text-align: center;
-    padding: 1rem;
-    color: #666;
-  }
-  
-  /* Pull to Refresh 스타일 */
-  .pullToRefresh {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
+    flex: 1;
+    align-self: stretch;
     display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: #f5f5f5;
-    transform: translateY(-100%);
-    transition: transform 0.3s ease;
-    z-index: 999;
   }
   
-  .pullToRefresh.pulling {
-    transform: translateY(0);
+  .reviewCard {
+    padding: 2rem;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .reviewCard {
+    padding: 1.25rem;
+  }
+
+  .userName {
+    font-size: 1.2rem;
+  }
+
+  .attractionInfo {
+    padding: 1rem;
   }
   
-  .pullToRefresh.refreshing {
-    transform: translateY(0);
+  .attractionName {
+    font-size: 1.3rem;
+  }
+  
+  .attractionImage {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .reviewContent {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .container {
+    color: #e0e0e0;
+  }
+  
+  .title {
+    color: #f0f0f0;
+  }
+  
+  .reviewCard {
+    background: #242526;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .userName {
+    color: #f0f0f0;
+  }
+  
+  .reviewHeader {
+    border-bottom-color: #333;
+  }
+  
+  .attractionInfo {
+    background: #2a2b2d;
+    border-color: #333;
+  }
+  
+  .attractionName {
+    color: #f0f0f0;
+  }
+  
+  .reviewContent {
+    color: #ccc;
+    background: #1e1e1e;
+  }
+  
+  .pullToRefresh {
+    background-color: rgba(30, 30, 30, 0.95);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
   }
   
   .pullIndicator {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #666;
-    font-size: 0.9rem;
+    color: #ccc;
   }
-  
-  .arrowIcon {
-    width: 20px;
-    height: 20px;
-    transition: transform 0.3s ease;
-  }
-  
-  .pulling .arrowIcon {
-    transform: rotate(180deg);
-  }
-  
-  .refreshing .arrowIcon {
-    display: none;
-  }
-  
-  .refreshSpinner {
-    display: none;
-    width: 20px;
-    height: 20px;
-    border: 2px solid transparent;
-    border-top-color: #2196f3;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  
-  .refreshing .refreshSpinner {
-    display: block;
-  }
-  
-  /* 로딩 스피너 */
-  .loadingSpinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    border-top-color: #666;
-  }
-  
-  /* 애니메이션 */
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-  }
-  
-  .refreshing .pullIndicator {
-    animation: bounce 1s infinite;
-  }
-  
-  /* 반응형 디자인 */
-  @media (max-width: 768px) {
-    .container {
-      margin: 1rem auto;
-    }
-  
-    .title {
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-  
-    .reviewCard {
-      padding: 1rem;
-    }
-  
-    .attractionInfo {
-      flex-wrap: wrap;
-    }
-    
-    .attractionName {
-      margin-bottom: 4px;
-    }
-    
-    .attractionImage {
-      margin-top: 8px;
-      margin-left: 0;
-      width: 100%;
-      height: auto;
-    }
-  }
+}

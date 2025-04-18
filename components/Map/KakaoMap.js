@@ -81,7 +81,7 @@ const KakaoMap = forwardRef(function KakaoMap({
   // 정보창 닫기 함수 (공통 처리)
   const closeInfoWindow = useCallback(() => {
     if (infoWindowRef.current) {
-      infoWindowRef.current.close();
+      infoWindowRef.current.setMap(null);
       infoWindowRef.current = null;
     }
   }, []);
@@ -112,42 +112,59 @@ const KakaoMap = forwardRef(function KakaoMap({
 
   // 마커 클릭 이벤트 핸들러 (공통 처리)
   const handleMarkerClick = useCallback((marker, attraction, map) => {
-    // 기존 정보창 닫기
-    closeInfoWindow();
-    
-    // 부모 컴포넌트에 마커 클릭 이벤트 전달
-    if (onMarkerClick) {
-      onMarkerClick(attraction);
+    // 기존 커스텀 오버레이 제거
+    if (infoWindowRef.current) {
+      infoWindowRef.current.setMap(null);  // 기존 말풍선 닫기
+      infoWindowRef.current = null;
     }
     
-    // 선택된 관광지 상태 설정
+    // 마커 중심으로 지도 이동 및 확대대
+    const position = marker.getPosition();
+    map.panTo(position); // 🔄 애니메이션 이동
+    map.setLevel(4); // 🔍 확대 레벨 고정 (원하는 확대 수준, 1이 최대 줌)
+  
+    // 3. 선택 상태 저장
+    if (onMarkerClick) onMarkerClick(attraction);
     setSelectedAttraction(attraction);
-
-    // 정보창 내용 생성
-    const content = `
-      <div style="padding:8px;width:220px;">
-        <h3 style="margin:0 0 8px 0;font-size:14px;font-weight:bold;">${attraction.name}</h3>
-        <p style="margin:0;font-size:12px;color:#666;">
-          ${attraction.type === 'indoor' ? '실내' :
-          attraction.type === 'outdoor' ? '야외' : '실내/야외'}
-        </p>
-        ${attraction.distanceKm ? 
-          `<p style="margin:4px 0 0 0;font-size:12px;color:#333;">
-            ${(attraction.distanceKm || 0).toFixed(1)}km
-          </p>` : ''
-        }
+  
+    // 커스텀 오버레이의 콘텐츠 DOM 생성
+    const content = document.createElement('div');
+    // 말풍선 스타일 설정정
+    content.innerHTML = `
+      <div style="
+        background: white;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #333;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        white-space: nowrap;
+        border: none;
+      ">
+        <div style="font-weight: bold; font-size: 14px;">${attraction.name}</div>
+        <div style="margin-top: 4px; color: #888;">
+          ${attraction.address || ''}
+        </div>
+<div style="margin-top: 4px; font-size: 12px; color: #555;">
+  유형: ${attraction.type === 'indoor' ? '실내' : attraction.type === 'outdoor' ? '야외' : '실내/야외'}
+  &nbsp;|&nbsp;
+  테마: <span style="color: #0077cc;">${attraction.tags?.[0] || '정보 없음'}</span>
+</div>
       </div>
     `;
-
-    // 정보창 생성 및 열기
-    const infoWindow = new window.kakao.maps.InfoWindow({
-      content: content,
-      removable: true
+  
+    // 커스텀 오버레이 생성
+    const customOverlay = new window.kakao.maps.CustomOverlay({
+      content,
+      position: marker.getPosition(),
+      xAnchor: 0.5,
+      yAnchor: 1.2 // 말풍선을 마커 위에 띄움
     });
-
-    infoWindow.open(map, marker);
-    infoWindowRef.current = infoWindow;
-  }, [closeInfoWindow, onMarkerClick]);
+  
+    // 지도에 오버레이 표시
+    customOverlay.setMap(map);
+    infoWindowRef.current = customOverlay;
+  }, [onMarkerClick]);
 
   // 현재 위치 마커 표시
   const showCurrentLocationMarker = useCallback((location, map) => {
