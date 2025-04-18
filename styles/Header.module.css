@@ -1,9 +1,9 @@
 .header {
-    background-color: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 100;
     width: 100%;
   }
   
@@ -12,51 +12,73 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.2rem 2rem;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #eee;
   }
   
   .logo {
-    height: 60px;
-    display: flex;
-    align-items: center;
+    flex: 1;
   }
   
   .auth {
     display: flex;
-    gap: 2rem;
     align-items: center;
+    gap: 1rem;
   }
   
   .auth a {
-    color: #000;
+    color: #333;
     text-decoration: none;
     font-weight: 500;
-    font-size: 1.1rem;
+    transition: color 0.2s;
+  }
+  
+  .auth a:hover {
+    color: #0070f3;
+  }
+  
+  .userName {
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .logoutButton {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.5rem;
+    transition: color 0.2s;
+  }
+  
+  .logoutButton:hover {
+    color: #e00;
   }
   
   /* 하단: 네비게이션 바 */
   .navBar {
-    border-top: 1px solid #eee;
-    background-color: #f8f9fa;
+    padding: 0 2rem;
   }
   
-  .navBar ul {
+  .navList {
     display: flex;
-    justify-content: center;
     list-style: none;
-    gap: 2rem;
-    padding: 0.8rem 0;
     margin: 0;
+    padding: 0;
+    gap: 2rem;
   }
   
-  .navBar a {
+  .navItem a {
     color: #333;
-    font-weight: 500;
     text-decoration: none;
-    transition: color 0.3s;
+    font-weight: 500;
+    padding: 1rem 0;
+    display: block;
+    transition: color 0.2s;
   }
   
-  .navBar a:hover {
+  .navItem a:hover {
     color: #0070f3;
   }
   

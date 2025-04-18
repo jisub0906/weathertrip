@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSession, signOut } from 'next-auth/react';
 import styles from '../../styles/Header.module.css';
 
 export default function Header() {
+  const { data: session, status } = useSession();
+
   return (
     <header className={styles.header}>
       {/* 상단 바: 로고 + 상태내역역 */}
@@ -25,8 +28,19 @@ export default function Header() {
           </Link>
         </div>
         <div className={styles.auth}>
-          <Link href="/users/login">로그인</Link>
-          <Link href="/users/register">회원가입</Link>
+          {status === 'authenticated' ? (
+            <>
+              <span className={styles.userName}>{session.user.name}님</span>
+              <button onClick={() => signOut()} className={styles.logoutButton}>
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/users/login">로그인</Link>
+              <Link href="/users/register">회원가입</Link>
+            </>
+          )}
         </div>
       </div>
       {/* 내비게이션 바 */}

@@ -185,26 +185,27 @@
   
   /* 리뷰 섹션 */
   .reviewForm {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
   
   .reviewInput {
     width: 100%;
+    min-height: 100px;
     padding: 1rem;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 8px;
     margin-bottom: 1rem;
-    min-height: 100px;
     resize: vertical;
   }
   
   .submitButton {
-    background-color: #0070f3;
+    background-color: var(--primary);
     color: white;
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.2s;
   }
   
   .submitButton:disabled {
@@ -212,28 +213,12 @@
     cursor: not-allowed;
   }
   
-  .reviewContent {
-    margin-top: 0.5rem;
-  }
-  
-  .noReviews {
-    text-align: center;
-    color: #888;
-    font-style: italic;
-    padding: 20px 0;
-  }
-  
-  .reviewsList {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
   .reviewItem {
-    background-color: #f9f9f9;
+    background-color: white;
     border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
   .reviewHeader {
@@ -241,6 +226,61 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
+  }
+  
+  .userInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .profileImage {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .userName {
+    font-weight: 500;
+  }
+  
+  .reviewContent {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+  }
+  
+  .reviewImages {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+  }
+  
+  .reviewImage {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .reviewDate {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .noReviews {
+    text-align: center;
+    color: #666;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+  }
+  
+  .reviewsList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
   
   .reviewActions {
@@ -363,23 +403,11 @@
     background-color: #da190b;
   }
   
-  .userName {
-    font-weight: 600;
-    color: #333;
-  }
-  
   .reviewComment {
     font-size: 0.95rem;
     line-height: 1.5;
     margin: 5px 0 10px;
     color: #444;
-  }
-  
-  .reviewDate {
-    display: block;
-    font-size: 0.8rem;
-    color: #888;
-    text-align: right;
   }
   
   /* 반응형 스타일 */

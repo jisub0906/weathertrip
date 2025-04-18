@@ -151,7 +151,7 @@ const KakaoMap = forwardRef(function KakaoMap({ center, onMarkerClick, onNearbyA
       // 이전 마커 제거
       clearMarkers();
 
-      const response = await axios.get('/api/attractions', {
+      const response = await axios.get('/api/attractions/attractions', {
         params: {
           latitude: location.latitude,
           longitude: location.longitude,

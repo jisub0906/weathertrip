@@ -3,10 +3,11 @@ import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaArrowLeft } from 'react-icons/fa
 import { IoClose } from 'react-icons/io5';
 import styles from '../../styles/AttractionDetail.module.css';
 import axios from 'axios';
+import { useSession } from 'next-auth/react';
 
 export default function AttractionDetail({ attraction, onClose }) {
+  const { data: session, status } = useSession();
   const [liked, setLiked] = useState(false);
-  const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
   const [reviews, setReviews] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -23,8 +24,8 @@ export default function AttractionDetail({ attraction, onClose }) {
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/attractions/${attraction._id}/reviews`);
-        if (response.data.success) {
+        const response = await axios.get(`/api/attractions/${attraction._id}/review`);
+        if (response.data.reviews) {
           setReviews(response.data.reviews);
         }
       } catch (error) {
@@ -38,6 +39,11 @@ export default function AttractionDetail({ attraction, onClose }) {
   }, [attraction._id]);
 
   const handleLike = async () => {
+    if (status !== 'authenticated') {
+      alert('좋아요를 누르려면 로그인이 필요합니다.');
+      return;
+    }
+
     try {
       setLiked(!liked);
       // 좋아요 상태 업데이트 (UI 즉시 반영)
@@ -46,6 +52,7 @@ export default function AttractionDetail({ attraction, onClose }) {
       
       // API 호출
       const response = await axios.post(`/api/attractions/${attraction._id}/like`, { 
+        userId: session.user.id,
         liked: !liked 
       });
       
@@ -65,14 +72,28 @@ export default function AttractionDetail({ attraction, onClose }) {
     e.preventDefault();
     if (!review.trim()) return;
 
+    if (status !== 'authenticated') {
+      alert('리뷰를 작성하려면 로그인이 필요합니다.');
+      return;
+    }
+
     try {
+      setSubmitting(true);
       const response = await axios.post(`/api/attractions/${attraction._id}/review`, {
-        comment: review,
+        userId: session.user.id,
+        content: review,
+        images: [] // 이미지 업로드 기능이 있다면 추가
       });
-      setReviews([response.data, ...reviews]);
-      setReview('');
+
+      if (response.data.review) {
+        setReviews([response.data.review, ...reviews]);
+        setReview('');
+      }
     } catch (error) {
       console.error('리뷰 작성 실패:', error);
+      alert('리뷰 작성에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -104,6 +125,7 @@ export default function AttractionDetail({ attraction, onClose }) {
               className={styles.likeButton} 
               onClick={handleLike}
               aria-label={liked ? '좋아요 취소' : '좋아요'}
+              disabled={status === 'loading'}
             >
               {liked ? <FaHeart color="#e74c3c" /> : <FaRegHeart />}
             </button>
@@ -126,15 +148,16 @@ export default function AttractionDetail({ attraction, onClose }) {
           <textarea
             value={review}
             onChange={(e) => setReview(e.target.value)}
-            placeholder="리뷰를 작성하세요..."
+            placeholder={status === 'authenticated' ? "리뷰를 작성하세요..." : "리뷰를 작성하려면 로그인이 필요합니다."}
             className={styles.reviewInput}
+            disabled={status !== 'authenticated'}
           />
           <button
             type="submit"
             className={styles.submitButton}
-            disabled={submitting || !review.trim()}
+            disabled={submitting || !review.trim() || status !== 'authenticated'}
           >
-            작성
+            {submitting ? '작성 중...' : '작성'}
           </button>
         </form>
         
@@ -148,15 +171,34 @@ export default function AttractionDetail({ attraction, onClose }) {
         ) : (
           <div className={styles.reviewsList}>
             {reviews.map((review) => (
-              <div key={review.id} className={styles.reviewItem}>
+              <div key={review._id} className={styles.reviewItem}>
                 <div className={styles.reviewHeader}>
-                  <span className={styles.userName}>{review.userName}</span>
+                  <div className={styles.userInfo}>
+                    <img 
+                      src={review.user?.profileImage || '/default-profile.png'} 
+                      alt={review.user?.name || '사용자'}
+                      className={styles.profileImage}
+                    />
+                    <span className={styles.userName}>{review.user?.name || '익명'}</span>
+                  </div>
                 </div>
                 <div className={styles.reviewContent}>
-                  <p>{review.comment}</p>
+                  <p>{review.content}</p>
                 </div>
+                {review.images && review.images.length > 0 && (
+                  <div className={styles.reviewImages}>
+                    {review.images.map((image, index) => (
+                      <img 
+                        key={index} 
+                        src={image} 
+                        alt={`리뷰 이미지 ${index + 1}`}
+                        className={styles.reviewImage}
+                      />
+                    ))}
+                  </div>
+                )}
                 <span className={styles.reviewDate}>
-                  {new Date(review.date).toLocaleDateString()}
+                  {new Date(review.createdAt).toLocaleDateString()}
                 </span>
               </div>
             ))}

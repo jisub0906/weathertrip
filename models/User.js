@@ -1,12 +1,5 @@
 import { getCollection, toObjectId } from '../lib/db/mongodb';
 
-// ✅ 사용할 도시 리스트
-const validCities = [
-  '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
-  '경기도', '강원도', '충청북도', '충청남도',
-  '전라북도', '전라남도', '경상북도', '경상남도', '제주도'
-];
-
 // ✅ 전화번호 앞자리 enum
 const validPhonePrefixes = ['010', '011', '016', '017', '018', '019'];
 
@@ -51,50 +44,35 @@ export const User = {
         throw new Error('비밀번호는 최소 4자리 이상이어야 합니다.');
       }
 
-      // 닉네임 검증
-      if (userData.nickname.length < 1) {
-        throw new Error('닉네임은 최소 1글자 이상이어야 합니다.');
-      }
-
-      if (/^\d/.test(userData.nickname)) {
-        throw new Error('닉네임은 숫자로 시작할 수 없습니다.');
-      }
-
-      // 전화번호 검증
+      // 전화번호 형식 검증
       if (!this.validatePhone(userData.phone)) {
         throw new Error('유효하지 않은 전화번호 형식입니다.');
       }
 
       // 중복 체크
-      const existingEmail = await this.findByEmail(userData.email);
-      if (existingEmail) {
-        throw new Error('이미 가입된 이메일입니다.');
-      }
-
-      const existingNickname = await this.findByNickname(userData.nickname);
-      if (existingNickname) {
-        throw new Error('이미 사용 중인 닉네임입니다.');
-      }
-
-      const existingPhone = await this.findByPhone(userData.phone);
-      if (existingPhone) {
-        throw new Error('이미 사용 중인 전화번호입니다.');
-      }
-
-      console.log('사용자 데이터 검증 완료');
-
-      const result = await collection.insertOne({
-        ...userData,
-        createdAt: new Date(),
-        updatedAt: new Date()
+      const existingUser = await collection.findOne({
+        $or: [
+          { email: userData.email },
+          { nickname: userData.nickname },
+          { phone: userData.phone }
+        ]
       });
 
-      if (!result.insertedId) {
-        throw new Error('사용자 생성에 실패했습니다.');
+      if (existingUser) {
+        if (existingUser.email === userData.email) {
+          throw new Error('이미 사용 중인 이메일입니다.');
+        }
+        if (existingUser.nickname === userData.nickname) {
+          throw new Error('이미 사용 중인 닉네임입니다.');
+        }
+        if (existingUser.phone === userData.phone) {
+          throw new Error('이미 사용 중인 전화번호입니다.');
+        }
       }
 
-      console.log('사용자 생성 성공:', result.insertedId.toString());
-      return result.insertedId.toString();
+      // 사용자 생성
+      const result = await collection.insertOne(userData);
+      return sanitizeUserData({ _id: result.insertedId, ...userData });
     } catch (error) {
       console.error('사용자 생성 오류:', error);
       throw error;
@@ -184,24 +162,7 @@ export const User = {
   },
 
   validatePhone(phone) {
-    // 전화번호 형식 확인 (000-0000-0000 형식 또는 직접 숫자만 입력)
-    if (!phone) return false;
-
-    // 하이픈 제거 후 숫자만 확인
-    const digits = phone.replace(/\D/g, '');
-    
-    // 10-11자리 확인 (지역번호 포함)
-    if (digits.length !== 10 && digits.length !== 11) return false;
-    
-    // 앞 3자리 확인
-    const prefix = digits.slice(0, 3);
-    if (!validPhonePrefixes.includes(prefix)) return false;
-    
-    // 숫자로만 구성되어 있는지 확인
-    return /^\d+$/.test(digits);
-  },
-
-  validateCity(city) {
-    return validCities.includes(city);
+    const phoneRegex = /^(010|011|016|017|018|019)-\d{4}-\d{4}$/;
+    return phoneRegex.test(phone);
   }
 };
