@@ -42,6 +42,19 @@ export default function Map() {
           clearInterval(checkMapAndAttractionsReady);
           console.log('지도와 관광지 로드 완료, 검색 실행');
           handleSearch(savedKeyword, savedAttractionId);
+          
+          // 검색 완료 후 약간의 시간을 두고 카드 클릭
+          setTimeout(() => {
+            // 관광지 ID에 해당하는 카드 찾기
+            const attractionCard = document.querySelector(`[data-attraction-id="${savedAttractionId}"]`);
+            if (attractionCard) {
+              console.log('관광지 카드 찾음, 클릭 실행');
+              attractionCard.click();
+            } else {
+              console.log('관광지 카드를 찾을 수 없음');
+            }
+          }, 1000); // 카드가 렌더링될 시간을 고려해 1초 정도 대기
+          
           localStorage.removeItem('searchKeyword');
           localStorage.removeItem('selectedAttractionId');
         }
@@ -209,12 +222,13 @@ export default function Map() {
           <div className={styles.attractionsList}>
             {filteredAttractions.map((attraction, index) => (
               <div
-                key={attraction._id || index}
-                className={`${styles.attractionItem} ${
-                  selectedAttraction === attraction ? styles.selected : ""
-                }`}
-                onClick={() => handleAttractionClick(attraction)}
-              >
+                    key={attraction._id || index}
+                    className={`${styles.attractionItem} ${
+                      selectedAttraction === attraction ? styles.selected : ""
+                    }`}
+                    data-attraction-id={attraction._id}
+                    onClick={() => handleAttractionClick(attraction)}
+                  >
                 <h3>{attraction.name || attraction.title || "이름 없음"}</h3>
                 <div className={styles.attractionDetails}>
                   <span>{attraction.address || attraction.location || "주소 정보 없음"}</span>
