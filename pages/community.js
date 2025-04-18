@@ -4,6 +4,7 @@ import { useInView } from "react-intersection-observer";
 import Image from "next/image";
 import styles from "../styles/Community.module.css";
 import Header from "../components/Layout/Header";
+import LanguageToggleButton from "../components/Translate/LanguageToggleButton";
 
 export default function Community() {
   const { data: session } = useSession();
@@ -12,7 +13,55 @@ export default function Community() {
   const [hasMore, setHasMore] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { ref, inView } = useInView();
+  const [selectedLang, setSelectedLang] = useState('');
   
+  // 리뷰 번역을 위한 언어 선택
+  const translateReviewContent = async (text, lang) => {
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, targetLang: lang }),
+      });
+      const result = await res.json();
+      return result.translations?.[0]?.text || text;
+    } catch (error) {
+      console.error('번역 실패:', error);
+      return text;
+    }
+  };
+  
+  const originalReviewsRef = useRef([]);
+
+  // 리뷰가 변경되거나 언어가 선택되면 번역 실행
+  useEffect(() => {
+    if (!selectedLang || reviews.length === 0) return;
+  
+    // 원본 저장 (한 번만)
+    if (!originalReviewsRef.current.length) {
+      originalReviewsRef.current = [...reviews];
+    }
+  
+    if (selectedLang === 'KO') {
+      // 한국어 선택 시 원본 복원
+      setReviews([...originalReviewsRef.current]);
+      return;
+    }
+  
+    // 번역 실행
+    const translateAll = async () => {
+      const translated = await Promise.all(
+        originalReviewsRef.current.map(async (rev) => ({
+          ...rev,
+          content: await translateReviewContent(rev.content, selectedLang),
+        }))
+      );
+      setReviews(translated);
+    };
+  
+    translateAll();
+  }, [selectedLang]);
+
   // Pagination state management
   const lastTimestampRef = useRef(null);
   const lastIdRef = useRef(null);
@@ -253,6 +302,7 @@ export default function Community() {
   return (
     <>
       <Header />
+      <LanguageToggleButton onSelect={(lang) => setSelectedLang(lang)} />
       <div
         className={`${styles.pullToRefresh} ${
           isPulling ? styles.pulling : ""
