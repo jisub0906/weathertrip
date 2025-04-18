@@ -201,13 +201,6 @@ export default function RollingBanner() {
     setTimeout(() => setActiveSlide(current), 10);
   }, [current, slides]);
 
-  const handleClick = useCallback(() => {
-    const keyword = slides[current]?.name;
-    if (keyword) {
-      router.push(`/map?keyword=${encodeURIComponent(keyword)}`);
-    }
-  }, [current, slides, router]);
-
   const goPrev = useCallback(() => {
     const prevSlide = (current - 1 + slides.length) % slides.length;
     if (preloadedImagesRef.current.has(slides[prevSlide].image)) {
@@ -251,7 +244,6 @@ export default function RollingBanner() {
           <Image 
             src={slides[current].image} 
             alt={slides[current].name} 
-            onClick={handleClick}
             width={1920}
             height={1080}
             priority
