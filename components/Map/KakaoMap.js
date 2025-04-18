@@ -117,16 +117,19 @@ const KakaoMap = forwardRef(function KakaoMap({
       infoWindowRef.current.setMap(null);  // 기존 말풍선 닫기
       infoWindowRef.current = null;
     }
+    
+    // 마커 중심으로 지도 이동 및 확대대
+    const position = marker.getPosition();
+    map.panTo(position); // 🔄 애니메이션 이동
+    map.setLevel(4); // 🔍 확대 레벨 고정 (원하는 확대 수준, 1이 최대 줌)
   
-    // 부모에게 클릭 알림
-    if (onMarkerClick) {
-      onMarkerClick(attraction);
-    }
-  
-    setSelectedAttraction(attraction);  // 선택된 관광지 상태 반영
+    // 3. 선택 상태 저장
+    if (onMarkerClick) onMarkerClick(attraction);
+    setSelectedAttraction(attraction);
   
     // 커스텀 오버레이의 콘텐츠 DOM 생성
     const content = document.createElement('div');
+    // 말풍선 스타일 설정정
     content.innerHTML = `
       <div style="
         background: white;
