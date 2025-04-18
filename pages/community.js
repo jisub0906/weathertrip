@@ -13,6 +13,7 @@ export default function Community() {
   const [hasMore, setHasMore] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { ref, inView } = useInView();
+  const lastAttractionElementRef = useRef(null);
   
   // 페이지네이션 상태 관리
   const lastTimestampRef = useRef(null);
@@ -22,6 +23,13 @@ export default function Community() {
   const [pullStartY, setPullStartY] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const pullThreshold = 100; // 새로고침을 트리거할 거리 (픽셀)
+
+  const handleCardClick = (attraction) => {
+    if (!attraction?.name) return;
+    localStorage.setItem('searchKeyword', attraction.name);
+    localStorage.setItem('selectedAttractionId', attraction._id);
+    window.location.href = '/map';
+  };
 
   // 리뷰 데이터 가져오기
   const fetchReviews = async (isRefresh = false) => {
@@ -209,60 +217,68 @@ export default function Community() {
         <h1 className={styles.title}>커뮤니티</h1>
         
         <div className={styles.reviewList}>
-          {reviews.map((review, index) => (
-            <div key={review._id} className={styles.reviewCard}>
-              {/* 사용자 이름 & 날짜 */}
-              <div className={styles.reviewHeader}>
-                <span className={styles.userName}>{review.user?.name || '익명'}</span>
-                <span className={styles.date}>
-                  {formatDate(review.createdAt)}
-                </span>
-              </div>
-              
-              {/* 관광지 정보 */}
-              <div className={styles.attractionContainer}>
-                <Link href={`/attractions/${review.attraction._id}`} className={styles.attractionLink}>
-                  <div className={styles.attractionInfo}>
-                    <div className={styles.attractionContent}>
-                      <div className={styles.locationRow}>
-                        <svg 
-                          className={styles.locationIcon} 
-                          viewBox="0 0 24 24" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="2" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                        >
-                          <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <h3 className={styles.attractionName}>{review.attraction.name}</h3>
-                      </div>
-                      <div className={styles.viewDetailText}>관광지 상세보기 →</div>
-                    </div>
-                    
-                    {review.attraction.images?.[0] && (
-                      <Image
-                        src={review.attraction.images[0]}
-                        alt={review.attraction.name}
-                        width={100}
-                        height={100}
-                        className={styles.attractionImage}
-                      />
-                    )}
-                  </div>
-                </Link>
-              </div>
-
-              {/* 리뷰 내용 */}
-              {review.content && (
-                <div className={styles.reviewContent}>
-                  <p>{review.content}</p>
+          {reviews.map((review, index) => {
+            const isLastElement = index === reviews.length - 1;
+            return (
+              <div key={review._id} className={styles.reviewCard}>
+                {/* 사용자 이름 & 날짜 */}
+                <div className={styles.reviewHeader}>
+                  <span className={styles.userName}>{review.user?.name || '익명'}</span>
+                  <span className={styles.date}>
+                    {formatDate(review.createdAt)}
+                  </span>
                 </div>
-              )}
-            </div>
-          ))}
+                
+                {/* 관광지 정보 */}
+                <div className={styles.attractionContainer}>
+                  <div
+                      key={review.attraction._id || index}
+                      className={styles.attractionLink}
+                      ref={isLastElement ? lastAttractionElementRef : null}
+                      onClick={() => handleCardClick(review.attraction)}
+                      >
+                    <div className={styles.attractionInfo}>
+                      <div className={styles.attractionContent}>
+                        <div className={styles.locationRow}>
+                          <svg 
+                            className={styles.locationIcon} 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          >
+                            <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <h3 className={styles.attractionName}>{review.attraction.name}</h3>
+                        </div>
+                        <div className={styles.viewDetailText}>관광지 상세보기 →</div>
+                      </div>
+                      
+                      {review.attraction.images?.[0] && (
+                        <Image
+                          src={review.attraction.images[0]}
+                          alt={review.attraction.name}
+                          width={100}
+                          height={100}
+                          className={styles.attractionImage}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 리뷰 내용 */}
+                {review.content && (
+                  <div className={styles.reviewContent}>
+                    <p>{review.content}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
           
           {loading && (
             <div className={styles.loading}>

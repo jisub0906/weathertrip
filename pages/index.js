@@ -117,9 +117,9 @@ export default function Home() {
   const handleCardClick = (attraction) => {
     if (!attraction?.name) return;
     localStorage.setItem('searchKeyword', attraction.name);
-    window.location.href = '/map'; // 혹은 router.push('/map')로 SPA 방식 처리
+    localStorage.setItem('selectedAttractionId', attraction._id);
+    window.location.href = '/map';
   };
-
   const fetchAttractions = useCallback(async (region) => {
     setLoading(true);
     setError(null);

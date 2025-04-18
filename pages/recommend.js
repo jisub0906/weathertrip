@@ -32,11 +32,9 @@ export default function Recommend() {
 const router = useRouter();
 
 const handleCardClick = (attraction) => {
-  if (!attraction.name) return;
-  
-  // 검색 키워드를 localStorage에 저장
+  if (!attraction?.name) return;
   localStorage.setItem('searchKeyword', attraction.name);
-  // 지도 페이지로 강제 이동
+  localStorage.setItem('selectedAttractionId', attraction._id);
   window.location.href = '/map';
 };
 

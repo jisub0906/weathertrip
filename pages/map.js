@@ -29,9 +29,11 @@ export default function Map() {
   // localStorage에서 저장된 키워드 불러오기
   useEffect(() => {
     const savedKeyword = localStorage.getItem('searchKeyword');
+    const savedAttractionId = localStorage.getItem('selectedAttractionId');
     console.log('저장된 검색 키워드:', savedKeyword);
+    console.log('저장된 관광지 ID:', savedAttractionId);
     
-    if (savedKeyword) {
+    if (savedKeyword && savedAttractionId) {
       setSearchKeyword(savedKeyword);
       
       // 지도와 관광지가 로드될 때까지 대기
@@ -39,18 +41,18 @@ export default function Map() {
         if (mapRef.current?.mapReady && allAttractions.length > 0) {
           clearInterval(checkMapAndAttractionsReady);
           console.log('지도와 관광지 로드 완료, 검색 실행');
-          handleSearch(savedKeyword);
+          handleSearch(savedKeyword, savedAttractionId);
           localStorage.removeItem('searchKeyword');
+          localStorage.removeItem('selectedAttractionId');
         }
-      }, 500); // 0.5초마다 확인
+      }, 500);
       
-      // 10초 후에도 로드되지 않으면 타임아웃
       setTimeout(() => {
         clearInterval(checkMapAndAttractionsReady);
         console.log('지도와 관광지 로드 타임아웃');
       }, 10000);
     }
-  }, [allAttractions]); // allAttractions 상태 변경을 감지
+  }, [allAttractions]);
 
   // 키워드 기반 위치 검색
   useEffect(() => {
@@ -137,8 +139,8 @@ export default function Map() {
     }
   }, []);
 
-  const handleSearch = (keyword) => {
-    console.log('검색 실행:', keyword);
+  const handleSearch = (keyword, attractionId) => {
+    console.log('검색 실행:', keyword, attractionId);
     if (!keyword) {
       setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
@@ -147,9 +149,9 @@ export default function Map() {
     setSearchKeyword(keyword);
     const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
     const filtered = searchData.filter(attraction => 
-      (attraction.name || '').toLowerCase().includes(keyword.toLowerCase()) ||
-      (attraction.address || '').toLowerCase().includes(keyword.toLowerCase()) ||
-      (attraction.description || '').toLowerCase().includes(keyword.toLowerCase())
+      (attraction._id === attractionId) || // ID가 일치하는 경우
+      ((attraction.name || '').toLowerCase().includes(keyword.toLowerCase()) &&
+       !attractionId) // ID가 없고 이름만 일치하는 경우
     );
     console.log('검색 결과:', filtered);
     setFilteredAttractions(filtered);
