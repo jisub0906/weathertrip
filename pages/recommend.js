@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Head from 'next/head';
 import Header from '../components/Layout/Header';
-import Footer from '../components/Layout/Footer';
 import useLocation from '../hooks/useLocation';
 import styles from '../styles/Recommend.module.css';
 import axios from 'axios';
