@@ -83,9 +83,23 @@ export default async function handler(req, res) {
 
         const result = await db.collection('reviews').insertOne(newReview);
 
+        // 사용자 정보 조회
+        const user = await db.collection('users').findOne(
+          { _id: userIdObj },
+          { projection: { name: 1, profileImage: 1 } }
+        );
+
         return res.status(201).json({ 
           message: '리뷰가 성공적으로 작성되었습니다.',
-          review: { ...newReview, _id: result.insertedId }
+          review: { 
+            ...newReview, 
+            _id: result.insertedId,
+            user: {
+              _id: user._id,
+              name: user.name,
+              profileImage: user.profileImage
+            }
+          }
         });
 
       case 'PUT':

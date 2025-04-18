@@ -57,6 +57,12 @@ export default function Header() {
           >
             맞춤추천
           </Link>
+          <Link
+            href="/community"
+            className={`${styles.navItem} ${isActive('/community') ? styles.active : ''}`}
+          >
+            커뮤니티
+          </Link>
         </div>
 
         <div className={styles.authButtons}>

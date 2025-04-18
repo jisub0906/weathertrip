@@ -174,11 +174,6 @@ export default function AttractionDetail({ attraction, onClose }) {
               <div key={review._id} className={styles.reviewItem}>
                 <div className={styles.reviewHeader}>
                   <div className={styles.userInfo}>
-                    <img 
-                      src={review.user?.profileImage || '/default-profile.png'} 
-                      alt={review.user?.name || '사용자'}
-                      className={styles.profileImage}
-                    />
                     <span className={styles.userName}>{review.user?.name || '익명'}</span>
                   </div>
                 </div>
