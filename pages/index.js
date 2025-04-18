@@ -14,6 +14,8 @@ import Image from 'next/image';
 import { calculateAttractionsDistance } from '../utils/distance';
 
 
+
+
 // 컴포넌트 외부로 이동
 const REGION_COORDINATES = {
   'seoul': { latitude: 37.5665, longitude: 126.9780 },
