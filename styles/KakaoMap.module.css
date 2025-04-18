@@ -32,7 +32,7 @@
   
   .mapArea {
     position: fixed;
-    top: 151px;
+    top: 73px;
     left: 400px;
     right: 0;
     bottom: 0;
@@ -276,7 +276,7 @@
   
   .attractionsSidebar {
     position: fixed;
-    top: 151px;
+    top: 75px;
     left: 0;
     bottom: 0;
     width: 400px;

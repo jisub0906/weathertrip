@@ -1,12 +1,12 @@
 /* styles/TopBanner.module.css */
 .topBanner {
-  background:rgb(255, 245, 103);
-  color: #333;
+  background: linear-gradient(135deg, #FFD54F 0%, #FFEB3B 100%);
+  color: rgba(0, 0, 0, 0.8);
   text-align: center;
   padding: 0.85rem 1.2rem;
-  font-weight: 600;
-  font-size: 1.05rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   z-index: 50;
   position: relative;
   overflow: hidden;
@@ -20,16 +20,39 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   animation: shine 3s infinite;
 }
 
-.topBanner p {
-  margin: 0;
+.topBanner::after {
+  content: '';
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.bannerContent {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  position: relative;
+  z-index: 1;
+}
+
+.icon {
+  color: #FF8F00;
+  flex-shrink: 0;
+}
+
+.text {
+  margin: 0;
+  line-height: 1.4;
 }
 
 @keyframes shine {
@@ -41,5 +64,25 @@
   }
   100% {
     left: 100%;
+  }
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  .topBanner {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .bannerContent {
+    gap: 0.4rem;
+  }
+}
+
+/* 더 작은 화면 최적화 */
+@media (max-width: 480px) {
+  .topBanner {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
   }
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styles from '../../styles/Register.module.css';
+import Header from '../../components/Layout/Header';
 
 export default function Register() {
   const router = useRouter();
@@ -105,133 +106,144 @@ export default function Register() {
   };
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>회원가입</h1>
-      
-      <form onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>이름</label>
-          <input
-            type="text"
-            name="name"
-            className={styles.input}
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="이름을 입력하세요"
-          />
-          {errors.name && <p className={styles.errorText}>{errors.name}</p>}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>이메일</label>
-          <input
-            type="email"
-            name="email"
-            className={styles.input}
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="example@email.com"
-          />
-          {errors.email && <p className={styles.errorText}>{errors.email}</p>}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>비밀번호</label>
-          <input
-            type="password"
-            name="password"
-            className={styles.input}
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="비밀번호를 입력하세요"
-          />
-          {errors.password && <p className={styles.errorText}>{errors.password}</p>}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>닉네임</label>
-          <input
-            type="text"
-            name="nickname"
-            className={styles.input}
-            value={formData.nickname}
-            onChange={handleChange}
-            placeholder="닉네임을 입력하세요"
-          />
-          {errors.nickname && <p className={styles.errorText}>{errors.nickname}</p>}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>성별</label>
-          <div className={styles.radioGroup}>
-            <label className={styles.radioLabel}>
+    <>
+      <Header />
+      <div className={styles.container}>
+        <div className={styles.registerBox}>
+          <h1 className={styles.title}>회원가입</h1>
+          
+          <form onSubmit={handleSubmit}>
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="name">이름</label>
               <input
-                type="radio"
-                name="gender"
-                value="남성"
-                checked={formData.gender === '남성'}
+                type="text"
+                id="name"
+                name="name"
+                className={styles.input}
+                value={formData.name}
                 onChange={handleChange}
-                className={styles.radio}
+                placeholder="이름을 입력하세요"
               />
-              남성
-            </label>
-            <label className={styles.radioLabel}>
+              {errors.name && <p className={styles.errorText}>{errors.name}</p>}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="email">이메일</label>
               <input
-                type="radio"
-                name="gender"
-                value="여성"
-                checked={formData.gender === '여성'}
+                type="email"
+                id="email"
+                name="email"
+                className={styles.input}
+                value={formData.email}
                 onChange={handleChange}
-                className={styles.radio}
+                placeholder="example@email.com"
               />
-              여성
-            </label>
+              {errors.email && <p className={styles.errorText}>{errors.email}</p>}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="password">비밀번호</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                className={styles.input}
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="비밀번호를 입력하세요"
+              />
+              {errors.password && <p className={styles.errorText}>{errors.password}</p>}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="nickname">닉네임</label>
+              <input
+                type="text"
+                id="nickname"
+                name="nickname"
+                className={styles.input}
+                value={formData.nickname}
+                onChange={handleChange}
+                placeholder="닉네임을 입력하세요"
+              />
+              {errors.nickname && <p className={styles.errorText}>{errors.nickname}</p>}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>성별</label>
+              <div className={styles.radioGroup}>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="남성"
+                    checked={formData.gender === '남성'}
+                    onChange={handleChange}
+                    className={styles.radio}
+                  />
+                  남성
+                </label>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="gender"
+                    value="여성"
+                    checked={formData.gender === '여성'}
+                    onChange={handleChange}
+                    className={styles.radio}
+                  />
+                  여성
+                </label>
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="birthdate">생년월일</label>
+              <input
+                type="date"
+                id="birthdate"
+                name="birthdate"
+                className={styles.datePicker}
+                value={formData.birthdate}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="phone">전화번호</label>
+              <input
+                type="text"
+                id="phone"
+                name="phone"
+                className={styles.input}
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="010-1234-5678"
+              />
+              {errors.phone && <p className={styles.errorText}>{errors.phone}</p>}
+            </div>
+
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isLoading}
+            >
+              {isLoading ? '처리중...' : '회원가입'}
+            </button>
+
+            {errors.submit && <p className={styles.errorText}>{errors.submit}</p>}
+          </form>
+
+          <div className={styles.linkContainer}>
+            <Link href="/users/login" className={styles.link}>
+              로그인
+            </Link>
+            <Link href="/" className={styles.link}>
+              홈으로
+            </Link>
           </div>
         </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>생년월일</label>
-          <input
-            type="date"
-            name="birthdate"
-            className={styles.datePicker}
-            value={formData.birthdate}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>전화번호</label>
-          <input
-            type="text"
-            name="phone"
-            className={styles.input}
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="010-1234-5678"
-          />
-          {errors.phone && <p className={styles.errorText}>{errors.phone}</p>}
-        </div>
-
-        <button
-          type="submit"
-          className={styles.submitButton}
-          disabled={isLoading}
-        >
-          {isLoading ? '처리중...' : '회원가입'}
-        </button>
-
-        {errors.submit && <p className={styles.errorText}>{errors.submit}</p>}
-      </form>
-
-      <div className={styles.linkContainer}>
-        <Link href="/users/login" className={styles.link}>
-          로그인
-        </Link>
-        <Link href="/" className={styles.link}>
-          홈으로
-        </Link>
       </div>
-    </div>
+    </>
   );
 }

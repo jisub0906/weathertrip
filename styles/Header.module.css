@@ -1,102 +1,202 @@
 .header {
-    background-color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  background-color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: box-shadow 0.3s ease;
+}
+
+.nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  margin-right: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.02);
+}
+
+.logo img {
+  width: 160px;
+  height: auto;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  flex-grow: 1;
+}
+
+.navItem {
+  text-decoration: none;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 0.5rem;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.navItem:hover {
+  color: #2196f3;
+}
+
+.navItem.active {
+  color: #2196f3;
+}
+
+.navItem.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #2196f3;
+  border-radius: 2px;
+  transform: scaleX(1);
+  transition: transform 0.3s ease;
+}
+
+.navItem:not(.active)::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #2196f3;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.navItem:hover::after {
+  transform: scaleX(1);
+}
+
+.authButtons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-left: 1.5rem;
+}
+
+.loginButton, .registerButton {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.loginButton {
+  color: #2196f3;
+  border: 1.5px solid #2196f3;
+  background: transparent;
+}
+
+.loginButton:hover {
+  background: rgba(33, 150, 243, 0.1);
+  transform: translateY(-2px);
+}
+
+.registerButton {
+  background: #2196f3;
+  color: white;
+  border: 1.5px solid transparent;
+  box-shadow: 0 2px 5px rgba(33, 150, 243, 0.3);
+}
+
+.registerButton:hover {
+  background: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+}
+
+/* 모바일 최적화 - 로고 크기 증가 */
+@media (max-width: 768px) {
+  .header {
+    padding: 0.75rem 1rem;
+  }
+
+  .logo img {
+    width: 160px; /* 기존 140px에서 증가 */
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .navLinks {
+    order: 2;
     width: 100%;
-  }
-  
-  /* 상단: 로고 + 로그인/회원가입 */
-  .topBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .logo {
-    flex: 1;
-  }
-  
-  .auth {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .auth a {
-    color: #333;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-  }
-  
-  .auth a:hover {
-    color: #0070f3;
-  }
-  
-  .userName {
-    color: #333;
-    font-weight: 500;
-  }
-  
-  .logoutButton {
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 0.5rem;
-    transition: color 0.2s;
-  }
-  
-  .logoutButton:hover {
-    color: #e00;
-  }
-  
-  /* 하단: 네비게이션 바 */
-  .navBar {
-    padding: 0 2rem;
-  }
-  
-  .navList {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    justify-content: center;
     gap: 2rem;
+    margin-top: 0.5rem;
   }
-  
-  .navItem a {
-    color: #333;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 1rem 0;
-    display: block;
-    transition: color 0.2s;
+
+  .navItem {
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
   }
-  
-  .navItem a:hover {
-    color: #0070f3;
+
+  .authButtons {
+    order: 1;
+    gap: 0.8rem;
+    margin-left: 0;
   }
-  
-  /* 반응형 처리 */
-  @media (max-width: 768px) {
-    .topBar {
-      padding: 1rem;
-    }
-    
-    .auth {
-      gap: 1rem;
-    }
-    
-    .auth a {
-      font-size: 1rem;
-    }
-    
-    .navBar ul {
-      gap: 3rem;
-    }
+
+  .loginButton, .registerButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-width: 70px;
   }
+}
+
+/* 더 작은 화면 최적화 */
+@media (max-width: 480px) {
+  .logo img {
+    width: 140px; /* 기존 120px에서 증가 */
+  }
+
+  .navLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .navItem {
+    font-size: 0.85rem;
+    padding: 0.25rem;
+  }
+
+  .authButtons {
+    gap: 0.6rem;
+  }
+
+  .loginButton, .registerButton {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8rem;
+  }
+}

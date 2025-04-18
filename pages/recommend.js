@@ -478,7 +478,6 @@ const handleCardClick = (attraction) => {
           )}
         </div>
       </section>
-      <Footer />
     </>
   );
 }

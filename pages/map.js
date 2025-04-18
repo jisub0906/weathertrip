@@ -258,8 +258,7 @@ export default function Map() {
             initialKeyword={keyword || searchKeyword}
           />
         )}
-      </main>
-      <Footer />
+      </main>     
     </>
   );
 }

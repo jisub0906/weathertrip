@@ -6,33 +6,71 @@ import styles from '../../styles/Login.module.css';
 import Header from '../../components/Layout/Header';
 
 export default function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+    const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        // 에러 메시지 초기화
+        if (errors[name]) {
+            setErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        
+        if (!formData.email.trim()) {
+            newErrors.email = '이메일을 입력해주세요';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = '올바른 이메일 형식이 아닙니다';
+        }
+        
+        if (!formData.password) {
+            newErrors.password = '비밀번호를 입력해주세요';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setLoading(true);
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
             const result = await signIn('credentials', {
                 redirect: false,
-                email,
-                password,
+                email: formData.email,
+                password: formData.password,
             });
 
             if (result.error) {
-                setError(result.error);
+                setErrors({ submit: result.error });
             } else {
                 router.push('/');
             }
         } catch (error) {
-            setError('로그인 중 오류가 발생했습니다.');
+            setErrors({ submit: '로그인 중 오류가 발생했습니다.' });
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -41,36 +79,55 @@ export default function Login() {
             <Header />
             <div className={styles.container}>
                 <div className={styles.loginBox}>
-                    <h1>로그인</h1>
-                    {error && <div className={styles.error}>{error}</div>}
+                    <h1 className={styles.title}>로그인</h1>
+                    
                     <form onSubmit={handleSubmit}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="email">이메일</label>
+                            <label className={styles.label} htmlFor="email">이메일</label>
                             <input
                                 type="email"
                                 id="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
+                                name="email"
+                                className={styles.input}
+                                value={formData.email}
+                                onChange={handleChange}
+                                placeholder="example@email.com"
                             />
+                            {errors.email && <p className={styles.errorText}>{errors.email}</p>}
                         </div>
+
                         <div className={styles.formGroup}>
-                            <label htmlFor="password">비밀번호</label>
+                            <label className={styles.label} htmlFor="password">비밀번호</label>
                             <input
                                 type="password"
                                 id="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
+                                name="password"
+                                className={styles.input}
+                                value={formData.password}
+                                onChange={handleChange}
+                                placeholder="비밀번호를 입력하세요"
                             />
+                            {errors.password && <p className={styles.errorText}>{errors.password}</p>}
                         </div>
-                        <button type="submit" className={styles.submitButton} disabled={loading}>
-                            {loading ? '로그인 중...' : '로그인'}
+
+                        <button 
+                            type="submit" 
+                            className={styles.submitButton} 
+                            disabled={isLoading}
+                        >
+                            {isLoading ? '로그인 중...' : '로그인'}
                         </button>
+
+                        {errors.submit && <p className={styles.errorText}>{errors.submit}</p>}
                     </form>
-                    <div className={styles.links}>
-                        <Link href="/users/register">회원가입</Link>
-                        <Link href="/users/find-password">비밀번호 찾기</Link>
+
+                    <div className={styles.linkContainer}>
+                        <Link href="/users/register" className={styles.link}>
+                            회원가입
+                        </Link>
+                        <Link href="/users/find-password" className={styles.link}>
+                            비밀번호 찾기
+                        </Link>
                     </div>
                 </div>
             </div>
