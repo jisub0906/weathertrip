@@ -1,5 +1,6 @@
 // pages/api/chat/chatbot.js
 import { getDatabase } from '../../../lib/db/mongodb';
+const axios = require('axios');
 
 // 날씨 데이터를 가져오는 함수
 async function fetchWeather(longitude, latitude) {
@@ -70,39 +71,102 @@ function getDefaultWeather() {
 // 주변 관광지 찾기 함수
 async function findNearbyAttractions(longitude, latitude, weatherCondition, radius = 5) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/attractions?longitude=${longitude}&latitude=${latitude}&radius=${radius}&weatherCondition=${weatherCondition}`);
-    
-    if (!response.ok) {
-      throw new Error(`관광지 API 응답 오류: ${response.status}`);
-    }
+    const db = await getDatabase();
+    const attractions = db.collection('attractions');
 
-    const data = await response.json();
-    
-    if (!data.attractions || data.attractions.length === 0) {
+    // 좌표 변환
+    const lng = parseFloat(longitude);
+    const lat = parseFloat(latitude);
+
+    if (isNaN(lng) || isNaN(lat)) {
+      console.error('유효하지 않은 좌표:', { longitude, latitude });
       return {
         success: false,
-        message: '주변에 추천할 만한 관광지가 없습니다.',
+        message: '위치 정보가 올바르지 않습니다.',
         attractions: []
       };
     }
 
-    // 거리순으로 정렬
-    const sortedAttractions = data.attractions.sort((a, b) => a.distanceKm - b.distanceKm);
+    // 날씨 조건에 따른 필터
+    let typeQuery = {};
+    if (weatherCondition) {
+      switch (weatherCondition) {
+        case 'Rain':
+        case 'Snow':
+          typeQuery = { type: 'indoor' };
+          break;
+        case 'Clear':
+          typeQuery = { type: 'outdoor' };
+          break;
+        default:
+          typeQuery = { type: { $in: ['indoor', 'outdoor', 'both'] } };
+      }
+    }
+
+    const pipeline = [
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [lng, lat]
+          },
+          distanceField: "calcDistance",
+          maxDistance: radius * 1000,
+          spherical: true,
+          query: typeQuery
+        }
+      },
+      {
+        $addFields: {
+          distanceKm: {
+            $round: [{ $divide: ["$calcDistance", 1000] }, 1]
+          }
+        }
+      },
+      {
+        $match: {
+          distanceKm: { $lte: radius }
+        }
+      },
+      {
+        $sort: { distanceKm: 1 }
+      },
+      {
+        $limit: 5
+      }
+    ];
+
+    console.log('주변 관광지 검색 파라미터:', { longitude: lng, latitude: lat, radius, weatherCondition });
+
+    const results = await attractions.aggregate(pipeline).toArray();
+    console.log(`검색된 관광지 수: ${results.length}`);
+
+    if (results.length > 0) {
+      console.log('첫 번째 검색 결과:', {
+        name: results[0].name,
+        distance: results[0].distanceKm,
+        type: results[0].type
+      });
+    }
 
     return {
       success: true,
-      message: `${sortedAttractions.length}개의 관광지를 찾았습니다.`,
-      attractions: sortedAttractions.map(attraction => ({
+      message: `${results.length}개의 관광지를 찾았습니다.`,
+      attractions: results.map(attraction => ({
+        _id: attraction._id,
         name: attraction.name,
         address: attraction.address,
-        distance: attraction.distanceKm.toFixed(1),
         type: attraction.type,
         description: attraction.description,
-        images: attraction.images || []
+        tags: attraction.tags || [],
+        distance: attraction.distanceKm,
+        openingHours: attraction.openingHours || null,
+        admissionFee: attraction.admissionFee || null
       }))
     };
+
   } catch (error) {
-    console.error('관광지 검색 중 오류 발생:', error);
+    console.error('주변 관광지 검색 오류:', error);
     return {
       success: false,
       message: '관광지 검색 중 오류가 발생했습니다.',
@@ -180,172 +244,105 @@ async function identifyAttraction(message) {
 function analyzeIntent(message) {
   const lowerMessage = message.toLowerCase();
   
-  // 의도별 키워드와 가중치
-  const intentPatterns = {
-    greeting: {
-      patterns: [
-        { regex: /^(안녕|하이|헬로|hi|hello)/, weight: 1.0 },
-        { regex: /반가워/, weight: 0.8 },
-        { regex: /처음.*뵙|처음.*만나/, weight: 0.8 }
-      ]
-    },
-    weather: {
-      patterns: [
-        { regex: /날씨.*어때|어때.*날씨/, weight: 1.0 },
-        { regex: /기온|온도|덥|추워/, weight: 0.8 },
-        { regex: /비.*오|눈.*오/, weight: 0.9 }
-      ]
-    },
-    location: {
-      patterns: [
-        { regex: /위치.*어디|어디.*위치/, weight: 1.0 },
-        { regex: /가는.*방법|찾아가/, weight: 0.9 },
-        { regex: /주소|네비/, weight: 0.8 }
-      ]
-    },
-    nearby: {
-      patterns: [
-        { regex: /주변.*뭐|근처.*뭐/, weight: 1.0 },
-        { regex: /가까운.*관광지|주변.*관광지/, weight: 0.9 },
-        { regex: /다른.*볼거리|추천/, weight: 0.8 }
-      ]
-    },
-    description: {
-      patterns: [
-        { regex: /[이것얘].*뭐야?/, weight: 0.7 },
-        { regex: /설명|소개|특징/, weight: 0.9 },
-        { regex: /알려줘|가르쳐/, weight: 0.6 }
-      ]
-    }
-  };
-
-  // 각 의도별 점수 계산
-  const scores = {};
-  for (const [intent, data] of Object.entries(intentPatterns)) {
-    scores[intent] = 0;
-    for (const pattern of data.patterns) {
-      if (pattern.regex.test(lowerMessage)) {
-        scores[intent] += pattern.weight;
-      }
-    }
+  if (lowerMessage.includes('주변') || lowerMessage.includes('근처')) {
+    return 'nearby';
   }
-
-  // 가장 높은 점수의 의도 찾기
-  let maxIntent = 'unknown';
-  let maxScore = 0;
   
-  for (const [intent, score] of Object.entries(scores)) {
-    if (score > maxScore) {
-      maxScore = score;
-      maxIntent = intent;
-    }
+  if (lowerMessage.includes('날씨')) {
+    return 'weather';
   }
-
-  // 최소 점수 threshold 설정
-  return maxScore >= 0.6 ? maxIntent : 'unknown';
+  
+  if (lowerMessage.includes('알려줘') || lowerMessage.includes('설명')) {
+    return 'info';
+  }
+  
+  return 'unknown';
 }
 
 // 응답 생성 함수
 async function generateResponse(intent, message, attraction, weatherData, nearbyAttractions) {
   try {
-    // 이전 응답을 저장할 컨텍스트 객체
-    const context = {
-      lastIntent: null,
-      lastAttraction: null,
-      responseCount: 0
-    };
+    console.log('응답 생성 시작:', { intent, message });
+    console.log('주변 관광지 데이터:', nearbyAttractions);
 
-    // 기본 응답 템플릿
-    const responses = {
-      unknown: [
-        "죄송합니다. 질문을 이해하지 못했어요. 다른 방식으로 물어봐주시겠어요?",
-        "무슨 말씀이신지 잘 모르겠어요. 좀 더 구체적으로 말씀해주시겠어요?",
-        "다시 한 번 말씀해주시겠어요? 더 자세히 알려주시면 도움이 될 것 같아요."
-      ],
-      greeting: [
-        "안녕하세요! 무엇을 도와드릴까요?",
-        "반갑습니다! 관광지에 대해 궁금하신 점을 물어보세요.",
-        "어서오세요! 위치, 날씨, 주변 관광지 등을 물어보실 수 있어요."
-      ],
-      weather: (data) => {
-        if (!data) return "죄송합니다. 현재 날씨 정보를 가져올 수 없습니다.";
-        
-        let response = `현재 기온은 ${data.temperature}°C이고, ${data.description}입니다.`;
-        
-        if (data.feelsLike) {
-          response += ` 체감온도는 ${data.feelsLike}°C,`;
-        }
-        
-        response += ` 습도는 ${data.humidity}%입니다.`;
-        
-        if (data.windSpeed) {
-          response += ` 풍속은 ${data.windSpeed}m/s입니다.`;
-        }
-        
-        // 날씨에 따른 추천 메시지
-        const weatherTips = {
-          'Clear': '날씨가 맑아서 야외 활동하기 좋은 날이에요!',
-          'Clouds': '구름이 있지만 산책하기 좋은 날씨네요.',
-          'Rain': '우산을 챙기시는 것이 좋겠어요.',
-          'Snow': '눈이 오니 미끄러운 길 조심하세요.',
-          'Thunderstorm': '천둥번개가 치니 실내 활동을 추천드려요.',
-          'Mist': '안개가 있으니 야외 활동 시 주의하세요.',
-          'Fog': '안개가 있으니 야외 활동 시 주의하세요.',
-          'Haze': '연무가 있으니 마스크 착용을 권장드려요.'
-        };
-        
-        if (weatherTips[data.condition]) {
-          response += ` ${weatherTips[data.condition]}`;
-        }
-        
-        return response;
-      },
-      nearby: (attractions) => {
-        if (!attractions || !attractions.success || attractions.attractions.length === 0) {
-          return "주변에 추천할 만한 관광지를 찾지 못했어요.";
-        }
-        const attractionList = attractions.attractions
-          .slice(0, 3)
-          .map(a => `${a.name}(${a.distance}km)`)
-          .join(', ');
-        return `주변 관광지로는 ${attractionList} 등이 있어요.`;
-      }
-    };
-
-    // 컨텍스트 기반 응답 생성
-    let response = "";
-    
     switch (intent) {
-      case 'greeting':
-        response = responses.greeting[Math.floor(Math.random() * responses.greeting.length)];
-        break;
-        
-      case 'weather':
-        response = responses.weather(weatherData);
-        break;
-        
       case 'nearby':
-        response = responses.nearby(nearbyAttractions);
-        break;
+        if (!nearbyAttractions || !nearbyAttractions.attractions || nearbyAttractions.attractions.length === 0) {
+          return {
+            response: "죄송합니다. 주변에서 관광지를 찾지 못했습니다.",
+            context: {}
+          };
+        }
         
-      case 'unknown':
+        const attractions = nearbyAttractions.attractions;
+        
+        // 텍스트 응답 형식 개선 - 간결하게
+        return {
+          response: `주변에 ${attractions.length}개의 관광지가 있습니다:`,
+          context: { attractions }
+        };
+
+      case 'weather':
+        if (!weatherData) {
+          return {
+            response: "죄송합니다. 날씨 정보를 가져올 수 없습니다.",
+            context: {}
+          };
+        }
+        
+        let response = `현재 기온은 ${weatherData.temperature}°C이고, ${weatherData.description}입니다.`;
+        if (weatherData.feelsLike) {
+          response += ` 체감온도는 ${weatherData.feelsLike}°C입니다.`;
+        }
+        return {
+          response,
+          context: { weatherData }
+        };
+
+      case 'info':
+        if (!attraction) {
+          return {
+            response: "죄송합니다. 관광지 정보를 찾을 수 없습니다.",
+            context: {}
+          };
+        }
+        
+        // 더 자세한 응답 메시지 생성
+        let infoResponse = "";
+        
+        // 관광지 이름과 설명 추가
+        if (attraction.description) {
+          infoResponse = `${attraction.name}\n\n${attraction.description}`;
+        } else {
+          infoResponse = `${attraction.name}\n\n해당 관광지에 대한 상세 설명이 준비되지 않았습니다.`;
+        }
+        
+        // 영업시간이나 입장료 등 기본 정보가 있다면 추가 (해당 필드가 있다는 가정)
+        if (attraction.openingHours) {
+          infoResponse += `\n\n🕒 영업시간: ${attraction.openingHours}`;
+        }
+        
+        if (attraction.admissionFee) {
+          infoResponse += `\n\n💰 입장료: ${attraction.admissionFee}`;
+        }
+        
+        return {
+          response: infoResponse,
+          context: { attraction }
+        };
+
       default:
-        response = responses.unknown[Math.floor(Math.random() * responses.unknown.length)];
-        break;
+        return {
+          response: "죄송합니다. 질문을 이해하지 못했어요. 다시 말씀해 주시겠어요?",
+          context: {}
+        };
     }
-
-    // 컨텍스트 업데이트
-    context.lastIntent = intent;
-    context.lastAttraction = attraction;
-    context.responseCount++;
-
-    return {
-      response,
-      context
-    };
   } catch (error) {
-    console.error('응답 생성 중 오류 발생:', error);
-    throw new Error('응답을 생성하는 중 오류가 발생했습니다.');
+    console.error('응답 생성 중 오류:', error);
+    return {
+      response: "죄송합니다. 응답을 생성하는 중에 오류가 발생했습니다.",
+      context: {}
+    };
   }
 }
 
@@ -359,6 +356,7 @@ export default async function handler(req, res) {
 
   try {
     const { message, attractionId, longitude, latitude } = req.body;
+    console.log('요청 받은 데이터:', { message, attractionId, longitude, latitude });
 
     if (!message) {
       return res.status(400).json({ 
@@ -367,55 +365,62 @@ export default async function handler(req, res) {
       });
     }
 
-    // 사용자 좌표
-    const userCoordinates = longitude && latitude ? { longitude, latitude } : null;
-    
-    // 선택된 관광지 정보 가져오기
-    let selectedAttraction = null;
-    if (attractionId) {
-      try {
-        selectedAttraction = await findAttraction(attractionId);
-      } catch (error) {
-        console.error('관광지 정보 조회 오류:', error);
-        return res.status(500).json({
-          success: false,
-          message: '관광지 정보를 가져오는 중 오류가 발생했습니다.'
-        });
-      }
-    }
-    
-    // 메시지 의도 분석
+    // 의도 분석
     const intent = analyzeIntent(message);
-    
-    // 필요한 데이터 수집
+    console.log('분석된 의도:', intent);
+
+    // 날씨 데이터 가져오기 (weather 의도일 때만)
     let weatherData = null;
-    let nearbyAttractions = [];
-    
-    if (intent === 'weather' && userCoordinates) {
+    if (intent === 'weather' && longitude && latitude) {
       try {
-        weatherData = await fetchWeather(userCoordinates.longitude, userCoordinates.latitude);
+        weatherData = await fetchWeather(longitude, latitude);
       } catch (error) {
         console.error('날씨 정보 조회 오류:', error);
-        return res.status(500).json({
-          success: false,
-          message: '날씨 정보를 가져오는 중 오류가 발생했습니다.'
-        });
       }
     }
-    
-    if (intent === 'nearby' && userCoordinates) {
+
+    // 주변 관광지 데이터 가져오기 (nearby 의도일 때만)
+    let nearbyAttractions = null;
+    if (intent === 'nearby' && longitude && latitude) {
       try {
         nearbyAttractions = await findNearbyAttractions(
-          userCoordinates.longitude,
-          userCoordinates.latitude,
+          longitude,
+          latitude,
           weatherData?.condition || 'Clear'
         );
+        console.log('검색된 주변 관광지:', nearbyAttractions);
       } catch (error) {
-        console.error('주변 관광지 조회 오류:', error);
-        return res.status(500).json({
-          success: false,
-          message: '주변 관광지 정보를 가져오는 중 오류가 발생했습니다.'
-        });
+        console.error('주변 관광지 검색 오류:', error);
+      }
+    }
+
+    // 특정 관광지 정보 가져오기 (info 의도일 때만)
+    let selectedAttraction = null;
+    if (intent === 'info' && attractionId) {
+      try {
+        const db = await getDatabase();
+        const attractions = db.collection('attractions');
+        selectedAttraction = await attractions.findOne({ _id: attractionId });
+        console.log('선택된 관광지 정보:', selectedAttraction);
+      } catch (error) {
+        console.error('관광지 정보 조회 오류:', error);
+      }
+    } else if (intent === 'info') {
+      // 메시지에서 관광지 이름 추출 시도
+      try {
+        const db = await getDatabase();
+        const attractions = db.collection('attractions');
+        const searchName = message.replace(/알려줘|정보|설명|대해/g, '').trim();
+        console.log('검색할 관광지 이름:', searchName);
+        
+        if (searchName) {
+          selectedAttraction = await attractions.findOne({
+            name: { $regex: searchName, $options: 'i' }
+          });
+          console.log('이름으로 검색된 관광지:', selectedAttraction);
+        }
+      } catch (error) {
+        console.error('관광지 이름 검색 오류:', error);
       }
     }
 
@@ -434,7 +439,7 @@ export default async function handler(req, res) {
       context,
       additionalData: {
         weather: weatherData,
-        nearbyAttractions: nearbyAttractions
+        nearbyAttractions: nearbyAttractions?.attractions || []
       }
     });
 

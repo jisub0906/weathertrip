@@ -1,5 +1,5 @@
 // components/chat/ChatBot.js
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from '../../styles/ChatBot.module.css';
 
 export default function ChatBot({ selectedAttraction, userLocation }) {
@@ -79,8 +79,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`API 응답 오류 (${response.status}): ${errorData.message || '서버 오류가 발생했습니다.'}`);
+        throw new Error(`API 응답 오류 (${response.status})`);
       }
 
       const data = await response.json();
@@ -111,26 +110,87 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
         );
       } 
       // 주변 관광지 정보 렌더링
-      else if (data.additionalData?.nearbyAttractions) {
+      else if (data.additionalData?.nearbyAttractions && data.additionalData.nearbyAttractions.length > 0) {
         const attractions = data.additionalData.nearbyAttractions;
-        if (attractions.length > 0) {
-          additionalContent = (
-            <div className={styles.attractionsList}>
-              {attractions.slice(0, 5).map((attr, index) => (
-                <div key={index} className={styles.attractionItem}>
-                  <div className={styles.attractionInfo}>
-                    <span className={styles.attractionName}>{attr.name}</span>
-                    <span className={styles.attractionDistance}>{attr.distanceKm.toFixed(1)}km</span>
+        additionalContent = (
+          <div className={styles.attractionsList}>
+            {attractions.slice(0, 5).map((attr, index) => (
+              <div key={index} className={styles.attractionItem}>
+                <div className={styles.attractionRow}>
+                  <div className={styles.attractionMainInfo}>
+                    <div className={styles.attractionIcon}>🏛️</div>
+                    <div className={styles.attractionName}>{attr.name}</div>
                   </div>
-                  {attr.tags && (
-                    <div className={styles.attractionTags}>
-                      {attr.tags.slice(0, 3).map((tag, idx) => (
-                        <span key={idx} className={styles.tag}>{tag}</span>
-                      ))}
+                  {attr.distance !== undefined && (
+                    <div className={styles.distanceBadge}>
+                      <span className={styles.distanceIcon}>📍</span>
+                      <span>{typeof attr.distance === 'number' ? attr.distance.toFixed(1) : attr.distance}km</span>
                     </div>
                   )}
                 </div>
-              ))}
+                <div className={styles.attractionTagsRow}>
+                  {attr.type && (
+                    <div className={styles.typeTag}>
+                      {attr.type === 'indoor' ? '🏢 실내' : 
+                       attr.type === 'outdoor' ? '🌳 실외' : '🏢🌳 실내/외'}
+                    </div>
+                  )}
+                  {attr.tags && attr.tags.length > 0 && attr.tags.slice(0, 2).map((tag, idx) => (
+                    <div key={idx} className={styles.tagBadge}>{tag}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      // 관광지 상세 정보 렌더링 (info 의도)
+      else if (data.context?.attraction) {
+        const attr = data.context.attraction;
+        // 관광지 정보가 있는 경우에만 카드 표시
+        if (attr) {
+          additionalContent = (
+            <div className={styles.attractionDetail}>
+              <div className={styles.attractionRow}>
+                <div className={styles.attractionMainInfo}>
+                  <div className={styles.attractionIcon}>🏛️</div>
+                  <div className={styles.attractionName}>{attr.name}</div>
+                </div>
+                {attr.distance !== undefined && (
+                  <div className={styles.distanceBadge}>
+                    <span className={styles.distanceIcon}>📍</span>
+                    <span>{typeof attr.distance === 'number' ? attr.distance.toFixed(1) : attr.distance}km</span>
+                  </div>
+                )}
+              </div>
+              <div className={styles.attractionTagsRow}>
+                {attr.type && (
+                  <div className={styles.typeTag}>
+                    {attr.type === 'indoor' ? '🏢 실내' : 
+                     attr.type === 'outdoor' ? '🌳 실외' : '🏢🌳 실내/외'}
+                  </div>
+                )}
+                {attr.tags && attr.tags.length > 0 && attr.tags.slice(0, 2).map((tag, idx) => (
+                  <div key={idx} className={styles.tagBadge}>{tag}</div>
+                ))}
+              </div>
+              {/* 영업시간 및 입장료 정보 표시 (있는 경우) */}
+              {(attr.openingHours || attr.admissionFee) && (
+                <div className={styles.attractionExtraInfo}>
+                  {attr.openingHours && (
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoIcon}>🕒</span>
+                      <span>{attr.openingHours}</span>
+                    </div>
+                  )}
+                  {attr.admissionFee && (
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoIcon}>💰</span>
+                      <span>{attr.admissionFee}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         }
@@ -146,6 +206,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
           additionalContent: additionalContent
         }]);
       }, typingDelay);
+
     } catch (error) {
       console.error('챗봇 API 호출 오류:', error);
       
@@ -287,7 +348,15 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
                 key={index} 
                 className={`${styles.message} ${message.type === 'user' ? styles.user : styles.bot} ${message.isError ? styles.error : ''}`}
               >
-                {message.text}
+                {/* 메시지 텍스트를 줄바꿈을 유지하여 표시 */}
+                {message.text.split('\n').map((line, i) => (
+                  <React.Fragment key={i}>
+                    {line}
+                    {i < message.text.split('\n').length - 1 && <br />}
+                  </React.Fragment>
+                ))}
+                
+                {/* 추가 컨텐츠 (관광지 카드 등) */}
                 {message.additionalContent && (
                   <div className={styles.additionalContent}>
                     {message.additionalContent}

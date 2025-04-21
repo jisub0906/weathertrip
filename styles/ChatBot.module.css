@@ -175,6 +175,7 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   font-size: 14px;
   line-height: 1.4;
+  white-space: pre-line; /* 줄바꿈 표시를 위한 스타일 추가 */
 }
 
 @keyframes fadeIn {
@@ -297,21 +298,22 @@
   cursor: not-allowed;
 }
 
-/* 날씨 카드 스타일 */
+/* 날씨 카드 스타일 개선 */
 .weatherCard {
-  margin-top: 10px;
-  padding: 12px;
-  background-color: #e3f2fd;
+  margin-top: 12px;
+  padding: 16px;
+  background-color: #f0f8ff;
   border-radius: 12px;
   display: flex;
   align-items: center;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #d1e3f6;
   width: 100%;
 }
 
 .weatherIcon {
-  font-size: 32px;
-  margin-right: 12px;
+  font-size: 36px;
+  margin-right: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -324,76 +326,130 @@
 }
 
 .temperature {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   color: #0d47a1;
 }
 
 .weatherDetail {
-  font-size: 12px;
+  font-size: 13px;
   color: #555;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
-/* 주변 관광지 목록 스타일 */
+/* 완전히 새로 작성된 관광지 목록 스타일 */
 .attractionsList {
-  margin-top: 10px;
-  background-color: #f5f5f5;
-  border-radius: 12px;
-  overflow: hidden;
+  margin-top: 12px;
   width: 100%;
-  border: 1px solid #e0e0e0;
-}
-
-.attractionItem {
-  padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #e0e0e0;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  gap: 8px;
+}
+
+.attractionItem, .attractionDetail {
+  padding: 12px;
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .attractionItem:hover {
-  background-color: #e8f5e9;
+  background-color: #f5f9f5;
 }
 
-.attractionItem:last-child {
-  border-bottom: none;
-}
-
-.attractionInfo {
+.attractionRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.attractionName {
-  font-weight: 500;
-  color: #333;
-}
-
-.attractionDistance {
-  color: #555;
-  font-size: 0.85em;
-  background-color: #e0e0e0;
-  padding: 3px 8px;
-  border-radius: 10px;
-}
-
-.attractionTags {
+.attractionMainInfo {
   display: flex;
-  gap: 5px;
-  margin-top: 5px;
+  align-items: center;
+  gap: 8px;
 }
 
-.tag {
-  font-size: 11px;
-  background-color: #e8f5e9;
+.attractionIcon {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a4a4a;
+}
+
+.attractionName {
+  font-weight: 600;
+  font-size: 15px;
   color: #2e7d32;
-  padding: 2px 6px;
+}
+
+.distanceBadge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background-color: #e8f5e9;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.distanceIcon {
+  font-size: 14px;
+}
+
+.attractionTagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: 28px; /* 아이콘 너비 + 간격 */
+}
+
+.typeTag {
+  display: flex;
+  align-items: center;
+  background-color: #f1f1f1;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #555;
+}
+
+.tagBadge {
+  background-color: #f5f5f5;
+  color: #555;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid #e0e0e0;
+}
+
+.attractionExtraInfo {
+  margin-top: 10px;
+  margin-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f7f7f7;
+  padding: 4px 10px;
   border-radius: 10px;
+  font-size: 13px;
+  color: #555;
+}
+
+.infoIcon {
+  font-size: 14px;
 }
 
 .additionalContent {
