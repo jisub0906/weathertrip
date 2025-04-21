@@ -114,7 +114,7 @@ export default function Home() {
   const [popularAttractions, setPopularAttractions] = useState([]);
   const [popularLoading, setPopularLoading] = useState(false);
   const [isListOpen, setIsListOpen] = useState(false);
-  const router = useRouter();
+
 
   const handleCardClick = (attraction) => {
     if (!attraction?.name) return;
@@ -122,6 +122,7 @@ export default function Home() {
     localStorage.setItem('selectedAttractionId', attraction._id);
     window.location.href = '/map';
   };
+  
   const fetchAttractions = useCallback(async (region) => {
     setLoading(true);
     setError(null);

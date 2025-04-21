@@ -29,7 +29,7 @@ export default function Recommend() {
     tag: '전체'
   });
 
-const router = useRouter();
+
 
 const handleCardClick = (attraction) => {
   if (!attraction?.name) return;
