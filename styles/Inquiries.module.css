@@ -1,0 +1,269 @@
+.formBox {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.labelInline {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.textarea {
+  min-height: 120px;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+.buttonGroup {
+  text-align: center;
+}
+
+.button {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #2980b9;
+}
+
+/* ✅ styles/Inquiries.module.css - InquiryForm + InquiryList 스타일 통합 */
+
+/* ---------- InquiryForm ---------- */
+
+.formBox {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.labelInline {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.textarea {
+  min-height: 120px;
+}
+
+.radioGroup {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+.buttonGroup {
+  text-align: center;
+}
+
+.button {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #2980b9;
+}
+
+/* ---------- InquiryList ---------- */
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.inquiryType {
+  font-weight: bold;
+  color: #3498db;
+}
+
+.secretTag {
+  font-size: 0.85rem;
+  color: #999;
+  margin-left: 0.5rem;
+}
+
+.date {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.userInfo {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.titleBox {
+  cursor: pointer;
+}
+
+.attractionInfo {
+  font-size: 0.95rem;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.titleText {
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #111;
+}
+
+.contentBox,
+.answerBox {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.contentText {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+.answerBox strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.feedbackRow {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.feedbackRow button {
+  background-color: #eee;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.feedbackRow button:hover {
+  background-color: #ddd;
+}
+
+.secretBox {
+  background-color: #f5f5f5;
+  color: #777;
+  padding: 1rem;
+  border-radius: 8px;
+  font-style: italic;
+  margin-top: 1rem;
+}
