@@ -125,13 +125,16 @@ export default async function handler(req, res) {
       // 응답 데이터 구성
       const weatherInfo = {
         temperature: parseFloat(currentData.T1H || 0),
+        feelsLike: parseFloat(currentData.T1H || 0) - (parseFloat(currentData.WSD || 0) > 1.5 ? 2 : 0), // 체감온도 계산
         sky: getSkyStatusText(currentData.SKY),
         precipitation: getPrecipitationText(currentData.PTY),
         humidity: parseInt(currentData.REH || 0),
         windSpeed: parseFloat(currentData.WSD || 0),
         condition: weatherCondition,
+        description: getSkyStatusText(currentData.SKY),
+        icon: getWeatherIcon(weatherCondition),
         recommendedType: weatherCondition === "Clear" ? "outdoor" : 
-                        weatherCondition === "Clouds" ? "both" : "indoor",
+                      weatherCondition === "Clouds" ? "both" : "indoor",
         baseDate: baseDate,
         baseTime: baseTime,
         fcstDate: timeKeys[0].split('-')[0],
@@ -145,6 +148,18 @@ export default async function handler(req, res) {
       console.error('날씨 API 호출 중 오류:', fetchError);
       
       // API 호출 실패시 Mock 데이터 반환
+      const mockWeatherData = {
+        temperature: 23,
+        feelsLike: 25,
+        humidity: 65,
+        windSpeed: 2.5,
+        condition: "Clear",
+        description: "맑음",
+        icon: "01d",
+        recommendedType: "outdoor",
+        isBackupData: true
+      };
+      
       console.log('API 실패, Mock 데이터 반환');
       return res.status(200).json({ 
         success: true, 
@@ -158,11 +173,12 @@ export default async function handler(req, res) {
     // 오류 발생시 Mock 데이터 반환
     const mockWeatherData = {
       temperature: 23,
+      feelsLike: 25,
       humidity: 65,
       windSpeed: 2.5,
       condition: "Clear",
-      sky: "맑음",
-      precipitation: "없음",
+      description: "맑음",
+      icon: "01d",
       recommendedType: "outdoor",
       isBackupData: true
     };
@@ -174,4 +190,20 @@ export default async function handler(req, res) {
       isBackupData: true
     });
   }
+}
+
+// 날씨 아이콘 코드 반환 함수
+function getWeatherIcon(condition) {
+  const icons = {
+    'Clear': '01d',
+    'Clouds': '03d',
+    'Rain': '10d',
+    'Snow': '13d',
+    'Thunderstorm': '11d',
+    'Drizzle': '09d',
+    'Mist': '50d',
+    'Fog': '50d',
+    'Haze': '50d'
+  };
+  return icons[condition] || '01d';
 } 

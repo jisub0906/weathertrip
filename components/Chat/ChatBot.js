@@ -79,72 +79,73 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
       });
 
       if (!response.ok) {
-        throw new Error('API 응답 오류');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`API 응답 오류 (${response.status}): ${errorData.message || '서버 오류가 발생했습니다.'}`);
       }
 
       const data = await response.json();
 
-      if (data.success) {
-        // 응답을 통해 추가 컨텐츠 렌더링
-        let additionalContent = null;
-        
-        // 날씨 정보 렌더링
-        if (data.additionalData?.weather) {
-          const weather = data.additionalData.weather;
+      if (!data.success) {
+        throw new Error(data.message || '응답 처리 중 오류가 발생했습니다.');
+      }
+
+      // 응답을 통해 추가 컨텐츠 렌더링
+      let additionalContent = null;
+      
+      // 날씨 정보 렌더링
+      if (data.additionalData?.weather) {
+        const weather = data.additionalData.weather;
+        additionalContent = (
+          <div className={styles.weatherCard}>
+            <div className={styles.weatherIcon}>
+              {getWeatherIcon(weather.condition, weather.icon)}
+            </div>
+            <div className={styles.weatherInfo}>
+              <span className={styles.temperature}>{weather.temperature}°C</span>
+              <span>{weather.description}</span>
+              <span className={styles.weatherDetail}>
+                체감온도: {weather.feelsLike}°C | 습도: {weather.humidity}%
+              </span>
+            </div>
+          </div>
+        );
+      } 
+      // 주변 관광지 정보 렌더링
+      else if (data.additionalData?.nearbyAttractions) {
+        const attractions = data.additionalData.nearbyAttractions;
+        if (attractions.length > 0) {
           additionalContent = (
-            <div className={styles.weatherCard}>
-              <div className={styles.weatherIcon}>
-                {getWeatherIcon(weather.condition, weather.icon)}
-              </div>
-              <div className={styles.weatherInfo}>
-                <span className={styles.temperature}>{weather.temperature}°C</span>
-                <span>{weather.description}</span>
-                <span className={styles.weatherDetail}>
-                  체감온도: {weather.feelsLike}°C | 습도: {weather.humidity}%
-                </span>
-              </div>
+            <div className={styles.attractionsList}>
+              {attractions.slice(0, 5).map((attr, index) => (
+                <div key={index} className={styles.attractionItem}>
+                  <div className={styles.attractionInfo}>
+                    <span className={styles.attractionName}>{attr.name}</span>
+                    <span className={styles.attractionDistance}>{attr.distanceKm.toFixed(1)}km</span>
+                  </div>
+                  {attr.tags && (
+                    <div className={styles.attractionTags}>
+                      {attr.tags.slice(0, 3).map((tag, idx) => (
+                        <span key={idx} className={styles.tag}>{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           );
-        } 
-        // 주변 관광지 정보 렌더링
-        else if (data.additionalData?.nearbyAttractions) {
-          const attractions = data.additionalData.nearbyAttractions;
-          if (attractions.length > 0) {
-            additionalContent = (
-              <div className={styles.attractionsList}>
-                {attractions.slice(0, 5).map((attr, index) => (
-                  <div key={index} className={styles.attractionItem}>
-                    <div className={styles.attractionInfo}>
-                      <span className={styles.attractionName}>{attr.name}</span>
-                      <span className={styles.attractionDistance}>{attr.distanceKm.toFixed(1)}km</span>
-                    </div>
-                    {attr.tags && (
-                      <div className={styles.attractionTags}>
-                        {attr.tags.slice(0, 3).map((tag, idx) => (
-                          <span key={idx} className={styles.tag}>{tag}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            );
-          }
         }
-
-        // 메시지에 부가 컨텐츠 추가 (자연스러운 타이핑 효과를 위한 지연)
-        const typingDelay = Math.min(data.response.length * 20, 2000);
-        setTimeout(() => {
-          setIsTyping(false);
-          setMessages(prev => [...prev, {
-            type: 'bot',
-            text: data.response,
-            additionalContent: additionalContent
-          }]);
-        }, typingDelay);
-      } else {
-        throw new Error(data.message || '응답 처리 오류');
       }
+
+      // 메시지에 부가 컨텐츠 추가 (자연스러운 타이핑 효과를 위한 지연)
+      const typingDelay = Math.min(data.response.length * 20, 2000);
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => [...prev, {
+          type: 'bot',
+          text: data.response,
+          additionalContent: additionalContent
+        }]);
+      }, typingDelay);
     } catch (error) {
       console.error('챗봇 API 호출 오류:', error);
       

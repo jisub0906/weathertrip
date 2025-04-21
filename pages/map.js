@@ -231,10 +231,16 @@ export default function Map() {
                   >
                 <h3>{attraction.name || attraction.title || "이름 없음"}</h3>
                 <div className={styles.attractionDetails}>
-                  <span>{attraction.address || attraction.location || "주소 정보 없음"}</span>
-                  <span>
-                    {attraction.distance
-                      ? `${(attraction.distance / 1000).toFixed(1)}km`
+                  <span className={styles.address}>
+                    <i className="fas fa-map-marker-alt"></i>
+                    {attraction.address || attraction.location || "주소 정보 없음"}
+                  </span>
+                  <span className={styles.distance}>
+                    <i className="fas fa-route"></i>
+                    {attraction.distanceKm
+                      ? `${attraction.distanceKm.toFixed(1)}km`
+                      : attraction.distance
+                      ? `${attraction.distance.toFixed(1)}km`
                       : ""}
                   </span>
                 </div>

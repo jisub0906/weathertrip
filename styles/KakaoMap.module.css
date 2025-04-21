@@ -348,7 +348,6 @@
   color: #333;
 }
 
-
 .buttonGroup {
   display: flex;
   gap: 0.5rem;
@@ -371,6 +370,39 @@
   border-color: #3498db;
 }
 
+.attractionDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.address i {
+  color: #4a90e2;
+  font-size: 1rem;
+}
+
+.distance {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  color: #28a745;
+}
+
+.distance i {
+  color: #28a745;
+  font-size: 1rem;
+}
 
 @media (max-width: 768px) {
   .mapArea {
@@ -390,7 +422,6 @@
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
   }
-
 
   .sidebarHeader {
     padding: 1rem;
