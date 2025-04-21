@@ -97,7 +97,8 @@
   margin-left: 1.5rem;
 }
 
-.loginButton, .registerButton {
+.loginButton,
+.registerButton {
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -132,6 +133,81 @@
   box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
 }
 
+/* 드롭다운 컨테이너 */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* 드롭다운 열기 버튼 */
+.dropdownTrigger {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+/* 드롭다운 메뉴 */
+.dropdownMenu {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+  padding: 0.3rem 0;
+  min-width: 150px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  z-index: 999;
+  animation: fadeInY 0.2s ease;
+  position: absolute;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 드롭다운 내부 항목 */
+.dropdownItem {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.dropdownItem:hover {
+  background-color: rgba(33, 150, 243, 0.1); /* 연한 파랑 배경 */
+  color: #1976d2; /* hover 시 강조 색상 */
+  transform: translateY(-1px);
+}
+
+.hamburgerIcon {
+  font-size: 1.1rem;
+  margin-left: 4px;
+}
+
+/* fade-in 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+
 /* 모바일 최적화 - 로고 크기 증가 */
 @media (max-width: 768px) {
   .header {
@@ -139,7 +215,8 @@
   }
 
   .logo img {
-    width: 160px; /* 기존 140px에서 증가 */
+    width: 160px;
+    /* 기존 140px에서 증가 */
   }
 
   .nav {
@@ -167,7 +244,8 @@
     margin-left: 0;
   }
 
-  .loginButton, .registerButton {
+  .loginButton,
+  .registerButton {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
     min-width: 70px;
@@ -177,7 +255,8 @@
 /* 더 작은 화면 최적화 */
 @media (max-width: 480px) {
   .logo img {
-    width: 140px; /* 기존 120px에서 증가 */
+    width: 140px;
+    /* 기존 120px에서 증가 */
   }
 
   .navLinks {
@@ -195,7 +274,8 @@
     gap: 0.6rem;
   }
 
-  .loginButton, .registerButton {
+  .loginButton,
+  .registerButton {
     padding: 0.45rem 0.9rem;
     font-size: 0.8rem;
   }

@@ -1,0 +1,173 @@
+/* 전체 레이아웃 */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 2rem;
+}
+
+.mypageBox {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+}
+
+/* 제목 */
+.title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+/* form group */
+.formGroup {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 라벨 */
+.label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  color: #555;
+}
+
+/* 인풋 */
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+/* 라디오 버튼 그룹 */
+.radioGroup {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.radioLabel {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.radio {
+  margin-right: 0.4rem;
+}
+
+/* 버튼 그룹 */
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.editBtn,
+.deleteBtn {
+  flex: 1;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* 수정 버튼 */
+.editBtn {
+  background-color: #2196f3;
+  color: white;
+}
+.editBtn:hover {
+  background-color: #1976d2;
+}
+
+/* 탈퇴 버튼 */
+.deleteBtn {
+  background-color: #f44336;
+  color: white;
+}
+.deleteBtn:hover {
+  background-color: #d32f2f;
+}
+
+/* 링크 */
+.link {
+  color: #2196f3;
+  text-decoration: none;
+  margin-top: 1.5rem;
+  display: block;
+  text-align: center;
+  font-weight: 500;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .mypageBox {
+    padding: 2rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .editBtn,
+  .deleteBtn {
+    width: 100%;
+  }
+}
+
+/* ✅ 회원탈퇴 입력창 드롭다운 스타일 */
+.withdrawBox {
+  background-color: #fff;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  animation: fadeSlideDown 0.25s ease-out;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* ✅ 부드럽게 아래로 열리는 애니메이션 */
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ✅ 제목 정렬 */
+.withdrawTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
