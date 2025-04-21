@@ -12,16 +12,22 @@ export default async function handler(req, res) {
     const { db } = await connectToDatabase();
 
     const attractionId = new ObjectId(id);
-    const userObjectId = new ObjectId(userId);
-
-    // 유저가 좋아요 눌렀는지 확인
-    const liked = await db.collection('likes').findOne({ attractionId, userId: userObjectId });
 
     // 전체 좋아요 수 세기
     const count = await db.collection('likes').countDocuments({ attractionId });
 
+    // 로그인한 사용자의 경우 좋아요 상태도 함께 반환
+    if (userId) {
+      const userObjectId = new ObjectId(userId);
+      const liked = await db.collection('likes').findOne({ attractionId, userId: userObjectId });
+      return res.status(200).json({
+        liked: !!liked,
+        count
+      });
+    }
+
+    // 로그인하지 않은 사용자의 경우 좋아요 수만 반환
     return res.status(200).json({
-      liked: !!liked,
       count
     });
   } catch (error) {

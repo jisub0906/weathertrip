@@ -45,20 +45,28 @@ export default function AttractionDetail({ attraction, onClose }) {
   }, [attraction._id]);
   
   // 좋아요 데이터 불러오기
-  // 사용자가 로그인한 상태라면 좋아요 상태를 불러옵니다.
-  // 로그인하지 않은 상태라면 좋아요 버튼을 비활성화합니다.
   useEffect(() => {
     const fetchLikeStatus = async () => {
-      const res = await axios.get(`/api/attractions/${attraction._id}/likeStatus?userId=${session.user.id}`);
-      setLiked(res.data.liked);
-      setLikeCount(res.data.count);
+      try {
+        // 로그인한 사용자의 경우 좋아요 상태도 함께 조회
+        if (session?.user) {
+          const res = await axios.get(`/api/attractions/${attraction._id}/likeStatus?userId=${session.user.id}`);
+          setLiked(res.data.liked);
+          setLikeCount(res.data.count);
+        } else {
+          // 로그인하지 않은 사용자의 경우 좋아요 수만 조회
+          const res = await axios.get(`/api/attractions/${attraction._id}/likeStatus`);
+          setLikeCount(res.data.count);
+        }
+      } catch (error) {
+        console.error('좋아요 상태 조회 오류:', error);
+      }
     };
-    if (session?.user) {
-      fetchLikeStatus();
-    }
+
+    fetchLikeStatus();
   }, [session, attraction._id]);
 
-  // 사용자가 로그인하지 않은 상태라면 좋아요를 막고, 알림을 띄웁니다.
+  // 좋아요 버튼 클릭 처리
   const handleLike = async () => {
     if (status !== 'authenticated') {
       alert('좋아요를 누르려면 로그인이 필요합니다.');
@@ -77,13 +85,6 @@ export default function AttractionDetail({ attraction, onClose }) {
         liked: !liked 
       });
       setLikeCount(response.data.count); // 서버에서 받은 좋아요 수로 업데이트
-      setLiked(!liked); // 좋아요 상태 업데이트
-
-      
-      // API 응답에 따라 좋아요 수 정확히 업데이트
-      if (response.data.success) {
-        setLikeCount(response.data.likeCount);
-      }
     } catch (error) {
       console.error('좋아요 처리 오류:', error);
       // 오류 발생 시 원래 상태로 복구
