@@ -165,7 +165,8 @@ export default function Home() {
     try {
       const response = await fetch(`/api/attractions/${attractionId}/review`);
       const data = await response.json();
-      return data.reviews[0]?.content || '';
+      const latestReviews = data.reviews.slice(0, 5).map(review => review.content).join('\n\n');
+      return latestReviews || '';
     } catch (error) {
       console.error('리뷰 데이터 로딩 실패:', error);
       return '';
