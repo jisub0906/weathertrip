@@ -11,6 +11,17 @@ const nextConfig = {
     // 타임아웃 관련 설정
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // 타임아웃 설정 추가
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+    // 타임아웃 설정 추가
+    unoptimized: true, // 이미지 최적화 비활성화
   },
   // API 요청 타임아웃 설정
   api: {
@@ -18,6 +29,27 @@ const nextConfig = {
       sizeLimit: '1mb',
     },
     responseLimit: '4mb',
+  },
+  // 이미지 최적화 타임아웃 설정
+  experimental: {
+    images: {
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'i.ibb.co',
+          port: '',
+          pathname: '/**',
+        },
+      ],
+    },
+  },
+  // 타임아웃 설정 추가
+  webpack: (config, { isServer }) => {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    };
+    return config;
   },
 }
 
