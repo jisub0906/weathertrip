@@ -283,13 +283,194 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
     return '관광 도우미';
   };
 
-  // 추천 질문 버튼 클릭 처리
+  // 추천 질문 버튼 클릭 처리 - 자동 전송 기능 추가
   const handleSuggestedQuestionClick = (question) => {
-    setInputValue(question);
-    if (inputRef.current) {
-      adjustTextareaHeight(inputRef.current);
-      inputRef.current.focus();
-    }
+    // UI에 메시지 추가
+    const userMessage = {
+      type: 'user',
+      text: question
+    };
+    
+    // UI에 메시지 추가
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue(''); // 입력창 비우기
+    setIsTyping(true);
+    setHasError(false);
+    
+    // API 호출 처리
+    const sendMessageWithText = async () => {
+      try {
+        // API 호출을 위한 데이터 준비
+        const requestData = {
+          message: question,
+          attractionId: selectedAttraction?._id,
+          // 사용자 위치 정보가 있으면 전달
+          ...(userLocation && {
+            longitude: userLocation.longitude,
+            latitude: userLocation.latitude
+          })
+        };
+
+        // API 호출
+        const response = await fetch('/api/chat/chatbot', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API 응답 오류 (${response.status})`);
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.message || '응답 처리 중 오류가 발생했습니다.');
+        }
+
+        // 응답 처리
+        let additionalContent = null;
+        
+        // 날씨 정보 렌더링
+        if (data.additionalData?.weather) {
+          const weather = data.additionalData.weather;
+          additionalContent = (
+            <div className={styles.weatherCard}>
+              <div className={styles.weatherIcon}>
+                {getWeatherIcon(weather.condition, weather.icon)}
+              </div>
+              <div className={styles.weatherInfo}>
+                <span className={styles.temperature}>{weather.temperature}°C</span>
+                <span>{weather.description}</span>
+                <span className={styles.weatherDetail}>
+                  체감온도: {weather.feelsLike}°C | 습도: {weather.humidity}%
+                </span>
+              </div>
+            </div>
+          );
+        } 
+        // 주변 관광지 정보 렌더링
+        else if (data.additionalData?.nearbyAttractions && data.additionalData.nearbyAttractions.length > 0) {
+          const attractions = data.additionalData.nearbyAttractions;
+          additionalContent = (
+            <div className={styles.attractionsList}>
+              {attractions.slice(0, 5).map((attr, index) => (
+                <div 
+                  key={index} 
+                  className={styles.attractionItem}
+                  onClick={() => handleAttractionClick(attr.name)}
+                >
+                  <div className={styles.attractionRow}>
+                    <div className={styles.attractionMainInfo}>
+                      <div className={styles.attractionIcon}>🏛️</div>
+                      <div className={styles.attractionName}>{attr.name}</div>
+                    </div>
+                    {attr.distance !== undefined && (
+                      <div className={styles.distanceBadge}>
+                        <span className={styles.distanceIcon}>📍</span>
+                        <span>{typeof attr.distance === 'number' ? attr.distance.toFixed(1) : attr.distance}km</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.attractionTagsRow}>
+                    {attr.type && (
+                      <div className={styles.typeTag}>
+                        {attr.type === 'indoor' ? '🏢 실내' : 
+                         attr.type === 'outdoor' ? '🌳 실외' : '🏢🌳 실내/외'}
+                      </div>
+                    )}
+                    {attr.tags && attr.tags.length > 0 && attr.tags.slice(0, 2).map((tag, idx) => (
+                      <div key={idx} className={styles.tagBadge}>{tag}</div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        }
+        // 관광지 상세 정보 렌더링 (info 의도)
+        else if (data.context?.attraction) {
+          const attr = data.context.attraction;
+          // 관광지 정보가 있는 경우에만 카드 표시
+          if (attr) {
+            additionalContent = (
+              <div className={styles.attractionDetail}>
+                <div className={styles.attractionRow}>
+                  <div className={styles.attractionMainInfo}>
+                    <div className={styles.attractionIcon}>🏛️</div>
+                    <div className={styles.attractionName}>{attr.name}</div>
+                  </div>
+                  {attr.distance !== undefined && (
+                    <div className={styles.distanceBadge}>
+                      <span className={styles.distanceIcon}>📍</span>
+                      <span>{typeof attr.distance === 'number' ? attr.distance.toFixed(1) : attr.distance}km</span>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.attractionTagsRow}>
+                  {attr.type && (
+                    <div className={styles.typeTag}>
+                      {attr.type === 'indoor' ? '🏢 실내' : 
+                       attr.type === 'outdoor' ? '🌳 실외' : '🏢🌳 실내/외'}
+                    </div>
+                  )}
+                  {attr.tags && attr.tags.length > 0 && attr.tags.slice(0, 2).map((tag, idx) => (
+                    <div key={idx} className={styles.tagBadge}>{tag}</div>
+                  ))}
+                </div>
+                {/* 영업시간 및 입장료 정보 표시 (있는 경우) */}
+                {(attr.openingHours || attr.admissionFee) && (
+                  <div className={styles.attractionExtraInfo}>
+                    {attr.openingHours && (
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoIcon}>🕒</span>
+                        <span>{attr.openingHours}</span>
+                      </div>
+                    )}
+                    {attr.admissionFee && (
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoIcon}>💰</span>
+                        <span>{attr.admissionFee}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          }
+        }
+
+        // 타이핑 지연 효과 (자연스러운 대화 경험을 위해)
+        const typingDelay = Math.min(data.response.length * 20, 2000);
+        setTimeout(() => {
+          setIsTyping(false);
+          setMessages(prev => [...prev, {
+            type: 'bot',
+            text: data.response,
+            additionalContent: additionalContent
+          }]);
+        }, typingDelay);
+
+      } catch (error) {
+        console.error('챗봇 API 호출 오류:', error);
+        
+        // 에러 응답 표시
+        setTimeout(() => {
+          setIsTyping(false);
+          setHasError(true);
+          setMessages(prev => [...prev, {
+            type: 'bot',
+            text: '죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+            isError: true
+          }]);
+        }, 500);
+      }
+    };
+    
+    // 메시지 전송 실행
+    sendMessageWithText();
   };
 
   // 관광지 항목 클릭 처리 (새로 추가) - 자동 전송 기능 추가
