@@ -426,8 +426,7 @@
   @media (max-width: 768px) {
     .detailContainer {
       width: 100%;
-      top: 145px;
-      height: calc(100vh - 56px);
+      top: 108px;
     }
   
     .imageContainer {

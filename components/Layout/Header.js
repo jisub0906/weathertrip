@@ -56,6 +56,12 @@ export default function Header() {
             width={160}
             height={53}
             priority
+            style={{
+              width: 'auto',
+              height: 'auto',
+              maxWidth: '160px',
+              maxHeight: '53px'
+            }}
           />
         </Link>
 
@@ -85,7 +91,7 @@ export default function Header() {
                 {isDropdownOpen && (
                   <div className={styles.dropdownMenu}>
                     <Link href="/users/mypage" className={styles.dropdownItem}>마이페이지</Link>
-                    <Link href="/users/mypage" className={styles.dropdownItem}>고객센터</Link>
+                    <Link href="/inquiries" className={styles.dropdownItem}>고객센터</Link>
                     <Link href="/users/mypage" className={styles.dropdownItem}>추가예정</Link>
                     <Link href="/users/mypage" className={styles.dropdownItem}>추가예정</Link>
                   </div>

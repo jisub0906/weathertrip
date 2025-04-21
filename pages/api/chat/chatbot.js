@@ -311,10 +311,10 @@ async function generateResponse(intent, message, attraction, weatherData, nearby
         let infoResponse = "";
         
         // 관광지 이름과 설명 추가
-        if (attraction.description) {
-          infoResponse = `${attraction.name}\n\n${attraction.description}`;
+        if (attraction.address) {
+          infoResponse = `${attraction.name}\n\n${attraction.address}`;
         } else {
-          infoResponse = `${attraction.name}\n\n해당 관광지에 대한 상세 설명이 준비되지 않았습니다.`;
+          infoResponse = `${attraction.name}\n\n해당 관광지에 대한 주소가 준비되지 않았습니다.`;
         }
         
         // 영업시간이나 입장료 등 기본 정보가 있다면 추가 (해당 필드가 있다는 가정)
