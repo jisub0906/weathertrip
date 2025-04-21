@@ -50,8 +50,16 @@ export default function Register() {
 
     if (!formData.password) {
       newErrors.password = '비밀번호를 입력해주세요';
-    } else if (formData.password.length < 4) {
-      newErrors.password = '비밀번호는 최소 4자 이상이어야 합니다';
+    } else if (formData.password.length < 8) {
+      newErrors.password = '비밀번호는 최소 8자 이상이어야 합니다';
+    } else if (!/(?=.*[a-z])/.test(formData.password)) {
+      newErrors.password = '비밀번호는 소문자를 포함해야 합니다';
+    } else if (!/(?=.*[A-Z])/.test(formData.password)) {
+      newErrors.password = '비밀번호는 대문자를 포함해야 합니다';
+    } else if (!/(?=.*\d)/.test(formData.password)) {
+      newErrors.password = '비밀번호는 숫자를 포함해야 합니다';
+    } else if (!/(?=.*[!@#$%^&*])/.test(formData.password)) {
+      newErrors.password = '비밀번호는 특수문자(!@#$%^&*)를 포함해야 합니다';
     }
 
     if (!formData.confirmPassword) {
