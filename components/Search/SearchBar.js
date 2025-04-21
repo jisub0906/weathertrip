@@ -3,7 +3,7 @@ import styles from '../../styles/SearchBar.module.css';
 
 // 검색바 컴포넌트
 // props: onSearch (검색 함수), initialValue (초기값)
-function SearchBar({ onSearch, initialValue = '' }) {
+function SearchBar({ onSearch, initialValue = '', disabled = false }) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
 
   // 처음 로딩 시 initialValue 설정 (처음 1회만)
@@ -28,14 +28,18 @@ function SearchBar({ onSearch, initialValue = '' }) {
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
+        disabled={disabled} // 일반문의에서 비활성화
         onKeyDown={(e) => {
-          e.preventDefault();
-          handleSearch();
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSearch();
+          }
         }}
       />
       <button
         className={styles.searchButton}
         onClick={handleSearch}
+        disabled={disabled} // 일반문의에서 비활성화
       >
         검색
       </button>

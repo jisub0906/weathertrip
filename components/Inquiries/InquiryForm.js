@@ -1,137 +1,186 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import styles from '../../styles/Inquiries.module.css';
 import SearchBar from '../Search/SearchBar';
+import { useRouter } from 'next/router';
 
-export default function InquiryForm() {
-  const [targetType, setTargetType] = useState('general');
-  const [attractions, setAttractions] = useState([]);
-  const [filteredAttractions, setFilteredAttractions] = useState([]);
+const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
+  const [type, setType] = useState('일반 문의');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedAttractionId, setSelectedAttractionId] = useState('');
   const [selectedAttractionName, setSelectedAttractionName] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSecret, setIsSecret] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState('');
 
-  useEffect(() => {
-    const fetchAttractions = async () => {
-      const res = await fetch('/api/attractions/all');
-      const data = await res.json();
-      setAttractions(data.attractions || []);
-    };
-    fetchAttractions();
-  }, []);
+  const isTourist = type === '관광지 문의';
+  const router = useRouter();
 
-  useEffect(() => {
-    const filtered = attractions.filter((a) => {
-      return !searchKeyword || a.name?.includes(searchKeyword);
-    });
-    setFilteredAttractions(filtered);
-  }, [searchKeyword, attractions]);
+  const handleSearch = (keyword) => {
+    setSearchKeyword(keyword);
+    setSelectedAttractionId('');
+    setSelectedAttractionName('');
+    if (typeof onSearch === 'function') {
+      onSearch(keyword);
+    }
+  };
+
+  const filteredAttractions = attractions.filter((a) =>
+    a.name.includes(searchKeyword)
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const body = {
-      targetType,
+    const payload = {
+      targetType: isTourist ? 'tourist' : 'general',
       title,
       content,
-      isSecret
+      isSecret,
+      attractionId: isTourist ? selectedAttractionId : null,
+      attractionName: isTourist ? selectedAttractionName : null,
     };
 
-    if (targetType === 'tourist') {
-      if (!selectedAttractionId || !selectedAttractionName) {
-        alert('관광지를 선택해주세요');
-        return;
+    try {
+      const res = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        alert('문의가 등록되었습니다.');
+        if (typeof onSubmitted === 'function') {
+          onSubmitted();
+        }
+
+        // 폼 초기화
+        setTitle('');
+        setContent('');
+        setSearchKeyword('');
+        setSelectedAttractionId('');
+        setSelectedAttractionName('');
+        setIsSecret(false);
+      } else {
+        alert(result.message || '등록에 실패했습니다.');
       }
-      body.attractionId = selectedAttractionId;
-      body.attractionName = selectedAttractionName;
-    }
-
-    const res = await fetch('/api/inquiries', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    const result = await res.json();
-    if (res.ok) {
-      alert('문의가 등록되었습니다!');
-      window.location.href = '/inquiries';
-    } else {
-      alert(result.message || '등록 실패');
+    } catch (error) {
+      console.error('등록 오류:', error);
+      alert('등록 중 오류가 발생했습니다.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.formBox}>
-      <h3 className={styles.formTitle}>문의 작성</h3>
-
-      <div className={styles.inputGroup}>
+    <form className={styles.form} onSubmit={handleSubmit}>
+      {/* 문의 유형 */}
+      <div className={styles.formGroup}>
         <label className={styles.label}>문의 유형</label>
-        <div className={styles.radioGroup}>
-          <label><input type="radio" value="general" checked={targetType === 'general'} onChange={() => setTargetType('general')} /> 일반 문의</label>
-          <label><input type="radio" value="tourist" checked={targetType === 'tourist'} onChange={() => setTargetType('tourist')} /> 관광지 관련 문의</label>
-        </div>
+        <select
+          className={styles.selectFull}
+          value={type}
+          onChange={(e) => {
+            setType(e.target.value);
+            setSearchKeyword('');
+            setSelectedAttractionId('');
+            setSelectedAttractionName('');
+          }}
+        >
+          <option value="일반 문의">일반 문의</option>
+          <option value="관광지 문의">관광지 문의</option>
+        </select>
       </div>
 
-      {targetType === 'tourist' && (
-        <>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>관광지 검색</label>
-            <SearchBar initialValue={searchKeyword} onSearch={(term) => setSearchKeyword(term)} />
-          </div>
+      {/* 관광지 검색 + 선택 or 일반문의 카테고리 선택 */}
+      <div className={styles.searchRow}>
+        <SearchBar
+          onSearch={handleSearch}
+          initialValue={searchKeyword}
+          disabled={!isTourist}
+        />
 
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>관광지 선택</label>
-            <select
-              className={styles.select}
-              value={selectedAttractionId}
-              onChange={(e) => {
-                const selected = filteredAttractions.find(a => a._id === e.target.value);
-                setSelectedAttractionId(e.target.value);
-                setSelectedAttractionName(selected?.name || '');
-              }}
-            >
-              <option value="">-- 관광지를 선택하세요 --</option>
-              {filteredAttractions.map((a) => (
-                <option key={a._id} value={a._id}>{a.name}</option>
-              ))}
-            </select>
-          </div>
-        </>
-      )}
+        <select
+          className={styles.placeSelect}
+          value={selectedAttractionId}
+          onChange={(e) => {
+            if (isTourist) {
+              const selected = filteredAttractions.find(a => a._id === e.target.value);
+              setSelectedAttractionId(e.target.value);
+              setSelectedAttractionName(selected?.name || '');
+            } else {
+              setSelectedAttractionId(e.target.value);
+              setSelectedAttractionName(e.target.options[e.target.selectedIndex].text);
+            }
+          }}
+        >
+          <option value="">-- 선택하세요 --</option>
+          {isTourist
+            ? filteredAttractions.map((a) => (
+              <option key={a._id} value={a._id}>{a.name}</option>
+            ))
+            : [
+              { value: 'account', label: '계정 관련 문의' },
+              { value: 'policy', label: '이용 정책 문의' },
+              { value: 'bug', label: '버그 제보' },
+              { value: 'suggestion', label: '오류&개선 요청사항' },
+              { value: 'etc', label: '기타' }, // ✅ 추가
+            ].map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))
+          }
+        </select>
+      </div>
 
-      <div className={styles.inputGroup}>
+      {/* 제목 */}
+      <div className={styles.formGroup}>
         <label className={styles.label}>제목</label>
         <input
-          type="text"
           className={styles.input}
-          placeholder="제목을 입력하세요"
+          type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="문의 제목을 입력하세요"
+          required
         />
       </div>
 
-      <div className={styles.inputGroup}>
+      {/* 내용 */}
+      <div className={styles.formGroup}>
         <label className={styles.label}>내용</label>
         <textarea
           className={styles.textarea}
-          placeholder="문의 내용을 입력하세요"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          placeholder="문의 내용을 입력하세요"
+          required
         />
       </div>
 
-      <div className={styles.inputGroup}>
-        <label className={styles.labelInline}>
-          <input type="checkbox" checked={isSecret} onChange={(e) => setIsSecret(e.target.checked)} /> 비밀글로 등록
+      {/* 비밀글 */}
+      <div className={styles.formGroup}>
+        <label className={styles.checkbox}>
+          <input
+            type="checkbox"
+            checked={isSecret}
+            onChange={() => setIsSecret(!isSecret)}
+          />
+          비밀글로 작성
         </label>
       </div>
 
-      <div className={styles.buttonGroup}>
-        <button type="submit" className={styles.button}>등록</button>
+      {/* 버튼 */}
+      <div className={styles.buttonRow}>
+        <button type="submit" className={styles.submitButton}>등록</button>
+        <button
+          type="button"
+          className={styles.homeButton}
+          onClick={() => router.push('/')}
+        >
+          홈으로
+        </button>
       </div>
     </form>
   );
-}
+};
+
+export default InquiryForm;

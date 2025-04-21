@@ -1,101 +1,96 @@
-import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
+import { useState } from 'react';
 import styles from '../../styles/Inquiries.module.css';
-import InquiryForm from './InquiryForm';
 
-export default function InquiryList() {
-  const [inquiries, setInquiries] = useState([]);
-  const [expandedId, setExpandedId] = useState(null);
+export default function InquiryList({ inquiries, onDelete, onAttractionClick }) {
   const { data: session } = useSession();
+  const [openId, setOpenId] = useState(null);
 
-  useEffect(() => {
-    const fetchInquiries = async () => {
-      try {
-        const res = await fetch('/api/inquiries');
-        const data = await res.json();
-        setInquiries(data.inquiries || []);
-      } catch (err) {
-        console.error('문의 목록 불러오기 실패:', err);
-      }
-    };
-    fetchInquiries();
-  }, []);
+  if (!inquiries || inquiries.length === 0) {
+    return <p className={styles.emptyText}>등록된 문의가 없습니다.</p>;
+  }
 
-  const toggleExpand = (id) => {
-    setExpandedId(prev => (prev === id ? null : id));
-  };
-
-  const canViewSecret = (inq) => {
-    return !inq.isSecret ||
-      (session && session.user && (
-        session.user.id === inq.userId || session.user.role === 'admin')
-      );
-  };
-
-  const handleFeedback = async (id, isHelpful) => {
-    await fetch(`/api/inquiries/${id}/feedback`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isHelpful })
-    });
-    alert(isHelpful ? '도움이 되었어요!' : '별로예요.');
+  const toggleOpen = (id) => {
+    setOpenId(openId === id ? null : id);
   };
 
   return (
-    <div className={styles.listContainer}>
-      <h2 className={styles.title}>고객 문의 리스트</h2>
+    <div className={styles.inquiryList}>
+      {inquiries.map((inquiry) => {
+        const isOwner = session?.user?.email === inquiry.email;
+        const isSecret = inquiry.isSecret;
+        const isTourist = inquiry.targetType === 'tourist';
+        const showContent = !isSecret || isOwner || session?.user?.role === 'admin';
+        const createdDate = new Date(inquiry.createdAt).toLocaleDateString();
+        const isOpen = openId === inquiry._id;
 
-      {/* ✅ 문의 작성 폼을 리스트 상단으로 이동 */}
-      <InquiryForm />
-
-      {inquiries.map((inq) => (
-        <div key={inq._id} className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div>
-              <span className={styles.inquiryType}>● {inq.targetType === 'tourist' ? '관광지 문의' : '일반 문의'}</span>
-              {inq.isSecret && <span className={styles.secretTag}>🔒 비밀글</span>}
+        return (
+          <div
+            key={inquiry._id}
+            className={styles.inquiryCard}
+            onClick={() => toggleOpen(inquiry._id)}
+          >
+            {/* 문의 유형 */}
+            <div className={styles.inquiryType}>
+              {isTourist ? '📍 관광지 문의' : '📩 일반 문의'}
             </div>
-            <div className={styles.date}>{new Date(inq.createdAt).toLocaleDateString()}</div>
-          </div>
 
-          <div className={styles.userInfo}><strong>{inq.nickname}</strong></div>
+            {/* 이름 + 날짜 */}
+            <div className={styles.inquiryHeader}>
+              <span className={styles.nickname}>
+                {inquiry.nickname} {isSecret && <span className={styles.secretMark}>🔒</span>}
+              </span>
+              <span className={styles.date}>{createdDate}</span>
+            </div>
 
-          <div className={styles.titleBox} onClick={() => toggleExpand(inq._id)}>
-            {inq.targetType === 'tourist' && inq.attractionName && (
-              <div className={styles.attractionInfo}>
-                📍 <Link href={`/map?search=${encodeURIComponent(inq.attractionName)}`}>{inq.attractionName}</Link>
+            {/* 제목 + 관광지명 */}
+            <div className={styles.titleRow}>
+              <span className={styles.title}>
+                {isSecret && !showContent
+                  ? '사용자의 요청에 의해 비밀 게시글로 작성되었습니다.'
+                  : inquiry.title}
+              </span>
+
+              {/* 관광지명 링크 (관광지 문의일 경우만) */}
+              {isTourist && inquiry.attractionId && (
+                <span
+                  className={styles.attractionName}
+                  onClick={(e) => {
+                    e.stopPropagation(); // 카드 열림 방지
+                    onAttractionClick?.(inquiry.attractionId); // 상위에서 전달된 함수 호출
+                  }}
+                >
+                  📍 {inquiry.attractionName}
+                </span>
+              )}
+            </div>
+
+            {/* 내용 (카드 열렸을 때만 표시) */}
+            {isOpen && (
+              <div className={styles.content}>
+                {isSecret && !showContent
+                  ? '사용자의 요청에 의해 비밀 게시글로 작성되었습니다.'
+                  : inquiry.content}
               </div>
             )}
-            <strong className={styles.titleText}>{inq.title}</strong>
+
+            {/* 삭제 버튼 (카드 열렸을 때 + 본인일 경우만 노출) */}
+            {isOwner && isOpen && (
+              <div className={styles.actionRow}>
+                <button
+                  className={styles.deleteButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(inquiry._id);
+                  }}
+                >
+                  삭제
+                </button>
+              </div>
+            )}
           </div>
-
-          {expandedId === inq._id && (
-            <>
-              {canViewSecret(inq) ? (
-                <>
-                  <div className={styles.contentBox}>
-                    <p className={styles.contentText}>{inq.content}</p>
-                  </div>
-
-                  {inq.answer && (
-                    <div className={styles.answerBox}>
-                      <strong>답변</strong>
-                      <p>{inq.answer}</p>
-                      <div className={styles.feedbackRow}>
-                        <button onClick={() => handleFeedback(inq._id, true)}>도움이 되었어요</button>
-                        <button onClick={() => handleFeedback(inq._id, false)}>별로예요</button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className={styles.secretBox}>🔒 비밀글입니다. 작성자 또는 관리자만 볼 수 있어요.</div>
-              )}
-            </>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
