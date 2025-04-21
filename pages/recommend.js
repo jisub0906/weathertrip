@@ -130,8 +130,32 @@ const handleCardClick = (attraction) => {
         });
 
         if (response.data.attractions) {
-          setAttractions(response.data.attractions);
-          setFilteredAttractions(response.data.attractions);
+          console.log('관광지 데이터 로드:', response.data.attractions.slice(0, 3)); // 처음 3개 관광지 데이터 출력
+          const modifiedAttractions = response.data.attractions.map(attraction => {
+            // 태그 처리
+            if (!attraction.tags || !Array.isArray(attraction.tags) || attraction.tags.length === 0) {
+              // tags가 없는 경우 테마명을 사용
+              if (attraction.테마명) {
+                attraction.tags = [attraction.테마명];
+              } else {
+                attraction.tags = ['문화/예술'];
+              }
+            }
+            
+            // 실내/야외 타입 처리
+            if (!attraction.type) {
+              if (attraction.실내구분 === '실내') {
+                attraction.type = 'indoor';
+              } else if (attraction.실내구분 === '실외') {
+                attraction.type = 'outdoor';
+              }
+            }
+            
+            return attraction;
+          });
+          
+          setAttractions(modifiedAttractions);
+          setFilteredAttractions(modifiedAttractions);
           setPage(1);
           setHasMore(true);
         }
@@ -156,17 +180,33 @@ const handleCardClick = (attraction) => {
         '야외': 'outdoor'
       };
       const filterType = typeMap[activeFilters.type] || '';
-      filtered = filtered.filter(item => item.type === filterType);
+      filtered = filtered.filter(item => {
+        if (item.type) {
+          return item.type === filterType;
+        } else if (item.실내구분) {
+          return (filterType === 'indoor' && item.실내구분 === '실내') || 
+                 (filterType === 'outdoor' && item.실내구분 === '실외');
+        }
+        return false;
+      });
     }
   
     // 태그 기반 대분류 필터 적용
     if (activeFilters.tag !== '전체') {
-      filtered = filtered.filter(item =>
-        Array.isArray(item.tags) &&
-        item.tags.some(tag => tag === activeFilters.tag)
-      );
+      filtered = filtered.filter(item => {
+        // tags 배열로 체크
+        if (Array.isArray(item.tags) && item.tags.includes(activeFilters.tag)) {
+          return true;
+        }
+        // 테마명으로 체크
+        if (item.테마명 === activeFilters.tag) {
+          return true;
+        }
+        return false;
+      });
     }
   
+    console.log('필터링된 결과:', filtered.length, '태그 필터:', activeFilters.tag);
     setFilteredAttractions(filtered);
     setPage(1);
     setHasMore(true);
@@ -444,7 +484,6 @@ const handleCardClick = (attraction) => {
                     <div className={styles.postContent}>
                       <div className={styles.postCaption}>
                         <strong>{attraction.name}</strong>
-                        <span className={styles.captionText}>{attraction.description || attraction.address || '멋진 관광지를 방문해보세요!'}</span>
                       </div>
 
                       <div className={styles.postMeta}>
@@ -457,9 +496,33 @@ const handleCardClick = (attraction) => {
                       </div>
 
                       <div className={styles.postTags}>
-                        {attraction.tags && attraction.tags.map(tag => (
-                          <span key={tag} className={styles.tag}>#{tag}</span>
-                        ))}
+                        {attraction.tags && Array.isArray(attraction.tags) && attraction.tags.length > 0 ? (
+                          attraction.tags.map(tag => (
+                            <span 
+                              key={tag} 
+                              className={styles.tag}
+                              data-category={tag}
+                            >
+                              {tag}
+                            </span>
+                          ))
+                        ) : (
+                          attraction.테마명 ? (
+                            <span 
+                              className={styles.tag}
+                              data-category={attraction.테마명}
+                            >
+                              {attraction.테마명}
+                            </span>
+                          ) : (
+                            <span 
+                              className={styles.tag}
+                              data-category="문화/예술"
+                            >
+                              문화/예술
+                            </span>
+                          )
+                        )}
                       </div>
                     </div>
                   </div>

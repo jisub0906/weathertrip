@@ -425,24 +425,59 @@
   }
   
   .postTags {
-    margin: 8px 0;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin-top: 12px;
   }
   
   .tag {
-    color: #00376b;
-    font-size: 13px;
-    cursor: pointer;
-    background-color: #f8f9fa;
-    padding: 4px 10px;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    padding: 6px 12px;
     border-radius: 20px;
-    transition: background-color 0.2s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
   }
   
   .tag:hover {
+    background-color: #e5e7eb;
+    transform: translateY(-1px);
+  }
+  
+  /* 태그 카테고리별 색상 */
+  .tag[data-category="자연/힐링"] {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-color: #c8e6c9;
+  }
+  
+  .tag[data-category="종교/역사/전통"] {
+    background-color: #fff3e0;
+    color: #e65100;
+    border-color: #ffe0b2;
+  }
+  
+  .tag[data-category="체험/학습/산업"] {
     background-color: #e3f2fd;
+    color: #1565c0;
+    border-color: #bbdefb;
+  }
+  
+  .tag[data-category="문화/예술"] {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+    border-color: #e1bee7;
+  }
+  
+  .tag[data-category="캠핑/스포츠"] {
+    background-color: #fbe9e7;
+    color: #d84315;
+    border-color: #ffccbc;
   }
   
   .loadingMore {

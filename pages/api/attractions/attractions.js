@@ -124,7 +124,10 @@ export default async function handler(req, res) {
           images: 1,
           location: 1,
           distance: { $round: ["$distance", 1] }, // 거리를 소수점 첫째 자리까지 반올림
-          distanceKm: { $round: ["$distance", 1] } // 동일한 값을 distanceKm 필드에도 저장
+          distanceKm: { $round: ["$distance", 1] }, // 동일한 값을 distanceKm 필드에도 저장
+          tags: 1,
+          테마명: 1,
+          실내구분: 1
         }
       }
     ];
@@ -144,7 +147,10 @@ export default async function handler(req, res) {
         console.log('첫 번째 결과:', {
           name: results[0].name,
           distance: results[0].distance,
-          coordinates: results[0].location?.coordinates
+          coordinates: results[0].location?.coordinates,
+          tags: results[0].tags,
+          테마명: results[0].테마명,
+          실내구분: results[0].실내구분
         });
       }
     } catch (error) {

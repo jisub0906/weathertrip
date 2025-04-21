@@ -165,7 +165,9 @@ export default function Home() {
     try {
       const response = await fetch(`/api/attractions/${attractionId}/review`);
       const data = await response.json();
-      const latestReviews = data.reviews.slice(0, 5).map(review => review.content).join('\n\n');
+      const latestReviews = data.reviews.slice(0, 5)
+        .map(review => `"${review.content}"`)
+        .join('<br /><br />');
       return latestReviews || '';
     } catch (error) {
       console.error('리뷰 데이터 로딩 실패:', error);
@@ -267,15 +269,20 @@ export default function Home() {
                     ❤️ {attraction.likeCount || 0}
                   </div>
                   <div className={styles.address}>{attraction.address}</div>
-                  <div className={styles.description}>
-                    {attractionReviews[attraction._id] || '아직 리뷰가 없습니다.'}
+                  <div className={styles.description} 
+                    dangerouslySetInnerHTML={{ __html: attractionReviews[attraction._id] || '아직 리뷰가 없습니다.' }}>
                   </div>
                   <div className={styles.tags}>
-                    {attraction.tags?.map((tag, i) => (
-                      <span key={i} className={styles.tag}>
-                        {tag}
+                    {attraction.테마명 && (
+                      <span className={`${styles.tag} ${styles.theme}`}>
+                        🎯 {attraction.테마명}
                       </span>
-                    ))}
+                    )}
+                    {attraction.실내구분 && (
+                      <span className={`${styles.tag} ${styles.indoor}`}>
+                        {attraction.실내구분 === '실내' ? '🏠 실내' : '🌳 실외'}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

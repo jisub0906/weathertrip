@@ -421,3 +421,33 @@
       height: 250px;
     }
   }
+
+.tag {
+  display: inline-block;
+  padding: 4px 8px;
+  margin: 2px;
+  border-radius: 12px;
+  background-color: #f0f0f0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.theme {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.indoor {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  line-height: 1.6;
+}
