@@ -272,9 +272,6 @@ export default function RollingBanner() {
         >
           <h2>{slides[current].name}</h2>
           <p className={styles.address}>{slides[current].address}</p>
-          {slides[current].description && (
-            <p className={styles.description}>{slides[current].description}</p>
-          )}
         </div>
       )}
       
