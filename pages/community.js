@@ -54,6 +54,11 @@ export default function Community() {
         originalReviewsRef.current.map(async (rev) => ({
           ...rev,
           content: await translateReviewContent(rev.content, selectedLang),
+          attraction: {
+            ...rev.attraction,
+            name: await translateReviewContent(rev.attraction.name, selectedLang),
+          },
+          translatedLabel: await translateReviewContent("관광지 상세보기 →", selectedLang),
         }))
       );
       setReviews(translated);
@@ -272,7 +277,7 @@ export default function Community() {
                   </h3>
                 </div>
                 <div className={styles.viewDetailText}>
-                  관광지 상세보기 →
+                {review.translatedLabel || "관광지 상세보기 →"}
                 </div>
               </div>
 
