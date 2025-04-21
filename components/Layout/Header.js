@@ -75,6 +75,9 @@ export default function Header() {
           <Link href="/community" className={`${styles.navItem} ${isActive('/community') ? styles.active : ''}`}>
             커뮤니티
           </Link>
+          <Link href="/quiz" className={`${styles.navItem} ${isActive('/quiz') ? styles.active : ''}`}>
+            퀴즈
+          </Link>
         </div>
 
         <div className={styles.authButtons}>
