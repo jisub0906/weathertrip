@@ -1,5 +1,6 @@
 import { convertToGrid } from '../../../utils/coordinates';
 import { classifyWeatherCondition, getSkyStatusText, getPrecipitationText } from '../../../utils/weather';
+import { parseString } from 'xml2js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -77,6 +78,7 @@ export default async function handler(req, res) {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
+          'Content-Type': 'application/json'
         }
       });
       
@@ -87,13 +89,53 @@ export default async function handler(req, res) {
 
       // 응답의 Content-Type 확인
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        console.error('날씨 API 응답이 JSON 형식이 아닙니다:', contentType);
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else if (contentType && contentType.includes('text/xml')) {
+        // XML 응답을 텍스트로 받아서 처리
+        const text = await response.text();
+        
+        // 간단한 XML 파싱
+        const parseXML = (xml) => {
+          const items = [];
+          const itemMatches = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
+          
+          itemMatches.forEach(itemXml => {
+            const item = {};
+            const matches = itemXml.match(/<([^>]+)>([^<]+)<\/\1>/g) || [];
+            
+            matches.forEach(match => {
+              const [, tag, value] = match.match(/<([^>]+)>([^<]+)<\/\1>/);
+              item[tag] = value;
+            });
+            
+            items.push(item);
+          });
+          
+          return {
+            response: {
+              header: {
+                resultCode: "00",
+                resultMsg: "NORMAL_SERVICE"
+              },
+              body: {
+                items: {
+                  item: items
+                }
+              }
+            }
+          };
+        };
+        
+        data = parseXML(text);
+      } else {
+        console.error('날씨 API 응답이 지원하지 않는 형식입니다:', contentType);
         console.log('Mock 데이터로 대체합니다');
         return res.status(200).json({ success: true, data: mockWeatherData });
       }
       
-      const data = await response.json();
       console.log('날씨 API 응답 헤더:', data.response?.header);
       
       if (!data.response?.header || data.response?.header?.resultCode !== "00") {
