@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-// IP 기반 위치정보 취득 (폴백용)
+// IP 주소 기반으로 사용자 위치 정보를 조회하는 비동기 함수
 async function fetchLocationByIP() {
   try {
     const response = await fetch('https://ipapi.co/json/');
@@ -9,7 +9,7 @@ async function fetchLocationByIP() {
     if (data.error) {
       throw new Error(data.reason || 'IP 위치 조회 실패');
     }
-    
+    // 성공적으로 위치 정보를 받은 경우 좌표와 도시/국가 정보 반환
     return {
       latitude: data.latitude,
       longitude: data.longitude,
@@ -32,21 +32,26 @@ async function fetchLocationByIP() {
 
 // 좌표를 주소로 변환하는 함수 (카카오맵 API 사용)
 async function getAddressFromCoords(latitude, longitude) {
+   // 카카오맵 API가 로드되어 있는지 확인
   if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
     console.warn('카카오맵 services 라이브러리가 로드되지 않았습니다.');
-    return null;
+    return null; // 로드되지 않은 경우 null 반환
   }
-  
+  // 비동기 작업을 위해 Promise 객체를 반환
   return new Promise((resolve, reject) => {
+    // 카카오맵 Geocoder 객체 생성
     const geocoder = new window.kakao.maps.services.Geocoder();
     
     geocoder.coord2Address(longitude, latitude, (result, status) => {
+      // 요청 성공 시 도로명 주소와 지번 주소를 반환
       if (status === window.kakao.maps.services.Status.OK) {
         if (result[0]) {
           const addressObj = result[0];
+          // 도로명 주소가 있으면 저장
           const roadAddr = addressObj.road_address ? addressObj.road_address.address_name : null;
+          // 지번 주소가 있으면 저장
           const jibunAddr = addressObj.address ? addressObj.address.address_name : null;
-          
+          // 도로명 주소와 지번 주소 중 하나라도 있으면 반환
           resolve({
             roadAddress: roadAddr,
             jibunAddress: jibunAddr,

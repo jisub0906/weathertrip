@@ -3,22 +3,22 @@ import { useState, useRef, useEffect } from 'react';
 import styles from '../../styles/ChatBot.module.css';
 
 export default function ChatBot({ selectedAttraction, userLocation }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [hasWelcome, setHasWelcome] = useState(false);
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);  // 챗봇 창 열림 여부
+  const [messages, setMessages] = useState([]); // 대화 메시지 목록
+  const [inputValue, setInputValue] = useState(''); // 입력창의 현재 텍스트
+  const [isTyping, setIsTyping] = useState(false); // 챗봇 타이밍 상태
+  const [hasError, setHasError] = useState(false); // 오류 발생 여부
+  const [hasWelcome, setHasWelcome] = useState(false); // 환영 메시지 표시 여부
+  const messagesEndRef = useRef(null); // 스크롤 이동용
+  const inputRef = useRef(null); // 입력창 포커스용용
 
-  // 메시지 스크롤 자동 이동
+  // 메시지 스크롤 유지지
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
   };
 
   useEffect(() => {
-    scrollToBottom();
+    scrollToBottom(); // 메시지 목록이 변경될 때마다 스크롤 이동
   }, [messages]);
 
   // 선택된 관광지 변경 시 환영 메시지 표시
@@ -51,7 +51,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
       type: 'user',
       text: inputValue
     };
-
+    // 사용자 메시지 추가
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsTyping(true);

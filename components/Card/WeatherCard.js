@@ -1,9 +1,11 @@
 import React from 'react';
 import styles from '../../styles/WeatherCard.module.css';
 
-export default function WeatherCard({ weather }) {
-  if (!weather) return null;
+// 날씨 컴포넌트
+export default function WeatherCard({ weather }) { 
+  if (!weather) return null; // 날씨 정보가 없으면 아무것도 렌더링하지 않음
 
+  // 날씨 아이콘과 추천 타입을 결정하는 함수
   const getWeatherIcon = (condition) => {
     switch (condition) {
       case 'Clear':
@@ -18,7 +20,7 @@ export default function WeatherCard({ weather }) {
         return '🌤️';
     }
   };
-
+  // 날씨 조건에 따라 추천되는 관광지 타입을을 결정하는 함수
   const getRecommendationType = (type) => {
     switch (type) {
       case 'indoor':
