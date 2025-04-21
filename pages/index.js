@@ -114,7 +114,7 @@ export default function Home() {
   const [popularAttractions, setPopularAttractions] = useState([]);
   const [popularLoading, setPopularLoading] = useState(false);
   const [isListOpen, setIsListOpen] = useState(false);
-
+  const [attractionReviews, setAttractionReviews] = useState({});
 
   const handleCardClick = (attraction) => {
     if (!attraction?.name) return;
@@ -161,13 +161,37 @@ export default function Home() {
     fetchAttractions('seoul');
   }, [fetchAttractions]);
 
+  const fetchAttractionReviews = async (attractionId) => {
+    try {
+      const response = await fetch(`/api/attractions/${attractionId}/review`);
+      const data = await response.json();
+      return data.reviews[0]?.content || '';
+    } catch (error) {
+      console.error('리뷰 데이터 로딩 실패:', error);
+      return '';
+    }
+  };
+
   useEffect(() => {
     const fetchPopularAttractions = async () => {
       setPopularLoading(true);
       try {
         const response = await axios.get('/api/attractions/popular');
         if (response.data.success && response.data.data.attractions) {
-          setPopularAttractions(response.data.data.attractions);
+          const attractions = response.data.data.attractions;
+          setPopularAttractions(attractions);
+          
+          const reviewsPromises = attractions.map(attraction => 
+            fetchAttractionReviews(attraction._id)
+          );
+          const reviews = await Promise.all(reviewsPromises);
+          
+          const reviewsMap = attractions.reduce((acc, attraction, index) => {
+            acc[attraction._id] = reviews[index];
+            return acc;
+          }, {});
+          
+          setAttractionReviews(reviewsMap);
         } else {
           setPopularAttractions([]);
         }
@@ -217,7 +241,7 @@ export default function Home() {
             </div>
           ) : (
             <div className={styles.popularGrid}>
-              {popularAttractions.map((attraction, index) => (
+              {popularAttractions.slice(0, 10).map((attraction, index) => (
                 <div key={attraction._id} 
                 className={styles.popularCard} 
                 onClick={() => handleCardClick(attraction)}
@@ -243,8 +267,7 @@ export default function Home() {
                   </div>
                   <div className={styles.address}>{attraction.address}</div>
                   <div className={styles.description}>
-                    {attraction.description?.slice(0, 100)}
-                    {attraction.description?.length > 100 ? '...' : ''}
+                    {attractionReviews[attraction._id] || '아직 리뷰가 없습니다.'}
                   </div>
                   <div className={styles.tags}>
                     {attraction.tags?.map((tag, i) => (
