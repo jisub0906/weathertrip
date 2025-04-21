@@ -33,6 +33,7 @@ export default function RollingBanner() {
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [displayedSlide, setDisplayedSlide] = useState(0);
   const preloadedImagesRef = useRef(new Map());
   const timerRef = useRef(null);
   const router = useRouter();
@@ -175,19 +176,29 @@ export default function RollingBanner() {
   useEffect(() => {
     if (slides.length === 0 || !imageLoaded) return;
     
-    timerRef.current = setInterval(() => {
-      const nextSlide = (current + 1) % slides.length;
-      if (preloadedImagesRef.current.has(slides[nextSlide].image)) {
-        setCurrent(nextSlide);
-      }
-    }, SLIDE_INTERVAL);
+    let timeoutId;
+    const startTimer = () => {
+      timeoutId = setTimeout(() => {
+        const nextSlide = (current + 1) % slides.length;
+        if (preloadedImagesRef.current.has(slides[nextSlide].image)) {
+          setCurrent(nextSlide);
+        } else {
+          // 다음 이미지가 로드되지 않은 경우, 로드 후 전환
+          preloadImage(slides[nextSlide].image).then(() => {
+            setCurrent(nextSlide);
+          });
+        }
+      }, SLIDE_INTERVAL);
+    };
+
+    startTimer();
     
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
-  }, [slides.length, current, imageLoaded]);
+  }, [slides.length, current, imageLoaded, preloadImage]);
 
   // 슬라이드 변경 시 이미지 로드 상태 관리
   useEffect(() => {
@@ -196,12 +207,13 @@ export default function RollingBanner() {
     setImageLoaded(false);
     if (preloadedImagesRef.current.has(slides[current]?.image)) {
       setImageLoaded(true);
+      setDisplayedSlide(current);
     }
-    
-    setTimeout(() => setActiveSlide(current), 10);
   }, [current, slides]);
 
   const goPrev = useCallback(() => {
+    if (!imageLoaded) return; // 이미지가 로드되지 않은 경우 전환하지 않음
+    
     const prevSlide = (current - 1 + slides.length) % slides.length;
     if (preloadedImagesRef.current.has(slides[prevSlide].image)) {
       setCurrent(prevSlide);
@@ -210,9 +222,11 @@ export default function RollingBanner() {
         setCurrent(prevSlide);
       });
     }
-  }, [current, slides.length, preloadImage]);
+  }, [current, slides.length, preloadImage, imageLoaded]);
   
   const goNext = useCallback(() => {
+    if (!imageLoaded) return; // 이미지가 로드되지 않은 경우 전환하지 않음
+    
     const nextSlide = (current + 1) % slides.length;
     if (preloadedImagesRef.current.has(slides[nextSlide].image)) {
       setCurrent(nextSlide);
@@ -221,11 +235,12 @@ export default function RollingBanner() {
         setCurrent(nextSlide);
       });
     }
-  }, [current, slides.length, preloadImage]);
+  }, [current, slides.length, preloadImage, imageLoaded]);
 
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
-  }, []);
+    setDisplayedSlide(current);
+  }, [current]);
 
   if (loading && slides.length === 0) {
     return (
@@ -241,12 +256,9 @@ export default function RollingBanner() {
     <div className={styles.banner}>
       <div className={styles.imageWrapper}>
         {slides[current] && (
-          <Image 
+          <img 
             src={slides[current].image} 
             alt={slides[current].name} 
-            width={1920}
-            height={1080}
-            priority
             onLoad={handleImageLoad}
             style={{
               objectFit: 'cover',
@@ -260,7 +272,7 @@ export default function RollingBanner() {
         )}
       </div>
       
-      {slides[current] && imageLoaded && (
+      {slides[displayedSlide] && imageLoaded && (
         <div 
           className={styles.overlay}
           style={{
@@ -270,8 +282,8 @@ export default function RollingBanner() {
             visibility: 'visible'
           }}
         >
-          <h2>{slides[current].name}</h2>
-          <p className={styles.address}>{slides[current].address}</p>
+          <h2>{slides[displayedSlide].name}</h2>
+          <p className={styles.address}>{slides[displayedSlide].address}</p>
         </div>
       )}
       
