@@ -15,15 +15,17 @@ export default async function handler(req, res) {
   if (method === 'POST') {
     const { userId, liked } = req.body;
 
-    if (!userId) {
+    if (!userId || !ObjectId.isValid(userId)) {
       return res.status(400).json({ message: '사용자 정보가 필요합니다.' });
     }
 
+    const userObjectId = new ObjectId(userId);
     const likeCollection = db.collection('likes');
     const attractionsCollection = db.collection('attractions');
+    
     const existing = await likeCollection.findOne({
       attractionId,
-      userId
+      userId: userObjectId
     });
 
     if (liked) {
@@ -31,7 +33,7 @@ export default async function handler(req, res) {
       if (!existing) {
         await likeCollection.insertOne({
           attractionId,
-          userId,
+          userId: userObjectId,
           createdAt: new Date()
         });
         // attractions 컬렉션의 likeCount 증가

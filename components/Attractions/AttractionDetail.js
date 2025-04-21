@@ -9,13 +9,14 @@ import { useSession } from 'next-auth/react';
 // props: attraction (관광지 정보), onClose (닫기 함수)
 export default function AttractionDetail({ attraction, onClose }) {
   const { data: session, status } = useSession(); // 로그인 상태 확인
-  const [liked, setLiked] = useState(false); // 좋아여 여부
+  const [liked, setLiked] = useState(null); // 좋아여 여부
   const [review, setReview] = useState(''); // 입력 중인 리뷰
   const [reviews, setReviews] = useState([]); // 관광지에 달린 리뷰 목록
   const [submitting, setSubmitting] = useState(false); // 리뷰 작성 여부
   const [likeCount, setLikeCount] = useState(attraction.likeCount || 0); // 좋아요 수
   const [loading, setLoading] = useState(true); // 리뷰 로딩 여부
   const MAX_REVIEW_LENGTH = 100; // 리뷰 최대 길이
+
 
   // 이미지 배열이 없거나 비어있는 경우 기본 이미지 사용
   const images = attraction.images && attraction.images.length > 0
@@ -49,7 +50,7 @@ export default function AttractionDetail({ attraction, onClose }) {
     const fetchLikeStatus = async () => {
       try {
         // 로그인한 사용자의 경우 좋아요 상태도 함께 조회
-        if (session?.user) {
+        if (session?.user) {    
           const res = await axios.get(`/api/attractions/${attraction._id}/likeStatus?userId=${session.user.id}`);
           setLiked(res.data.liked);
           setLikeCount(res.data.count);
