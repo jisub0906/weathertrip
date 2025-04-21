@@ -1,15 +1,16 @@
 import React from 'react';
 import styles from '../../styles/AttractionsList.module.css';
 
+// 관광지 리스트를 렌더링하는 함수형 컴포넌트
 export default function AttractionsList({ attractions, loading, error, weatherCondition, onAttractionClick }) {
   if (loading) {
     return <div className={styles.loading}>관광지 정보를 불러오는 중...</div>;
   }
-  
+  // 로딩 중일 때 보여줄 메시지
   if (error) {
     return <div className={styles.error}>오류: {error}</div>;
   }
-  
+  // 오류가 발생했을 때 보여줄 메시지
   if (!attractions || attractions.length === 0) {
     return (
       <div className={styles.noResults}>
@@ -19,7 +20,7 @@ export default function AttractionsList({ attractions, loading, error, weatherCo
     );
   }
   
-  // 날씨 조건에 따른 메시지
+  // 날씨 조건에 따른 메시지 출력
   const getWeatherMessage = () => {
     switch (weatherCondition) {
       case 'Clear':
@@ -34,10 +35,10 @@ export default function AttractionsList({ attractions, loading, error, weatherCo
         return '주변 인기 관광지';
     }
   };
-  
+  // 카드 클릭 시 상위 컴포넌트로 관광지 객체를 넘겨줌
   const handleAttractionClick = (attraction) => {
     if (onAttractionClick) {
-      onAttractionClick(attraction);
+      onAttractionClick(attraction); // 상위 컴포넌트의 클릭 핸들러 호출
     }
   };
   

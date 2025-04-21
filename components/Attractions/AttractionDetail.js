@@ -5,15 +5,17 @@ import styles from '../../styles/AttractionDetail.module.css';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 
+// 관광지 상세 정보 컴포넌트
+// props: attraction (관광지 정보), onClose (닫기 함수)
 export default function AttractionDetail({ attraction, onClose }) {
-  const { data: session, status } = useSession();
-  const [liked, setLiked] = useState(false);
-  const [review, setReview] = useState('');
-  const [reviews, setReviews] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [likeCount, setLikeCount] = useState(attraction.likeCount || 0);
-  const [loading, setLoading] = useState(true);
-  const MAX_REVIEW_LENGTH = 100;
+  const { data: session, status } = useSession(); // 로그인 상태 확인
+  const [liked, setLiked] = useState(false); // 좋아여 여부
+  const [review, setReview] = useState(''); // 입력 중인 리뷰
+  const [reviews, setReviews] = useState([]); // 관광지에 달린 리뷰 목록
+  const [submitting, setSubmitting] = useState(false); // 리뷰 작성 여부
+  const [likeCount, setLikeCount] = useState(attraction.likeCount || 0); // 좋아요 수
+  const [loading, setLoading] = useState(true); // 리뷰 로딩 여부
+  const MAX_REVIEW_LENGTH = 100; // 리뷰 최대 길이
 
   // 이미지 배열이 없거나 비어있는 경우 기본 이미지 사용
   const images = attraction.images && attraction.images.length > 0
@@ -25,10 +27,13 @@ export default function AttractionDetail({ attraction, onClose }) {
     const fetchReviews = async () => {
       try {
         setLoading(true);
+        // 리뷰 데이터 API 호출
         const response = await axios.get(`/api/attractions/${attraction._id}/review`);
+        // 응답에 리뷰가 있다면 reviews 상태에 저장해서 화면에 표시되게 합니다.
         if (response.data.reviews) {
           setReviews(response.data.reviews);
         }
+        // 오류가 발생해도 앱이 꺼지지 않도록 try-catch로 감싸고, 마지막에 로딩 상태를 끕니다.
       } catch (error) {
         console.error('리뷰 데이터 불러오기 오류:', error);
       } finally {
@@ -38,24 +43,42 @@ export default function AttractionDetail({ attraction, onClose }) {
 
     fetchReviews();
   }, [attraction._id]);
+  
+  // 좋아요 데이터 불러오기
+  // 사용자가 로그인한 상태라면 좋아요 상태를 불러옵니다.
+  // 로그인하지 않은 상태라면 좋아요 버튼을 비활성화합니다.
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      const res = await axios.get(`/api/attractions/${attraction._id}/likeStatus?userId=${session.user.id}`);
+      setLiked(res.data.liked);
+      setLikeCount(res.data.count);
+    };
+    if (session?.user) {
+      fetchLikeStatus();
+    }
+  }, [session, attraction._id]);
 
+  // 사용자가 로그인하지 않은 상태라면 좋아요를 막고, 알림을 띄웁니다.
   const handleLike = async () => {
     if (status !== 'authenticated') {
       alert('좋아요를 누르려면 로그인이 필요합니다.');
       return;
     }
-
+  
     try {
       setLiked(!liked);
       // 좋아요 상태 업데이트 (UI 즉시 반영)
       const newLikeCount = liked ? likeCount - 1 : likeCount + 1;
       setLikeCount(newLikeCount);
       
-      // API 호출
+      // API 호출 : 좋아요 상태를 서버에 저장합니다.
       const response = await axios.post(`/api/attractions/${attraction._id}/like`, { 
         userId: session.user.id,
         liked: !liked 
       });
+      setLikeCount(response.data.count); // 서버에서 받은 좋아요 수로 업데이트
+      setLiked(!liked); // 좋아요 상태 업데이트
+
       
       // API 응답에 따라 좋아요 수 정확히 업데이트
       if (response.data.success) {
@@ -69,6 +92,7 @@ export default function AttractionDetail({ attraction, onClose }) {
     }
   };
 
+  // 리뷰 입력 처리
   const handleReviewChange = (e) => {
     const value = e.target.value;
     if (value.length <= MAX_REVIEW_LENGTH) {
@@ -76,6 +100,7 @@ export default function AttractionDetail({ attraction, onClose }) {
     }
   };
 
+  // 리뷰 제출 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!review.trim()) return;
@@ -84,24 +109,25 @@ export default function AttractionDetail({ attraction, onClose }) {
       alert('리뷰를 작성하려면 로그인이 필요합니다.');
       return;
     }
-
+    // 서버에 리뷰 데이터를 POST 요청으로 보냅니다
     try {
-      setSubmitting(true);
+      setSubmitting(true); // 로딩 상태 시작
       const response = await axios.post(`/api/attractions/${attraction._id}/review`, {
         userId: session.user.id,
         content: review,
         images: [] // 이미지 업로드 기능이 있다면 추가
       });
-
+      // 서버에서 성공적으로 리뷰를 작성한 경우 리뷰 목록에 추가 후 입력창 초기화
       if (response.data.review) {
         setReviews([response.data.review, ...reviews]);
         setReview('');
       }
+      // 실패 시 경고 메시지 출력
     } catch (error) {
       console.error('리뷰 작성 실패:', error);
       alert('리뷰 작성에 실패했습니다. 다시 시도해주세요.');
     } finally {
-      setSubmitting(false);
+      setSubmitting(false); // 로딩 상태 종료
     }
   };
 
