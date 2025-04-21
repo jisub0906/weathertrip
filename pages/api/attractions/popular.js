@@ -8,18 +8,43 @@ export default async function handler(req, res) {
   try {
     const db = await getDatabase();
     const attractions = db.collection('attractions');
+    const likes = db.collection('likes');
     
     const limit = parseInt(req.query.limit) || 10;
     
-    // 전체 데이터 확인
-    const allAttractions = await attractions.find({}).toArray();
-    console.log('전체 관광지 데이터:', allAttractions);
-    
-    // likeCount가 0보다 큰 관광지 조회
+    // 좋아요 수가 있는 관광지 조회
     const popularAttractions = await attractions
-      .find({ likeCount: { $gt: 0 } })
-      .sort({ likeCount: -1 })
-      .limit(limit)
+      .aggregate([
+        {
+          $lookup: {
+            from: 'likes',
+            localField: '_id',
+            foreignField: 'attractionId',
+            as: 'likes'
+          }
+        },
+        {
+          $addFields: {
+            likeCount: { $size: '$likes' }
+          }
+        },
+        {
+          $match: {
+            likeCount: { $gt: 0 }
+          }
+        },
+        {
+          $sort: { likeCount: -1 }
+        },
+        {
+          $limit: limit
+        },
+        {
+          $project: {
+            likes: 0
+          }
+        }
+      ])
       .toArray();
 
     console.log('인기 관광지 조회 결과:', popularAttractions);

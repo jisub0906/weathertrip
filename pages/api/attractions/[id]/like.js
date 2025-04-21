@@ -20,6 +20,7 @@ export default async function handler(req, res) {
     }
 
     const likeCollection = db.collection('likes');
+    const attractionsCollection = db.collection('attractions');
     const existing = await likeCollection.findOne({
       attractionId,
       userId
@@ -33,6 +34,11 @@ export default async function handler(req, res) {
           userId,
           createdAt: new Date()
         });
+        // attractions 컬렉션의 likeCount 증가
+        await attractionsCollection.updateOne(
+          { _id: attractionId },
+          { $inc: { likeCount: 1 } }
+        );
       }
     } else {
       // 좋아요 제거
@@ -40,6 +46,11 @@ export default async function handler(req, res) {
         await likeCollection.deleteOne({
           _id: existing._id
         });
+        // attractions 컬렉션의 likeCount 감소
+        await attractionsCollection.updateOne(
+          { _id: attractionId },
+          { $inc: { likeCount: -1 } }
+        );
       }
     }
 
