@@ -53,6 +53,7 @@ export default withErrorHandler(async (req, res) => {
       isSecret: !!isSecret,
       answer: '',
       status: 'pending',
+      email: session.user.email,
       userId: toObjectId(session.user.id),
       nickname: session.user.nickname || session.user.name || '익명',
       createdAt: new Date(),
