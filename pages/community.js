@@ -5,6 +5,7 @@ import Image from "next/image";
 import styles from "../styles/Community.module.css";
 import Header from "../components/Layout/Header";
 import LanguageToggleButton from "../components/Translate/LanguageToggleButton";
+import Quiz from '../components/Quiz/Quiz';
 
 export default function Community() {
   const { data: session } = useSession();
@@ -15,6 +16,9 @@ export default function Community() {
   const { ref, inView } = useInView();
   const [selectedLang, setSelectedLang] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
+  const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' 또는 'quiz'
+  const [quizData, setQuizData] = useState([]);
+  const [quizLoading, setQuizLoading] = useState(false);
   
   // 리뷰 번역을 위한 언어 선택
   const translateReviewContent = async (text, lang) => {
@@ -192,10 +196,10 @@ export default function Community() {
 
   // Infinite scroll
   useEffect(() => {
-    if (inView && !loading && hasMore) {
+    if (inView && !loading && hasMore && activeTab === 'reviews') {
       fetchReviews();
     }
-  }, [inView, loading, hasMore]);
+  }, [inView, loading, hasMore, activeTab]);
 
   // Top scroll refresh
   useEffect(() => {
@@ -209,7 +213,8 @@ export default function Community() {
       if (
         currentScrollY === 0 &&
         lastScrollY > currentScrollY &&
-        !isRefreshing
+        !isRefreshing &&
+        activeTab === 'reviews'
       ) {
         clearTimeout(refreshTimeout);
         refreshTimeout = setTimeout(() => {
@@ -225,7 +230,7 @@ export default function Community() {
       window.removeEventListener("scroll", handleScroll);
       clearTimeout(refreshTimeout);
     };
-  }, [isRefreshing]);
+  }, [isRefreshing, activeTab]);
 
   // Touch event handlers
   const handleTouchStart = (e) => {
@@ -236,7 +241,7 @@ export default function Community() {
   };
 
   const handleTouchMove = (e) => {
-    if (pullStartY === 0 || isRefreshing) return;
+    if (pullStartY === 0 || isRefreshing || activeTab !== 'reviews') return;
 
     const pullDistance = e.touches[0].clientY - pullStartY;
     if (pullDistance > 0 && window.scrollY === 0) {
@@ -247,7 +252,7 @@ export default function Community() {
   };
 
   const handleTouchEnd = async () => {
-    if (!isPulling || isRefreshing) return;
+    if (!isPulling || isRefreshing || activeTab !== 'reviews') return;
 
     setIsPulling(false);
     setPullStartY(0);
@@ -270,7 +275,7 @@ export default function Community() {
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [pullStartY, isPulling, isRefreshing]);
+  }, [pullStartY, isPulling, isRefreshing, activeTab]);
 
   // Format date
   const formatDate = (dateString) => {
@@ -348,6 +353,30 @@ export default function Community() {
     </div>
   );
 
+  // 퀴즈 데이터 가져오기
+  const fetchQuizData = async () => {
+    try {
+      setQuizLoading(true);
+      const response = await fetch('/api/quiz/quiz');
+      if (!response.ok) {
+        throw new Error('퀴즈 데이터를 가져오는데 실패했습니다');
+      }
+      const data = await response.json();
+      setQuizData(data);
+    } catch (error) {
+      console.error("퀴즈 데이터 로딩 오류:", error);
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+
+  // 탭이 변경될 때 해당 데이터 로드
+  useEffect(() => {
+    if (activeTab === 'quiz' && quizData.length === 0) {
+      fetchQuizData();
+    }
+  }, [activeTab]);
+
   return (
     <>
       <Header />
@@ -385,32 +414,61 @@ export default function Community() {
 
       <main className={styles.container}>
         <h1 className={styles.title}>커뮤니티</h1>
-
-        <div className={styles.reviewList}>
-          {reviews.map((review, index) => (
-            <ReviewCard
-              key={review._id}
-              review={review}
-              isLastElement={index === reviews.length - 1}
-              // Fixed: Don't pass ref directly to a component prop as it causes infinite renders
-              lastAttractionElementRef={null}
-            />
-          ))}
-
-          {loading && (
-            <div className={styles.loading}>
-              <div className={styles.loadingSpinner} />
-              리뷰를 불러오는 중...
-            </div>
-          )}
-
-          {!loading && !hasMore && (
-            <div className={styles.noMore}>더 이상 리뷰가 없습니다.</div>
-          )}
-
-          {/* This is the correct place to add the InView ref */}
-          <div ref={ref} style={{ height: "10px" }} />
+        
+        <div className={styles.tabContainer}>
+          <button 
+            className={`${styles.tabButton} ${activeTab === 'reviews' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('reviews')}
+          >
+            리뷰
+          </button>
+          <button 
+            className={`${styles.tabButton} ${activeTab === 'quiz' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('quiz')}
+          >
+            퀴즈
+          </button>
         </div>
+
+        {activeTab === 'reviews' ? (
+          <div className={styles.reviewList}>
+            {reviews.map((review, index) => (
+              <ReviewCard
+                key={review._id}
+                review={review}
+                isLastElement={index === reviews.length - 1}
+              />
+            ))}
+
+            {loading && (
+              <div className={styles.loading}>
+                <div className={styles.loadingSpinner} />
+                리뷰를 불러오는 중...
+              </div>
+            )}
+
+            {!loading && !hasMore && (
+              <div className={styles.noMore}>더 이상 리뷰가 없습니다.</div>
+            )}
+
+            {/* This is the correct place to add the InView ref */}
+            <div ref={ref} style={{ height: "10px" }} />
+          </div>
+        ) : (
+          <div className={styles.quizSection}>
+            {quizLoading ? (
+              <div className={styles.loading}>
+                <div className={styles.loadingSpinner} />
+                퀴즈를 불러오는 중...
+              </div>
+            ) : (
+              <>
+                <p className={styles.subtitle}>한국의 관광지에 대한 퀴즈를 풀어보세요!</p>
+                <Quiz questions={quizData} />
+              </>
+            )}
+          </div>
+        )}
       </main>
     </>
   );
