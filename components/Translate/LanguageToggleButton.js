@@ -6,7 +6,7 @@ const LANGUAGES = [
   { code: 'KO', label: '한국어' },
   { code: 'EN', label: 'English' },
   { code: 'JA', label: '日本語' },
-  { code: 'ZH', label: '中文（简体）' },
+  { code: 'ZH', label: '中文' },
   // 필요시 추가: { code: 'ZH-TW', label: '中文（繁體）' },
 ];
 

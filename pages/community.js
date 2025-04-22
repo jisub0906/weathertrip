@@ -5,7 +5,6 @@ import Image from "next/image";
 import styles from "../styles/Community.module.css";
 import Header from "../components/Layout/Header";
 import LanguageToggleButton from "../components/Translate/LanguageToggleButton";
-import Quiz from '../components/Quiz/Quiz';
 
 export default function Community() {
   const { data: session } = useSession();
@@ -15,61 +14,102 @@ export default function Community() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { ref, inView } = useInView();
   const [selectedLang, setSelectedLang] = useState('');
-  const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' 또는 'quiz'
-  const [quizData, setQuizData] = useState([]);
-  const [quizLoading, setQuizLoading] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   
   // 리뷰 번역을 위한 언어 선택
   const translateReviewContent = async (text, lang) => {
     try {
+      // 화살표 기호를 임시로 제거하고 번역
+      const textToTranslate = text.replace(' →', '');
+      
       const res = await fetch('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, targetLang: lang }),
+        body: JSON.stringify({ text: textToTranslate, targetLang: lang }),
       });
       const result = await res.json();
-      return result.translations?.[0]?.text || text;
+      
+      // 번역된 텍스트에 화살표 추가 (원본 텍스트가 화살표를 포함하고 있었을 경우에만)
+      const translatedText = result.translations?.[0]?.text || text;
+      return text.includes('→') ? `${translatedText} →` : translatedText;
     } catch (error) {
       console.error('번역 실패:', error);
       return text;
     }
   };
   
-  const originalReviewsRef = useRef([]);
+  const originalReviewsRef = useRef(new Map());
 
   // 리뷰가 변경되거나 언어가 선택되면 번역 실행
   useEffect(() => {
-    if (!selectedLang || reviews.length === 0) return;
-  
-    // 원본 저장 (한 번만)
-    if (!originalReviewsRef.current.length) {
-      originalReviewsRef.current = [...reviews];
-    }
+    if (!selectedLang || reviews.length === 0 || isTranslating) return;
   
     if (selectedLang === 'KO') {
       // 한국어 선택 시 원본 복원
-      setReviews([...originalReviewsRef.current]);
+      const originalReviews = Array.from(originalReviewsRef.current.values());
+      setReviews(originalReviews);
       return;
     }
   
+    // 번역이 필요한 리뷰만 필터링
+    const untranslatedReviews = reviews.filter(review => 
+      !review.translations?.[selectedLang] || 
+      !review.attraction.translations?.[selectedLang]
+    );
+  
+    if (untranslatedReviews.length === 0) return;
+  
     // 번역 실행
     const translateAll = async () => {
-      const translated = await Promise.all(
-        originalReviewsRef.current.map(async (rev) => ({
-          ...rev,
-          content: await translateReviewContent(rev.content, selectedLang),
-          attraction: {
-            ...rev.attraction,
-            name: await translateReviewContent(rev.attraction.name, selectedLang),
-          },
-          translatedLabel: await translateReviewContent("관광지 상세보기 →", selectedLang),
-        }))
-      );
-      setReviews(translated);
+      setIsTranslating(true);
+      try {
+        const translatedReviews = await Promise.all(
+          reviews.map(async (review) => {
+            // 이미 번역된 리뷰는 재사용
+            if (review.translations?.[selectedLang]) {
+              return review;
+            }
+            
+            // 원본 저장
+            if (!originalReviewsRef.current.has(review._id)) {
+              originalReviewsRef.current.set(review._id, { ...review });
+            }
+            
+            // 새로운 번역 수행
+            const translatedContent = await translateReviewContent(review.content, selectedLang);
+            const translatedName = await translateReviewContent(review.attraction.name, selectedLang);
+            const translatedLabel = await translateReviewContent("관광지 상세보기 →", selectedLang);
+            
+            return {
+              ...review,
+              content: translatedContent,
+              translations: {
+                ...(review.translations || {}),
+                [selectedLang]: translatedContent
+              },
+              attraction: {
+                ...review.attraction,
+                name: translatedName,
+                translations: {
+                  ...(review.attraction.translations || {}),
+                  [selectedLang]: translatedName
+                }
+              },
+              translatedLabel
+            };
+          })
+        );
+        
+        setReviews(translatedReviews);
+      } catch (error) {
+        console.error('번역 중 오류 발생:', error);
+      } finally {
+        setIsTranslating(false);
+      }
     };
   
     translateAll();
-  }, [selectedLang]);
+  }, [selectedLang, reviews]);
 
   // Pagination state management
   const lastTimestampRef = useRef(null);
@@ -308,30 +348,6 @@ export default function Community() {
     </div>
   );
 
-  // 퀴즈 데이터 가져오기
-  const fetchQuizData = async () => {
-    try {
-      setQuizLoading(true);
-      const response = await fetch('/api/quiz/quiz');
-      if (!response.ok) {
-        throw new Error('퀴즈 데이터를 가져오는데 실패했습니다');
-      }
-      const data = await response.json();
-      setQuizData(data);
-    } catch (error) {
-      console.error("퀴즈 데이터 로딩 오류:", error);
-    } finally {
-      setQuizLoading(false);
-    }
-  };
-
-  // 탭이 변경될 때 해당 데이터 로드
-  useEffect(() => {
-    if (activeTab === 'quiz' && quizData.length === 0) {
-      fetchQuizData();
-    }
-  }, [activeTab]);
-
   return (
     <>
       <Header />
@@ -369,63 +385,32 @@ export default function Community() {
 
       <main className={styles.container}>
         <h1 className={styles.title}>커뮤니티</h1>
-        
-        <div className={styles.tabContainer}>
-          <button 
-            className={`${styles.tabButton} ${activeTab === 'reviews' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('reviews')}
-          >
-            리뷰
-          </button>
-          <button 
-            className={`${styles.tabButton} ${activeTab === 'quiz' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('quiz')}
-          >
-            퀴즈
-          </button>
+
+        <div className={styles.reviewList}>
+          {reviews.map((review, index) => (
+            <ReviewCard
+              key={review._id}
+              review={review}
+              isLastElement={index === reviews.length - 1}
+              // Fixed: Don't pass ref directly to a component prop as it causes infinite renders
+              lastAttractionElementRef={null}
+            />
+          ))}
+
+          {loading && (
+            <div className={styles.loading}>
+              <div className={styles.loadingSpinner} />
+              리뷰를 불러오는 중...
+            </div>
+          )}
+
+          {!loading && !hasMore && (
+            <div className={styles.noMore}>더 이상 리뷰가 없습니다.</div>
+          )}
+
+          {/* This is the correct place to add the InView ref */}
+          <div ref={ref} style={{ height: "10px" }} />
         </div>
-
-        {activeTab === 'reviews' ? (
-          <div className={styles.reviewList}>
-            {reviews.map((review, index) => (
-              <ReviewCard
-                key={review._id}
-                review={review}
-                isLastElement={index === reviews.length - 1}
-                // Fixed: Don't pass ref directly to a component prop as it causes infinite renders
-                lastAttractionElementRef={null}
-              />
-            ))}
-
-            {loading && (
-              <div className={styles.loading}>
-                <div className={styles.loadingSpinner} />
-                리뷰를 불러오는 중...
-              </div>
-            )}
-
-            {!loading && !hasMore && (
-              <div className={styles.noMore}>더 이상 리뷰가 없습니다.</div>
-            )}
-
-            {/* This is the correct place to add the InView ref */}
-            <div ref={ref} style={{ height: "10px" }} />
-          </div>
-        ) : (
-          <div className={styles.quizSection}>
-            {quizLoading ? (
-              <div className={styles.loading}>
-                <div className={styles.loadingSpinner} />
-                퀴즈를 불러오는 중...
-              </div>
-            ) : (
-              <>
-                <p className={styles.subtitle}>한국의 관광지에 대한 퀴즈를 풀어보세요!</p>
-                <Quiz questions={quizData} />
-              </>
-            )}
-          </div>
-        )}
       </main>
     </>
   );
