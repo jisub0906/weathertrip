@@ -11,16 +11,16 @@ const MARKER_CONFIG = {
     offset: { x: 20, y: 40 }
   },
   CURRENT_LOCATION: {
-    path: '/marker_red.png',
+    path: '/marker_pink.png',
     size: 40,
     offset: { x: 20, y: 40 }
   },
   THEME: {
     NATURE: '/marker_green.png',
-    HISTORY: '/marker_brown.png', 
+    HISTORY: '/marker_red.png', 
     EXPERIENCE: '/marker_blue.png',
-    CULTURE: '/marker_yellow.png',
-    SPORTS: '/marker_pink.png'
+    CULTURE: '/marker_purple.png',
+    SPORTS: '/marker_orange.png'
   }
 };
 
