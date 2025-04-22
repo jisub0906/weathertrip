@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import InquiryForm from '../components/Inquiries/InquiryForm';
 import InquiryList from '../components/Inquiries/InquiryList';
 import styles from '../styles/Inquiries.module.css';
+import Header from '@/components/Layout/Header';
 
 export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState([]);
@@ -70,6 +71,8 @@ export default function InquiriesPage() {
   }, []);
 
   return (
+    <>
+    <Header />
     <div className={styles.inquiriesPage}>
       <h1 className={styles.pageTitle}>고객센터</h1>
 
@@ -87,5 +90,6 @@ export default function InquiriesPage() {
         onAttractionClick={handleAttractionClick}
       />
     </div>
+    </>
   );
 }
