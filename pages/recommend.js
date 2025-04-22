@@ -7,6 +7,7 @@ import useLocation from '../hooks/useLocation';
 import styles from '../styles/Recommend.module.css';
 import axios from 'axios';
 import SearchBar from '../components/Search/SearchBar';
+import AIRecommendation from '../components/Ai/AIRecommendation';
 
 export default function Recommend() {
   const { location, error: locationError, loading: locationLoading } = useLocation();
@@ -261,12 +262,63 @@ const handleCardClick = (attraction) => {
   }, [searchTerm, applySearchFilter]);
 
   // 필터 변경 핸들러
-  const handleFilterChange = (filterType, value) => {
-    setActiveFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
+  const getRandomCategory = (type) => {
+    const indoorCategories = ['문화/예술', '체험/학습/산업'];
+    const outdoorCategories = ['자연/힐링', '종교/역사/전통', '캠핑/스포츠'];
+    
+    if (type === '실내') {
+      const randomIndex = Math.floor(Math.random() * indoorCategories.length);
+      return indoorCategories[randomIndex];
+    } else if (type === '야외') {
+      const randomIndex = Math.floor(Math.random() * outdoorCategories.length);
+      return outdoorCategories[randomIndex];
+    }
+    return '전체';
   };
+
+  const getRecommendedType = (condition) => {
+    switch (condition) {
+      case 'Clear':
+        return '야외';
+      case 'Clouds':
+        return Math.random() > 0.5 ? '실내' : '야외';
+      case 'Rain':
+      case 'Snow':
+        return '실내';
+      default:
+        return '전체';
+    }
+  };
+
+  const handleFilterChange = (filterType, value) => {
+    if (filterType === 'type') {
+      const newType = value;
+      const newCategory = value !== '전체' ? getRandomCategory(value) : '전체';
+      
+      setActiveFilters(prev => ({
+        ...prev,
+        type: newType,
+        tag: newCategory
+      }));
+    } else {
+      setActiveFilters(prev => ({
+        ...prev,
+        [filterType]: value
+      }));
+    }
+  };
+
+  useEffect(() => {
+    if (!weather?.condition) return;
+
+    const recommendedType = getRecommendedType(weather.condition);
+    const recommendedCategory = getRandomCategory(recommendedType);
+
+    setActiveFilters(prev => ({
+      type: recommendedType,
+      tag: recommendedCategory
+    }));
+  }, [weather]);
 
   // 필터 UI 부분
   const locationTypes = ['전체', '실내', '야외'];
@@ -342,16 +394,6 @@ const handleCardClick = (attraction) => {
       <section className="section">
         <div className="container">
           <h1 className={styles.pageTitle}>맞춤형 관광지 추천</h1>
-          <div className={styles.heroSection}>
-            <p className={styles.heroText}>현재 위치와 날씨를 기반으로<br />맞춤형 여행지를 추천해드려요</p>
-            <div className={styles.heroIcons}>
-              <span>📍</span>
-              <span>+</span>
-              <span>🌤️</span>
-              <span>=</span>
-              <span>✨</span>
-            </div>
-          </div>
 
           {/* 위치 정보 로딩/오류 상태 표시 */}
           {locationLoading && (
@@ -398,6 +440,9 @@ const handleCardClick = (attraction) => {
                 {weather.isBackupData && (
                   <p className={styles.warningText}>* 백업 날씨 데이터를 사용 중입니다</p>
                 )}
+                <div className={styles.aiRecommendSection}>
+                  <AIRecommendation weather={weather} activeFilters={activeFilters} />
+                </div>
               </div>
             </div>
           )}
