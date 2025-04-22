@@ -170,10 +170,12 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
 
       {/* 버튼 */}
       <div className={styles.buttonRow}>
-        <button type="submit" className={styles.submitButton}>등록</button>
+        <button type="submit" className={styles.blueButton}>
+          등록
+        </button>
         <button
           type="button"
-          className={styles.homeButton}
+          className={styles.grayButton}
           onClick={() => router.push('/')}
         >
           홈으로

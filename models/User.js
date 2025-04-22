@@ -6,7 +6,7 @@ const validPhonePrefixes = ['010', '011', '016', '017', '018', '019'];
 // 사용자 데이터 정제 함수
 function sanitizeUserData(user, includePassword = false) {
   if (!user) return null;
-  
+
   const { _id, password, ...userData } = user;
   return {
     id: _id.toString(),
@@ -24,11 +24,11 @@ export const User = {
       });
 
       const collection = await getCollection('users');
-      
+
       // 필수 필드 검증
       const requiredFields = ['name', 'email', 'password', 'nickname', 'phone'];
       const missingFields = requiredFields.filter(field => !userData[field]);
-      
+
       if (missingFields.length > 0) {
         throw new Error(`필수 필드가 누락되었습니다: ${missingFields.join(', ')}`);
       }
@@ -39,9 +39,23 @@ export const User = {
         throw new Error('유효하지 않은 이메일 형식입니다.');
       }
 
-      // 비밀번호 길이 검증
-      if (userData.password.length < 4) {
-        throw new Error('비밀번호는 최소 4자리 이상이어야 합니다.');
+      // ✅ 비밀번호 복잡성 검증
+      const password = userData.password;
+
+      if (password.length < 8) {
+        throw new Error('비밀번호는 최소 8자 이상이어야 합니다.');
+      }
+      if (!/[a-z]/.test(password)) {
+        throw new Error('비밀번호는 소문자를 포함해야 합니다.');
+      }
+      if (!/[A-Z]/.test(password)) {
+        throw new Error('비밀번호는 대문자를 포함해야 합니다.');
+      }
+      if (!/\d/.test(password)) {
+        throw new Error('비밀번호는 숫자를 포함해야 합니다.');
+      }
+      if (!/[!@#$%^&*]/.test(password)) {
+        throw new Error('비밀번호는 특수문자(!@#$%^&*)를 포함해야 합니다.');
       }
 
       // 전화번호 형식 검증
@@ -70,6 +84,9 @@ export const User = {
         }
       }
 
+      // ✅ [수정 포인트] 기본 role 설정 ('user'로)
+      userData.role = userData.role || 'user';
+
       // 사용자 생성
       const result = await collection.insertOne(userData);
       return sanitizeUserData({ _id: result.insertedId, ...userData });
@@ -78,7 +95,7 @@ export const User = {
       throw error;
     }
   },
-  
+
   async findByEmail(email) {
     try {
       const collection = await getCollection('users');
@@ -130,10 +147,10 @@ export const User = {
       const collection = await getCollection('users');
       const objectId = toObjectId(id);
       if (!objectId) return null;
-      
+
       const result = await collection.updateOne(
         { _id: objectId },
-        { 
+        {
           $set: {
             ...updateData,
             updatedAt: new Date()
@@ -152,7 +169,7 @@ export const User = {
       const collection = await getCollection('users');
       const objectId = toObjectId(id);
       if (!objectId) return null;
-      
+
       const result = await collection.deleteOne({ _id: objectId });
       return result.deletedCount > 0;
     } catch (error) {
