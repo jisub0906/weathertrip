@@ -8,7 +8,7 @@ import styles from '../../styles/RollingBanner.module.css';
 const STORAGE_KEY = 'attractionsData';
 const STORAGE_TIMESTAMP = 'attractionsTimestamp';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24시간
-const SLIDE_INTERVAL = 5000; // 5초로 변경
+const SLIDE_INTERVAL = 8000; // 5초로 변경
 const DEFAULT_SLIDES = [
   {
     name: '광화문',
