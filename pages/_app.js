@@ -38,7 +38,7 @@ export default function App({ Component, pageProps }) {
   // 관광지 상세 정보 가져오기
   const fetchAttractionDetails = async (attractionId) => {
     try {
-      const response = await fetch(`/api/attractions/${attractionId}`);
+      const response = await fetch(`/api/attractions/attractions?id=${attractionId}`);
       if (response.ok) {
         const data = await response.json();
         setSelectedAttraction(data);

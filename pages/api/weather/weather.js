@@ -2,6 +2,24 @@ import { convertToGrid } from '../../../utils/coordinates';
 import { classifyWeatherCondition, getSkyStatusText, getPrecipitationText } from '../../../utils/weather';
 import { parseString } from 'xml2js';
 
+// 재시도 함수
+async function fetchWithRetry(url, options, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) {
+        return response;
+      }
+      console.log(`재시도 ${i + 1}/${maxRetries}: API 호출 실패`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // 지수 백오프
+    } catch (error) {
+      console.error(`재시도 ${i + 1}/${maxRetries} 실패:`, error);
+      if (i === maxRetries - 1) throw error;
+    }
+  }
+  throw new Error('최대 재시도 횟수 초과');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ message: '허용되지 않는 메서드입니다.' });
@@ -16,12 +34,12 @@ export default async function handler(req, res) {
     
     console.log('날씨 API 요청 수신:', { longitude, latitude });
     
-    // Mock 데이터 - API 연결 문제시 테스트용
+    // Mock 데이터
     const mockWeatherData = {
       temperature: 23,
       humidity: 65,
       windSpeed: 2.5,
-      condition: "Clear", // Clear, Clouds, Rain, Snow
+      condition: "Clear",
       sky: "맑음",
       precipitation: "없음",
       recommendedType: "outdoor",
@@ -29,9 +47,9 @@ export default async function handler(req, res) {
       baseTime: String(new Date().getHours()).padStart(2, '0') + '30',
     };
     
-    // 개발 모드에서 Mock 데이터 사용 옵션
-    if (process.env.USE_MOCK_WEATHER === 'true') {
-      console.log('Mock 날씨 데이터 사용');
+    // 개발 모드에서는 항상 Mock 데이터 사용
+    if (process.env.NODE_ENV === 'development' || !process.env.WEATHER_API_KEY_ENCODED) {
+      console.log('개발 모드 또는 API 키 없음: Mock 날씨 데이터 사용');
       return res.status(200).json({ success: true, data: mockWeatherData });
     }
     
@@ -74,7 +92,7 @@ export default async function handler(req, res) {
     console.log('날씨 API 요청 URL:', url);
     
     try {
-      const response = await fetch(url, { 
+      const response = await fetchWithRetry(url, { 
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -82,11 +100,6 @@ export default async function handler(req, res) {
         }
       });
       
-      if (!response.ok) {
-        console.error('날씨 API 응답 오류:', response.status, response.statusText);
-        throw new Error(`API 응답 오류: ${response.status} ${response.statusText}`);
-      }
-
       // 응답의 Content-Type 확인
       const contentType = response.headers.get('content-type');
       let data;
@@ -94,54 +107,19 @@ export default async function handler(req, res) {
       if (contentType && contentType.includes('application/json')) {
         data = await response.json();
       } else if (contentType && contentType.includes('text/xml')) {
-        // XML 응답을 텍스트로 받아서 처리
         const text = await response.text();
-        
-        // 간단한 XML 파싱
-        const parseXML = (xml) => {
-          const items = [];
-          const itemMatches = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
-          
-          itemMatches.forEach(itemXml => {
-            const item = {};
-            const matches = itemXml.match(/<([^>]+)>([^<]+)<\/\1>/g) || [];
-            
-            matches.forEach(match => {
-              const [, tag, value] = match.match(/<([^>]+)>([^<]+)<\/\1>/);
-              item[tag] = value;
-            });
-            
-            items.push(item);
+        data = await new Promise((resolve, reject) => {
+          parseString(text, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
           });
-          
-          return {
-            response: {
-              header: {
-                resultCode: "00",
-                resultMsg: "NORMAL_SERVICE"
-              },
-              body: {
-                items: {
-                  item: items
-                }
-              }
-            }
-          };
-        };
-        
-        data = parseXML(text);
+        });
       } else {
-        console.error('날씨 API 응답이 지원하지 않는 형식입니다:', contentType);
-        console.log('Mock 데이터로 대체합니다');
-        return res.status(200).json({ success: true, data: mockWeatherData });
+        throw new Error('지원하지 않는 응답 형식입니다.');
       }
       
-      console.log('날씨 API 응답 헤더:', data.response?.header);
-      
       if (!data.response?.header || data.response?.header?.resultCode !== "00") {
-        console.error('날씨 API 응답 오류:', data.response?.header);
-        console.log('Mock 데이터로 대체합니다');
-        return res.status(200).json({ success: true, data: mockWeatherData });
+        throw new Error('API 응답 오류: ' + (data.response?.header?.resultMsg || '알 수 없는 오류'));
       }
       
       // 날씨 정보 파싱 및 가공
@@ -160,16 +138,13 @@ export default async function handler(req, res) {
       // 가장 빠른 시간의 예보 데이터 사용
       const timeKeys = Object.keys(timeGroups).sort();
       if (timeKeys.length === 0) {
-        console.error('날씨 데이터가 없습니다.');
-        return res.status(500).json({ message: '날씨 데이터를 가져올 수 없습니다.' });
+        throw new Error('날씨 데이터가 없습니다.');
       }
       
       const currentData = timeGroups[timeKeys[0]];
-      console.log('날씨 데이터 항목:', Object.keys(currentData));
       
       // 필수 데이터 체크
       if (!currentData.SKY || !currentData.PTY) {
-        console.error('필수 날씨 데이터가 없습니다:', currentData);
         throw new Error('날씨 정보 누락: 하늘상태 또는 강수형태 데이터가 없습니다');
       }
       
@@ -182,7 +157,7 @@ export default async function handler(req, res) {
       // 응답 데이터 구성
       const weatherInfo = {
         temperature: parseFloat(currentData.T1H || 0),
-        feelsLike: parseFloat(currentData.T1H || 0) - (parseFloat(currentData.WSD || 0) > 1.5 ? 2 : 0), // 체감온도 계산
+        feelsLike: parseFloat(currentData.T1H || 0) - (parseFloat(currentData.WSD || 0) > 1.5 ? 2 : 0),
         sky: getSkyStatusText(currentData.SKY),
         precipitation: getPrecipitationText(currentData.PTY),
         humidity: parseInt(currentData.REH || 0),
@@ -196,55 +171,24 @@ export default async function handler(req, res) {
         baseTime: baseTime,
         fcstDate: timeKeys[0].split('-')[0],
         fcstTime: timeKeys[0].split('-')[1],
-        grid: grid  // 디버깅 용도
+        grid: grid
       };
       
-      console.log('응답 날씨 정보:', weatherInfo);
       return res.status(200).json({ success: true, data: weatherInfo });
-    } catch (fetchError) {
-      console.error('날씨 API 호출 중 오류:', fetchError);
-      
-      // API 호출 실패시 Mock 데이터 반환
-      const mockWeatherData = {
-        temperature: 23,
-        feelsLike: 25,
-        humidity: 65,
-        windSpeed: 2.5,
-        condition: "Clear",
-        description: "맑음",
-        icon: "01d",
-        recommendedType: "outdoor",
-        isBackupData: true
-      };
-      
-      console.log('API 실패, Mock 데이터 반환');
-      return res.status(200).json({ 
-        success: true, 
-        data: mockWeatherData,
-        isBackupData: true
+    } catch (error) {
+      console.error('날씨 API 호출 중 오류:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: '날씨 정보를 가져오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+        error: error.message
       });
     }
   } catch (error) {
     console.error('날씨 데이터 처리 오류:', error);
-    
-    // 오류 발생시 Mock 데이터 반환
-    const mockWeatherData = {
-      temperature: 23,
-      feelsLike: 25,
-      humidity: 65,
-      windSpeed: 2.5,
-      condition: "Clear",
-      description: "맑음",
-      icon: "01d",
-      recommendedType: "outdoor",
-      isBackupData: true
-    };
-    
-    return res.status(200).json({ 
-      success: true, 
-      data: mockWeatherData,
-      error: error.message,
-      isBackupData: true
+    return res.status(500).json({ 
+      success: false, 
+      message: '날씨 정보를 처리하는 중 오류가 발생했습니다.',
+      error: error.message
     });
   }
 }
