@@ -10,7 +10,6 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
   const [selectedAttractionName, setSelectedAttractionName] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [isSecret, setIsSecret] = useState(false);
 
   const isTourist = type === '관광지 문의';
   const router = useRouter();
@@ -35,7 +34,6 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
       targetType: isTourist ? 'tourist' : 'general',
       title,
       content,
-      isSecret,
       attractionId: isTourist ? selectedAttractionId : null,
       attractionName: isTourist ? selectedAttractionName : null,
     };
@@ -61,7 +59,6 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
         setSearchKeyword('');
         setSelectedAttractionId('');
         setSelectedAttractionName('');
-        setIsSecret(false);
       } else {
         alert(result.message || '등록에 실패했습니다.');
       }
@@ -154,18 +151,6 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
           placeholder="문의 내용을 입력하세요"
           required
         />
-      </div>
-
-      {/* 비밀글 */}
-      <div className={styles.formGroup}>
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={isSecret}
-            onChange={() => setIsSecret(!isSecret)}
-          />
-          비밀글로 작성
-        </label>
       </div>
 
       {/* 버튼 */}
