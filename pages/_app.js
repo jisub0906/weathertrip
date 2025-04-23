@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import ChatBot from '../components/Chat/ChatBot';
 import useLocation from '../hooks/useLocation'; // 기존 useLocation 훅 재사용
+import Head from 'next/head';
 
 export default function App({ Component, pageProps }) {
   // useLocation 훅을 사용하여 사용자 위치 가져오기
@@ -49,6 +50,10 @@ export default function App({ Component, pageProps }) {
 
   return (
     <SessionProvider session={pageProps.session}>
+      <Head>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Head>
       <Script
         src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_JAVASCRIPT_KEY}&libraries=services&autoload=false`}
         strategy="afterInteractive"
