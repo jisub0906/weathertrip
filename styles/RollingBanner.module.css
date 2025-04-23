@@ -3,7 +3,7 @@
   width: 100%;
   height: 400px;
   overflow: hidden;
-  background-color: #f0f0f0; /* 이미지 로딩 전 배경색 */
+  background-color: #f5f5f5;
 }
 
 .imageWrapper {
@@ -126,16 +126,16 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1;
+  z-index: 2;
 }
 
-.spinner {
+.loadingSpinner {
   width: 40px;
   height: 40px;
   border: 4px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -207,7 +207,7 @@
 
 @media (max-width: 768px) {
   .banner {
-    height: 250px;
+    height: 300px;
   }
   
   .overlay {
@@ -217,16 +217,16 @@
   }
   
   .overlay h2 {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     margin-bottom: 0.3rem;
   }
   
   .overlay .address {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 
   .overlay .description {
-    font-size: 0.75rem;
+    font-size: 1rem;
     margin-top: 0.3rem;
     -webkit-line-clamp: 2;
     display: -webkit-box;

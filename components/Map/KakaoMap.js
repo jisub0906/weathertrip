@@ -2,6 +2,7 @@ import axios from 'axios';
 import { forwardRef, useRef, useState, useEffect, useCallback, useImperativeHandle } from 'react';
 import styles from '../../styles/KakaoMap.module.css';
 import AttractionDetail from '../Attractions/AttractionDetail';
+import Image from 'next/image';
 
 // 상수 정의 - 설정을 쉽게 변경할 수 있도록 최상단으로 분리
 const MARKER_CONFIG = {
@@ -16,11 +17,12 @@ const MARKER_CONFIG = {
     offset: { x: 20, y: 40 }
   },
   THEME: {
-    NATURE: '/marker_green.png',
-    HISTORY: '/marker_red.png', 
-    EXPERIENCE: '/marker_blue.png',
-    CULTURE: '/marker_purple.png',
-    SPORTS: '/marker_orange.png'
+    '자연/힐링': '/marker_green.png',
+    '종교/역사/전통': '/marker_red.png',
+    '체험/학습/산업': '/marker_blue.png',
+    '문화/예술': '/marker_purple.png',
+    '캠핑/스포츠': '/marker_orange.png',
+    '쇼핑/놀이': '/marker_white.png'
   }
 };
 
@@ -48,23 +50,55 @@ const KakaoMap = forwardRef(function KakaoMap({
   const locationMarkerRef = useRef(null);
   const searchMarkerRef = useRef(null);
   const infoWindowRef = useRef(null); // 현재 열린 정보창 참조를 위해 추가
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [preloadedImages, setPreloadedImages] = useState(new Set());
+
+  const preloadImage = useCallback((url) => {
+    return new Promise((resolve) => {
+      if (preloadedImages.has(url)) {
+        resolve(url);
+        return;
+      }
+
+      const img = new window.Image();
+      img.onload = () => {
+        setPreloadedImages(prev => new Set([...prev, url]));
+        resolve(url);
+      };
+      img.onerror = () => resolve(url);
+      img.src = url;
+    });
+  }, [preloadedImages]);
+
+  useEffect(() => {
+    // 마커 이미지 프리로드
+    const markerImages = [
+      MARKER_CONFIG.DEFAULT.path,
+      MARKER_CONFIG.CURRENT_LOCATION.path,
+      ...Object.values(MARKER_CONFIG.THEME)
+    ];
+
+    Promise.all(markerImages.map(preloadImage))
+      .catch(error => console.error('마커 이미지 프리로드 실패:', error));
+  }, [preloadImage]);
+
+  const handleImageLoad = useCallback((url) => {
+    setLoadedImages(prev => new Set([...prev, url]));
+  }, []);
 
   // 마커 이미지 경로를 테마에 따라 반환 (개선된 버전)
   const getMarkerImagePath = useCallback((tags) => {
     if (!Array.isArray(tags)) return MARKER_CONFIG.DEFAULT.path;
 
+    // 태그 배열을 문자열로 변환하여 검색
     const tagString = tags.join(',');
 
-    if (tagString.includes('자연') || tagString.includes('힐링')) 
-      return MARKER_CONFIG.THEME.NATURE;
-    if (tagString.includes('종교') || tagString.includes('역사') || tagString.includes('전통')) 
-      return MARKER_CONFIG.THEME.HISTORY;
-    if (tagString.includes('체험') || tagString.includes('학습') || tagString.includes('산업')) 
-      return MARKER_CONFIG.THEME.EXPERIENCE;
-    if (tagString.includes('문화') || tagString.includes('예술')) 
-      return MARKER_CONFIG.THEME.CULTURE;
-    if (tagString.includes('캠핑') || tagString.includes('스포츠')) 
-      return MARKER_CONFIG.THEME.SPORTS;
+    // 카테고리별 마커 이미지 매핑
+    for (const [category, path] of Object.entries(MARKER_CONFIG.THEME)) {
+      if (tagString.includes(category)) {
+        return path;
+      }
+    }
 
     return MARKER_CONFIG.DEFAULT.path;
   }, []);
@@ -501,7 +535,9 @@ const KakaoMap = forwardRef(function KakaoMap({
       <div ref={mapRef} className={styles.mapContent}></div>
       {isLoading && (
         <div className={styles.mapLoadingOverlay}>
-          <div className={styles.mapLoadingSpinner}></div>
+          <div className={styles.mapLoadingSpinner}>
+            <div className={styles.spinner}></div>
+          </div>
           <p>관광지 불러오는 중...</p>
         </div>
       )}

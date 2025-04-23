@@ -1,8 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import styles from '../../styles/AttractionsList.module.css';
 
 // 관광지 리스트를 렌더링하는 함수형 컴포넌트
 export default function AttractionsList({ attractions, loading, error, weatherCondition, onAttractionClick }) {
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [preloadedImages, setPreloadedImages] = useState(new Set());
+  const [visibleAttractions, setVisibleAttractions] = useState(6); // 초기에 보여줄 관광지 수
+
+  const preloadImage = useCallback((url) => {
+    return new Promise((resolve) => {
+      if (preloadedImages.has(url)) {
+        resolve(url);
+        return;
+      }
+
+      const img = new window.Image();
+      img.onload = () => {
+        setPreloadedImages(prev => new Set([...prev, url]));
+        resolve(url);
+      };
+      img.onerror = () => resolve(url);
+      img.src = url;
+    });
+  }, [preloadedImages]);
+
+  useEffect(() => {
+    // 초기 이미지 프리로드
+    const initialAttractions = attractions?.slice(0, visibleAttractions) || [];
+    const initialImages = initialAttractions.map(attraction => 
+      attraction.images?.[0]
+    ).filter(Boolean);
+
+    Promise.all(initialImages.map(preloadImage))
+      .catch(error => console.error('이미지 프리로드 실패:', error));
+  }, [attractions, preloadImage, visibleAttractions]);
+
+  const handleImageLoad = useCallback((url) => {
+    setLoadedImages(prev => new Set([...prev, url]));
+  }, []);
+
+  const loadMoreAttractions = useCallback(() => {
+    setVisibleAttractions(prev => prev + 6);
+  }, []);
+
   if (loading) {
     return <div className={styles.loading}>관광지 정보를 불러오는 중...</div>;
   }
@@ -47,7 +88,7 @@ export default function AttractionsList({ attractions, loading, error, weatherCo
       <h2 className={styles.title}>{getWeatherMessage()}</h2>
       
       <div className={styles.attractionsList}>
-        {attractions.map((attraction) => (
+        {attractions.slice(0, visibleAttractions).map((attraction) => (
           <div 
             key={attraction._id} 
             className={styles.attractionCard}
@@ -55,11 +96,26 @@ export default function AttractionsList({ attractions, loading, error, weatherCo
           >
             <div className={styles.imageContainer}>
               {attraction.images && attraction.images.length > 0 ? (
-                <img 
-                  src={attraction.images[0]} 
-                  alt={attraction.name} 
-                  className={styles.attractionImage}
-                />
+                <div className={styles.imageWrapper}>
+                  <Image
+                    src={attraction.images[0]}
+                    alt={attraction.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    quality={75}
+                    priority={attractions.indexOf(attraction) < 2}
+                    loading={attractions.indexOf(attraction) < 2 ? 'eager' : 'lazy'}
+                    style={{
+                      objectFit: 'cover',
+                      opacity: loadedImages.has(attraction.images[0]) ? 1 : 0,
+                      transition: 'opacity 0.3s ease-in-out'
+                    }}
+                    onLoad={() => handleImageLoad(attraction.images[0])}
+                  />
+                  {!loadedImages.has(attraction.images[0]) && (
+                    <div className={styles.skeletonImage} />
+                  )}
+                </div>
               ) : (
                 <div className={styles.noImage}>이미지 없음</div>
               )}
@@ -88,6 +144,12 @@ export default function AttractionsList({ attractions, loading, error, weatherCo
           </div>
         ))}
       </div>
+
+      {attractions.length > visibleAttractions && (
+        <button onClick={loadMoreAttractions} className={styles.loadMoreButton}>
+          더 많은 관광지 보기
+        </button>
+      )}
     </div>
   );
 } 

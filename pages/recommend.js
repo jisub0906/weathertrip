@@ -263,7 +263,7 @@ const handleCardClick = (attraction) => {
 
   // 필터 변경 핸들러
   const getRandomCategory = (type) => {
-    const indoorCategories = ['문화/예술', '체험/학습/산업'];
+    const indoorCategories = ['문화/예술', '체험/학습/산업', '쇼핑/놀이'];
     const outdoorCategories = ['자연/힐링', '종교/역사/전통', '캠핑/스포츠'];
     
     if (type === '실내') {
@@ -323,12 +323,13 @@ const handleCardClick = (attraction) => {
   // 필터 UI 부분
   const locationTypes = ['전체', '실내', '야외'];
   const categories = [
-  '전체',
-  '자연/힐링',
-  '종교/역사/전통',
-  '체험/학습/산업',
-  '문화/예술',
-  '캠핑/스포츠'
+    '전체',
+    '자연/힐링',
+    '종교/역사/전통',
+    '체험/학습/산업',
+    '문화/예술',
+    '캠핑/스포츠',
+    '쇼핑/놀이'
   ];
 
   // 날씨 상태를 서버 응답과 일치하게 변환하는 유틸리티 함수

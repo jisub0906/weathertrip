@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaArrowLeft } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
 import styles from '../../styles/AttractionDetail.module.css';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 
 // 관광지 상세 정보 컴포넌트
 // props: attraction (관광지 정보), onClose (닫기 함수)
@@ -16,12 +17,48 @@ export default function AttractionDetail({ attraction, onClose }) {
   const [likeCount, setLikeCount] = useState(attraction.likeCount || 0); // 좋아요 수
   const [loading, setLoading] = useState(true); // 리뷰 로딩 여부
   const MAX_REVIEW_LENGTH = 100; // 리뷰 최대 길이
-
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [preloadedImages, setPreloadedImages] = useState(new Set());
+  const [visibleImages, setVisibleImages] = useState(3); // 초기에 보여줄 이미지 수
 
   // 이미지 배열이 없거나 비어있는 경우 기본 이미지 사용
   const images = attraction.images && attraction.images.length > 0
     ? attraction.images
     : ['/next.svg'];
+
+  const preloadImage = useCallback((url) => {
+    return new Promise((resolve) => {
+      if (preloadedImages.has(url)) {
+        resolve(url);
+        return;
+      }
+
+      const img = new window.Image();
+      img.onload = () => {
+        setPreloadedImages(prev => new Set([...prev, url]));
+        resolve(url);
+      };
+      img.onerror = () => resolve(url);
+      img.src = url;
+    });
+  }, [preloadedImages]);
+
+  useEffect(() => {
+    // 초기 이미지 프리로드
+    const initialImages = attraction.images?.slice(0, visibleImages) || [];
+    const reviewImages = attraction.reviews?.slice(0, 2).map(review => review.image).filter(Boolean) || [];
+
+    Promise.all([...initialImages, ...reviewImages].map(preloadImage))
+      .catch(error => console.error('이미지 프리로드 실패:', error));
+  }, [attraction, preloadImage, visibleImages]);
+
+  const handleImageLoad = useCallback((url) => {
+    setLoadedImages(prev => new Set([...prev, url]));
+  }, []);
+
+  const loadMoreImages = useCallback(() => {
+    setVisibleImages(prev => prev + 3);
+  }, []);
 
   // 컴포넌트가 마운트될 때 리뷰 데이터 불러오기
   useEffect(() => {
@@ -146,11 +183,35 @@ export default function AttractionDetail({ attraction, onClose }) {
       </div>
       
       <div className={styles.imageContainer}>
-        <img 
-          src={images[0]} 
-          alt={attraction.name} 
-          className={styles.mainImage}
-        />
+        <div className={styles.imageGallery}>
+          {attraction.images?.slice(0, visibleImages).map((image, index) => (
+            <div key={index} className={styles.imageWrapper}>
+              <Image
+                src={image}
+                alt={`${attraction.name} 이미지 ${index + 1}`}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                quality={75}
+                priority={index < 2}
+                loading={index < 2 ? 'eager' : 'lazy'}
+                style={{
+                  objectFit: 'cover',
+                  opacity: loadedImages.has(image) ? 1 : 0,
+                  transition: 'opacity 0.3s ease-in-out'
+                }}
+                onLoad={() => handleImageLoad(image)}
+              />
+              {!loadedImages.has(image) && (
+                <div className={styles.skeletonImage} />
+              )}
+            </div>
+          ))}
+          {attraction.images?.length > visibleImages && (
+            <button onClick={loadMoreImages} className={styles.loadMoreButton}>
+              더 보기
+            </button>
+          )}
+        </div>
       </div>
       
       <div className={styles.contentContainer}>
@@ -223,12 +284,25 @@ export default function AttractionDetail({ attraction, onClose }) {
                 {review.images && review.images.length > 0 && (
                   <div className={styles.reviewImages}>
                     {review.images.map((image, index) => (
-                      <img 
-                        key={index} 
-                        src={image} 
-                        alt={`리뷰 이미지 ${index + 1}`}
-                        className={styles.reviewImage}
-                      />
+                      <div key={index} className={styles.reviewImageWrapper}>
+                        <Image
+                          src={image}
+                          alt={`리뷰 이미지 ${index + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          quality={75}
+                          loading="lazy"
+                          style={{
+                            objectFit: 'cover',
+                            opacity: loadedImages.has(image) ? 1 : 0,
+                            transition: 'opacity 0.3s ease-in-out'
+                          }}
+                          onLoad={() => handleImageLoad(image)}
+                        />
+                        {!loadedImages.has(image) && (
+                          <div className={styles.skeletonImage} />
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}

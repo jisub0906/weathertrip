@@ -1,83 +1,45 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/router';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import axios from 'axios';
 import styles from '../../styles/RollingBanner.module.css';
 
-// 상수 정의
-const STORAGE_KEY = 'attractionsData';
-const STORAGE_TIMESTAMP = 'attractionsTimestamp';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24시간
-const SLIDE_INTERVAL = 8000; // 5초로 변경
 const DEFAULT_SLIDES = [
   {
-    name: '광화문',
+    id: 1,
+    title: '여행지 추천',
+    description: '날씨에 맞는 여행지를 추천해드립니다',
     image: 'https://i.ibb.co/svhf5fW4/0-1.webp',
-    address: '서울 종로구 당주동 40'
+    link: '/recommend'
   },
   {
-    name: '조계사',
+    id: 2,
+    title: '커뮤니티',
+    description: '다른 여행자들의 이야기를 들어보세요',
     image: 'https://i.ibb.co/nsmpsr1y/0-1.jpg',
-    address: '서울 종로구 견지동 46'
+    link: '/community'
   },
   {
-    name: 'N서울타워',
+    id: 3,
+    title: '지도',
+    description: '주변 관광지를 찾아보세요',
     image: 'https://i.ibb.co/jZzSKH6L/N-0-0.png',
-    address: '서울 용산구 용산동2가 1'
+    link: '/map'
   }
 ];
 
 export default function RollingBanner() {
-  const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [slides, setSlides] = useState(DEFAULT_SLIDES);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [displayedSlide, setDisplayedSlide] = useState(0);
   const preloadedImagesRef = useRef(new Map());
-  const timerRef = useRef(null);
-  const router = useRouter();
+  const intervalRef = useRef(null);
 
-  // 캐시된 데이터 확인
-  const getCachedData = useCallback(() => {
-    if (typeof window === 'undefined') return null;
-    
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      const timestamp = localStorage.getItem(STORAGE_TIMESTAMP);
-      
-      if (data && timestamp) {
-        const now = new Date().getTime();
-        if (now - parseInt(timestamp) < CACHE_DURATION) {
-          return JSON.parse(data);
-        }
-      }
-    } catch (error) {
-      console.error('캐시 데이터 로드 실패:', error);
-    }
-    return null;
-  }, []);
-
-  // 데이터 캐싱
-  const setCachedData = useCallback((data) => {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      localStorage.setItem(STORAGE_TIMESTAMP, new Date().getTime().toString());
-    } catch (error) {
-      console.error('캐시 데이터 저장 실패:', error);
-    }
-  }, []);
-
-  // 이미지 프리로딩 최적화
   const preloadImage = useCallback((url) => {
     return new Promise((resolve) => {
       if (preloadedImagesRef.current.has(url)) {
         resolve(url);
         return;
       }
-      
+
       const img = new window.Image();
       img.onload = () => {
         preloadedImagesRef.current.set(url, true);
@@ -88,22 +50,21 @@ export default function RollingBanner() {
     });
   }, []);
 
-  // 이미지 프리로딩 일괄 처리
   const preloadImages = useCallback(async (slidesData) => {
-    if (!slidesData?.length) return;
-    
-    // 첫 번째 이미지 우선 로드
-    await preloadImage(slidesData[0].image);
-    setImageLoaded(true);
-    
-    // 나머지 이미지 병렬 로드
-    const promises = slidesData.slice(1).map(slide => preloadImage(slide.image));
-    await Promise.allSettled(promises);
+    try {
+      // 첫 번째 이미지 먼저 로드
+      await preloadImage(slidesData[0].image);
+      setImageLoaded(true);
+
+      // 나머지 이미지들 병렬로 로드
+      const promises = slidesData.slice(1).map(slide => preloadImage(slide.image));
+      await Promise.all(promises);
+    } catch (error) {
+      console.error('이미지 프리로드 실패:', error);
+    }
   }, [preloadImage]);
 
-  // 다음 이미지 프리로딩
   const preloadNextImage = useCallback(() => {
-    if (slides.length === 0) return;
     const nextIndex = (current + 1) % slides.length;
     const nextImage = slides[nextIndex]?.image;
     if (nextImage && !preloadedImagesRef.current.has(nextImage)) {
@@ -111,121 +72,39 @@ export default function RollingBanner() {
     }
   }, [current, slides, preloadImage]);
 
-  // API 데이터 가져오기
-  const fetchFreshData = useCallback(async () => {
-    try {
-      const response = await axios.get('/api/attractions/random', {
-        params: { random: true, limit: 10 },
-        timeout: 5000
-      });
-
-      if (response.data.attractions) {
-        const attractionsData = response.data.attractions.map(attraction => ({
-          name: attraction.name,
-          image: attraction.images[0],
-          address: attraction.address,
-          description: attraction.description
-        }));
-        
-        await preloadImages(attractionsData);
-        setSlides(attractionsData);
-        setCachedData(attractionsData);
-      }
-    } catch (error) {
-      console.error('인기 관광지 데이터 로딩 실패:', error);
-    }
-  }, [preloadImages, setCachedData]);
-
   // 초기 데이터 로드
   useEffect(() => {
-    const initializeData = async () => {
-      const cachedData = getCachedData();
-      
-      if (cachedData?.length) {
-        setSlides(cachedData);
-        await preloadImages(cachedData);
-        setLoading(false);
-        if (cachedData.length > 1) {
-          preloadImage(cachedData[1].image);
-        }
-        fetchFreshData();
-      } else {
-        setSlides(DEFAULT_SLIDES);
-        await preloadImages(DEFAULT_SLIDES);
-        setLoading(false);
-        if (DEFAULT_SLIDES.length > 1) {
-          preloadImage(DEFAULT_SLIDES[1].image);
-        }
-        fetchFreshData();
-      }
-    };
-
-    initializeData();
-  }, [getCachedData, preloadImages, preloadImage, fetchFreshData]);
-
-  // 슬라이드 변경 시 다음 이미지 프리로드
-  useEffect(() => {
-    if (slides.length === 0) return;
-    
-    if (imageLoaded) {
-      preloadNextImage();
-    }
-  }, [current, imageLoaded, slides.length, preloadNextImage]);
-
-  // 슬라이드 자동 전환
-  useEffect(() => {
-    if (slides.length === 0 || !imageLoaded) return;
-    
-    let timeoutId;
-    const startTimer = () => {
-      timeoutId = setTimeout(() => {
-        const nextSlide = (current + 1) % slides.length;
-        if (preloadedImagesRef.current.has(slides[nextSlide].image)) {
-          setCurrent(nextSlide);
+    const fetchFreshData = async () => {
+      try {
+        const response = await fetch('/api/attractions/popular');
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+          const attractionsData = data.data.map(attraction => ({
+            id: attraction._id,
+            title: attraction.name,
+            description: attraction.description,
+            image: attraction.images[0],
+            link: `/attractions/${attraction._id}`
+          }));
+          
+          await preloadImages(attractionsData);
+          setSlides(attractionsData);
         } else {
-          // 다음 이미지가 로드되지 않은 경우, 로드 후 전환
-          preloadImage(slides[nextSlide].image).then(() => {
-            setCurrent(nextSlide);
-          });
+          await preloadImages(DEFAULT_SLIDES);
         }
-      }, SLIDE_INTERVAL);
-    };
-
-    startTimer();
-    
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      } catch (error) {
+        console.error('인기 관광지 데이터 로드 실패:', error);
+        await preloadImages(DEFAULT_SLIDES);
       }
     };
-  }, [slides.length, current, imageLoaded, preloadImage]);
 
-  // 슬라이드 변경 시 이미지 로드 상태 관리
-  useEffect(() => {
-    if (slides.length === 0) return;
-    
-    setImageLoaded(false);
-    if (preloadedImagesRef.current.has(slides[current]?.image)) {
-      setImageLoaded(true);
-      setDisplayedSlide(current);
-    }
-  }, [current, slides]);
+    fetchFreshData();
+  }, [preloadImages]);
 
-  const goPrev = useCallback(() => {
-    if (!imageLoaded) return; // 이미지가 로드되지 않은 경우 전환하지 않음
-    
-    const prevSlide = (current - 1 + slides.length) % slides.length;
-    if (preloadedImagesRef.current.has(slides[prevSlide].image)) {
-      setCurrent(prevSlide);
-    } else {
-      preloadImage(slides[prevSlide].image).then(() => {
-        setCurrent(prevSlide);
-      });
-    }
-  }, [current, slides.length, preloadImage, imageLoaded]);
-  
-  const goNext = useCallback(() => {
-    if (!imageLoaded) return; // 이미지가 로드되지 않은 경우 전환하지 않음
+  // 다음 슬라이드로 이동
+  const nextSlide = useCallback(() => {
+    if (!imageLoaded) return;
     
     const nextSlide = (current + 1) % slides.length;
     if (preloadedImagesRef.current.has(slides[nextSlide].image)) {
@@ -235,66 +114,90 @@ export default function RollingBanner() {
         setCurrent(nextSlide);
       });
     }
-  }, [current, slides.length, preloadImage, imageLoaded]);
+  }, [current, slides, imageLoaded, preloadImage]);
+
+  // 이전 슬라이드로 이동
+  const prevSlide = useCallback(() => {
+    if (!imageLoaded) return;
+    
+    const prevSlide = (current - 1 + slides.length) % slides.length;
+    if (preloadedImagesRef.current.has(slides[prevSlide].image)) {
+      setCurrent(prevSlide);
+    } else {
+      preloadImage(slides[prevSlide].image).then(() => {
+        setCurrent(prevSlide);
+      });
+    }
+  }, [current, slides, imageLoaded, preloadImage]);
+
+  // 자동 슬라이드
+  useEffect(() => {
+    if (!imageLoaded) return;
+    
+    intervalRef.current = setInterval(nextSlide, 5000);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [nextSlide, imageLoaded]);
 
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
-    setDisplayedSlide(current);
-  }, [current]);
+  }, []);
 
-  if (loading && slides.length === 0) {
+  if (slides.length === 0 || !imageLoaded) {
     return (
       <div className={styles.banner}>
-        <div className={styles.skeletonLoader}>
-          <div className={styles.skeletonImage}></div>
-        </div>
+        <div className={styles.skeletonImage}></div>
       </div>
     );
   }
 
+  const displayedSlide = current;
+  const nextSlideIndex = (current + 1) % slides.length;
+  const prevSlideIndex = (current - 1 + slides.length) % slides.length;
+
   return (
     <div className={styles.banner}>
       <div className={styles.imageWrapper}>
-        {slides[current] && (
-          <img 
-            src={slides[current].image} 
-            alt={slides[current].name} 
-            onLoad={handleImageLoad}
-            style={{
-              objectFit: 'cover',
-              width: '100%',
-              height: '100%',
-              opacity: imageLoaded ? 1 : 0,
-              transition: 'opacity 0.5s ease-in-out',
-              visibility: imageLoaded ? 'visible' : 'hidden'
-            }}
-          />
-        )}
+        <Image
+          src={slides[current].image}
+          alt={slides[current].title}
+          fill
+          priority
+          quality={85}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          style={{
+            objectFit: 'cover',
+            opacity: imageLoaded ? 1 : 0,
+            visibility: imageLoaded ? 'visible' : 'hidden',
+            transition: 'opacity 0.3s ease-in-out'
+          }}
+          onLoad={handleImageLoad}
+        />
       </div>
       
       {slides[displayedSlide] && imageLoaded && (
-        <div 
-          className={styles.overlay}
-          style={{
-            opacity: 1,
-            transform: 'translateY(0)',
-            transition: 'all 0.5s ease-in-out',
-            visibility: 'visible'
-          }}
-        >
-          <h2>{slides[displayedSlide].name}</h2>
-          <p className={styles.address}>{slides[displayedSlide].address}</p>
+        <div className={styles.content}>
+          <h2>{slides[displayedSlide].title}</h2>
+          <p>{slides[displayedSlide].description}</p>
+          <a href={slides[displayedSlide].link}>자세히 보기</a>
         </div>
       )}
       
       {!imageLoaded && (
         <div className={styles.imageLoading}>
-          <div className={styles.spinner}></div>
+          <div className={styles.loadingSpinner}></div>
         </div>
       )}
       
-      <button className={styles.prev} onClick={goPrev}>&#10094;</button>
-      <button className={styles.next} onClick={goNext}>&#10095;</button>
+      <button className={styles.prevButton} onClick={prevSlide}>
+        &lt;
+      </button>
+      <button className={styles.nextButton} onClick={nextSlide}>
+        &gt;
+      </button>
     </div>
   );
 }
