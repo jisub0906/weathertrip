@@ -191,7 +191,7 @@ export default function AttractionDetail({ attraction, onClose }) {
                 alt={`${attraction.name} 이미지 ${index + 1}`}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                quality={75}
+                quality={1}
                 priority={index < 2}
                 loading={index < 2 ? 'eager' : 'lazy'}
                 style={{
@@ -290,7 +290,7 @@ export default function AttractionDetail({ attraction, onClose }) {
                           alt={`리뷰 이미지 ${index + 1}`}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          quality={75}
+                          quality={1}
                           loading="lazy"
                           style={{
                             objectFit: 'cover',

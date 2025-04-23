@@ -102,7 +102,7 @@ export default function AttractionsList({ attractions, loading, error, weatherCo
                     alt={attraction.name}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    quality={75}
+                    quality={1}
                     priority={attractions.indexOf(attraction) < 2}
                     loading={attractions.indexOf(attraction) < 2 ? 'eager' : 'lazy'}
                     style={{
