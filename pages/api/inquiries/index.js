@@ -7,9 +7,18 @@ export default withErrorHandler(async (req, res) => {
   const inquiries = await getCollection('inquiries');
 
   if (req.method === 'GET') {
-    // 전체 문의 목록 조회
-    const results = await inquiries.find({})
-      .sort({ createdAt: -1 }) // 최신순 정렬
+    const session = await getServerSession(req, res, authOptions);
+    const filters = {};
+
+    if (session?.user?.role !== 'admin') {
+      if (!session?.user?.email) {
+        return res.status(403).json({ message: '로그인이 필요합니다.' });
+      }
+      filters.email = session.user.email; // 일반 사용자는 본인 문의만 조회
+    }
+
+    const results = await inquiries.find(filters)
+      .sort({ createdAt: -1 })
       .toArray();
 
     return res.status(200).json({ inquiries: results });
@@ -26,8 +35,7 @@ export default withErrorHandler(async (req, res) => {
       attractionId,
       attractionName,
       title,
-      content,
-      isSecret
+      content
     } = req.body;
 
     if (!title || !content) {
@@ -50,24 +58,18 @@ export default withErrorHandler(async (req, res) => {
       attractionName: targetType === 'tourist' ? attractionName : null,
       title,
       content,
-      isSecret: !!isSecret,
       status: 'pending',
       email: session.user.email,
-      // userId: toObjectId(session.user.id),  // ← 필요 없으면 그대로 주석
       nickname: session.user.nickname || session.user.name || '익명',
       createdAt: new Date(),
       updatedAt: new Date(),
       answeredAt: null,
-    
-      // ✅ 관리자 답변은 처음에 입력하지 않음
       answers: [],
-    
       feedback: {
         isHelpful: null,
         votedAt: null
       }
     };
-    
 
     const result = await inquiries.insertOne(newInquiry);
 

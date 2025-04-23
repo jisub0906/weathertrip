@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import InquiryForm from '../components/Inquiries/InquiryForm';
 import InquiryList from '../components/Inquiries/InquiryList';
+import InquiryAdminFilter from '../components/Inquiries/InquiryAdminFilter';
 import styles from '../styles/Inquiries.module.css';
 import Header from '../components/Layout/Header';
 
 export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState([]);
   const [attractions, setAttractions] = useState([]);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const { data: session } = useSession();
 
-  // 문의 목록 불러오기
-  const fetchInquiries = async () => {
+  const fetchMyInquiries = async () => {
     try {
       const res = await fetch('/api/inquiries');
       const data = await res.json();
@@ -17,11 +20,23 @@ export default function InquiriesPage() {
         setInquiries(data.inquiries);
       }
     } catch (err) {
-      console.error('문의 목록 불러오기 실패:', err);
+      console.error('내 문의 목록 불러오기 실패:', err);
     }
   };
 
-  // 관광지 전체 목록 불러오기
+  const fetchAdminInquiries = async (filters = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    try {
+      const res = await fetch(`/api/inquiries/admin?${query}`);
+      const data = await res.json();
+      if (data?.inquiries) {
+        setInquiries(data.inquiries);
+      }
+    } catch (err) {
+      console.error('관리자 문의 목록 불러오기 실패:', err);
+    }
+  };
+
   const fetchAttractions = async () => {
     try {
       const res = await fetch('/api/attractions/all');
@@ -34,10 +49,13 @@ export default function InquiriesPage() {
     }
   };
 
-  // 삭제 및 새로고침 핸들러
   const handleDelete = async (idOrCommand) => {
     if (idOrCommand === 'refresh') {
-      fetchInquiries();
+      if (session?.user?.role === 'admin') {
+        fetchAdminInquiries();
+      } else {
+        fetchMyInquiries();
+      }
       return;
     }
 
@@ -47,7 +65,11 @@ export default function InquiriesPage() {
       const res = await fetch(`/api/inquiries/${idOrCommand}`, { method: 'DELETE' });
       if (res.ok) {
         alert('삭제되었습니다.');
-        fetchInquiries();
+        if (session?.user?.role === 'admin') {
+          fetchAdminInquiries();
+        } else {
+          fetchMyInquiries();
+        }
       } else {
         alert('삭제 실패');
       }
@@ -57,7 +79,6 @@ export default function InquiriesPage() {
     }
   };
 
-  // 관광지명 클릭 시 map으로 이동 + 자동 포커싱
   const handleAttractionClick = (id) => {
     const selected = attractions.find((a) => a._id?.toString?.() === id);
     if (selected) {
@@ -69,25 +90,50 @@ export default function InquiriesPage() {
     }
   };
 
+  const handleSearch = (keyword) => {
+    setSearchKeyword(keyword);
+  };
+
   useEffect(() => {
-    fetchInquiries();
     fetchAttractions();
   }, []);
+
+  useEffect(() => {
+    if (session?.user?.role === 'admin') {
+      fetchAdminInquiries();
+    } else {
+      fetchMyInquiries();
+    }
+  }, [session]);
+
+  const filteredAttractions = attractions.filter((a) =>
+    a.name.toLowerCase().includes(searchKeyword.toLowerCase())
+  );
 
   return (
     <>
       <Header />
       <div className={styles.inquiriesPage}>
-        <h1 className={styles.pageTitle}>고객센터</h1>
+        <h1 className={styles.pageTitle}>문의하기</h1>
 
-        {/* 문의 등록 폼 */}
-        <InquiryForm
-          attractions={attractions}
-          onSearch={() => { }}
-          onSubmitted={fetchInquiries}
-        />
+        {session?.user?.role === 'admin' ? (
+          <InquiryAdminFilter
+            onFilter={fetchAdminInquiries}
+            attractions={filteredAttractions}
+            onSearch={handleSearch}
+          />
+        ) : (
+          <InquiryForm
+            attractions={attractions}
+            onSearch={handleSearch}
+            onSubmitted={fetchMyInquiries}
+          />
+        )}
 
-        {/* 문의 리스트 */}
+        <h1 className={styles.pageTitle}>
+          {session?.user?.role === 'admin' ? '전체 문의 리스트' : '내 문의 리스트'}
+        </h1>
+
         <InquiryList
           inquiries={inquiries}
           onDelete={handleDelete}
