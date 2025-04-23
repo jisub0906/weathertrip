@@ -1,4 +1,4 @@
-import { getCollection, toObjectId } from '../../../lib/db/mongodb';
+import { getCollection, ObjectId, toObjectId } from '../../../lib/db/mongodb';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { withErrorHandler, validationError, authError } from '../../../lib/middlewares/errorHandler';
@@ -51,19 +51,23 @@ export default withErrorHandler(async (req, res) => {
       title,
       content,
       isSecret: !!isSecret,
-      answer: '',
       status: 'pending',
       email: session.user.email,
-      userId: toObjectId(session.user.id),
+      // userId: toObjectId(session.user.id),  // ← 필요 없으면 그대로 주석
       nickname: session.user.nickname || session.user.name || '익명',
       createdAt: new Date(),
       updatedAt: new Date(),
       answeredAt: null,
+    
+      // ✅ 관리자 답변은 처음에 입력하지 않음
+      answers: [],
+    
       feedback: {
         isHelpful: null,
         votedAt: null
       }
     };
+    
 
     const result = await inquiries.insertOne(newInquiry);
 

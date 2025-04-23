@@ -102,7 +102,7 @@ export default function MyPage() {
             <Header />
             <div className={styles.container}>
                 <div className={styles.mypageBox}>
-                    <h1 className={styles.title}>회원정보 수정</h1>
+                    <h1 className={styles.title}>회원정보</h1>
                     <form onSubmit={(e) => e.preventDefault()}>
                         <div className={styles.formGroup}>
                             <label className={styles.label} htmlFor="name">이름</label>
@@ -153,7 +153,7 @@ export default function MyPage() {
                                 </>
                             ) : (
                                 <>
-                                    <button type="button" className={styles.editBtn} onClick={() => setIsEditing(true)}>회원정보 수정</button>
+                                    <button type="button" className={styles.editBtn} onClick={() => setIsEditing(true)}>정보 수정</button>
                                     <button type="button" className={styles.deleteBtn} onClick={() => setIsDeleting(true)}>회원 탈퇴</button>
                                 </>
                             )}
@@ -170,7 +170,7 @@ export default function MyPage() {
                                     <input type="password" id="deletePassword" className={styles.input} value={withdrawData.password} onChange={(e) => setWithdrawData((prev) => ({ ...prev, password: e.target.value }))} />
                                 </div>
                                 <div className={styles.buttonGroup}>
-                                    <button type="button" className={styles.deleteBtn} onClick={handleWithdraw}>탈퇴하기</button>
+                                    <button type="button" className={styles.deleteBtn} onClick={handleWithdraw}>탈퇴</button>
                                     <button type="button" className={styles.editBtn} onClick={() => setIsDeleting(false)}>취소</button>
                                 </div>
                             </div>

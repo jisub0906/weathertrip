@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import InquiryForm from '../components/Inquiries/InquiryForm';
 import InquiryList from '../components/Inquiries/InquiryList';
 import styles from '../styles/Inquiries.module.css';
-import Header from '@/components/Layout/Header';
+import Header from '../components/Layout/Header';
 
 export default function InquiriesPage() {
   const [inquiries, setInquiries] = useState([]);
@@ -34,12 +34,17 @@ export default function InquiriesPage() {
     }
   };
 
-  // 삭제 핸들러
-  const handleDelete = async (id) => {
+  // 삭제 및 새로고침 핸들러
+  const handleDelete = async (idOrCommand) => {
+    if (idOrCommand === 'refresh') {
+      fetchInquiries();
+      return;
+    }
+
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
     try {
-      const res = await fetch(`/api/inquiries/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/inquiries/${idOrCommand}`, { method: 'DELETE' });
       if (res.ok) {
         alert('삭제되었습니다.');
         fetchInquiries();
@@ -64,7 +69,6 @@ export default function InquiriesPage() {
     }
   };
 
-  // 초기 로딩 시 목록 불러오기
   useEffect(() => {
     fetchInquiries();
     fetchAttractions();
@@ -72,24 +76,24 @@ export default function InquiriesPage() {
 
   return (
     <>
-    <Header />
-    <div className={styles.inquiriesPage}>
-      <h1 className={styles.pageTitle}>고객센터</h1>
+      <Header />
+      <div className={styles.inquiriesPage}>
+        <h1 className={styles.pageTitle}>고객센터</h1>
 
-      {/* 문의 등록 폼 */}
-      <InquiryForm
-        attractions={attractions}
-        onSearch={() => { }}
-        onSubmitted={fetchInquiries}
-      />
+        {/* 문의 등록 폼 */}
+        <InquiryForm
+          attractions={attractions}
+          onSearch={() => { }}
+          onSubmitted={fetchInquiries}
+        />
 
-      {/* 문의 리스트 */}
-      <InquiryList
-        inquiries={inquiries}
-        onDelete={handleDelete}
-        onAttractionClick={handleAttractionClick}
-      />
-    </div>
+        {/* 문의 리스트 */}
+        <InquiryList
+          inquiries={inquiries}
+          onDelete={handleDelete}
+          onAttractionClick={handleAttractionClick}
+        />
+      </div>
     </>
   );
 }
