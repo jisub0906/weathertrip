@@ -416,12 +416,10 @@ const KakaoMap = forwardRef(function KakaoMap({
           showCurrentLocationMarker(center, map);
         }
 
-        // 약간의 지연 후 관광지 정보 가져오기
-        setTimeout(() => {
-          if (!unmounted) {
-            fetchAllAttractions(map);
-          }
-        }, 1000);
+        // 관광지 정보 가져오기
+        if (!unmounted) {
+          fetchAllAttractions(map);
+        }
       } catch (error) {
         console.error('카카오맵 초기화 중 오류 발생:', error);
         alert('지도를 불러오는데 문제가 발생했습니다. 페이지를 새로고침 해주세요.');
