@@ -75,7 +75,7 @@ export default async function handler(req, res) {
             'attraction.name': 1,
             'attraction.images': 1,
             'user._id': 1,
-            'user.name': 1,
+            'user.nickname': 1,
             'user.profileImage': 1
           }
         }

@@ -380,7 +380,7 @@ export default function Community() {
     <div className={styles.reviewCard}>
       {/* User name & date */}
       <div className={styles.reviewHeader}>
-        <span className={styles.userName}>{review.user?.name || "익명"}</span>
+        <span className={styles.userName}>{review.user?.nickname || "익명"}</span>
         <span className={styles.date}>{formatDate(review.createdAt)}</span>
       </div>
 
