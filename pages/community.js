@@ -5,7 +5,7 @@ import Image from "next/image";
 import styles from "../styles/Community.module.css";
 import Header from "../components/Layout/Header";
 import LanguageToggleButton from "../components/Translate/LanguageToggleButton";
-import Quiz from '../components/Quiz/Quiz';
+import Quiz from "../components/Quiz/Quiz";
 
 export default function Community() {
   const { data: session } = useSession();
@@ -14,55 +14,134 @@ export default function Community() {
   const [hasMore, setHasMore] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { ref, inView } = useInView();
-  const [selectedLang, setSelectedLang] = useState('');
+  const [selectedLang, setSelectedLang] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
-  const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' 또는 'quiz'
+  const [activeTab, setActiveTab] = useState("reviews"); // 'reviews' 또는 'quiz'
+  const [translatedQuizData, setTranslatedQuizData] = useState([]);
+  const [translatedSubtitle, setTranslatedSubtitle] = useState(
+    "한국의 관광지에 대한 퀴즈를 풀어보세요!"
+  );
   const [quizData, setQuizData] = useState([]);
   const [quizLoading, setQuizLoading] = useState(false);
-  
+
   // 리뷰 번역을 위한 언어 선택
   const translateReviewContent = async (text, lang) => {
     try {
-      // 화살표 기호를 임시로 제거하고 번역
-      const textToTranslate = text.replace(' →', '');
-      
-      const res = await fetch('/api/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      if (!text || !lang) return text; // 필터링
+  
+      const textToTranslate = text.replace(" →", "");
+  
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: textToTranslate, targetLang: lang }),
       });
+  
+      // ✅ 응답 상태 확인
+      if (!res.ok) {
+        const errorText = await res.text(); // 텍스트로 응답 받기
+        console.error("DeepL 응답 오류:", {
+          status: res.status,
+          message: errorText,
+        });
+        return text; // 번역 실패 시 원본 반환
+      }
+  
       const result = await res.json();
-      
-      // 번역된 텍스트에 화살표 추가 (원본 텍스트가 화살표를 포함하고 있었을 경우에만)
+  
       const translatedText = result.translations?.[0]?.text || text;
-      return text.includes('→') ? `${translatedText} →` : translatedText;
+      return text.includes("→") ? `${translatedText} →` : translatedText;
+  
     } catch (error) {
-      console.error('번역 실패:', error);
+      console.error("번역 실패:", error);
       return text;
     }
   };
-  
+
+  // 퀴즈 번역을 위한 언어 선택
+  const translateQuizContent = async (quiz, lang) => {
+    try {
+      const translatedQuestion = await translateReviewContent(
+        quiz.question,
+        lang
+      );
+      const translatedOptions = await Promise.all(
+        quiz.options.map((option) => translateReviewContent(option, lang))
+      );
+      const translatedExplanation = await translateReviewContent(
+        quiz.explanation,
+        lang
+      );
+
+      return {
+        ...quiz,
+        question: translatedQuestion,
+        options: translatedOptions,
+        explanation: translatedExplanation,
+      };
+    } catch (error) {
+      console.error("퀴즈 번역 실패:", error);
+      return quiz;
+    }
+  };
+
   const originalReviewsRef = useRef(new Map());
+
+  // 퀴즈 번역을 위한 언어 선택
+  useEffect(() => {
+    if (!selectedLang || quizData.length === 0 || selectedLang === 'KO') {
+      setTranslatedQuizData([]); // 초기화
+      return;
+    }
+  
+    const translateAllQuizzes = async () => {
+      setIsTranslating(true);
+      try {
+        // ✅ 번역할 퀴즈를 일부로 제한 (예: 앞에서 3문제만)
+        const sliceSize = 3;
+        const limitedQuizzes = quizData.slice(0, sliceSize);
+  
+        const translated = await Promise.all(
+          limitedQuizzes.map((quiz) => translateQuizContent(quiz, selectedLang))
+        );
+  
+        const subtitle = await translateReviewContent(
+          '한국의 관광지에 대한 퀴즈를 풀어보세요!',
+          selectedLang
+        );
+  
+        setTranslatedQuizData(translated);
+        setTranslatedSubtitle(subtitle);
+      } catch (err) {
+        console.error('퀴즈 번역 오류:', err);
+      } finally {
+        setIsTranslating(false);
+      }
+    };
+  
+    translateAllQuizzes();
+  }, [selectedLang, quizData]);
 
   // 리뷰가 변경되거나 언어가 선택되면 번역 실행
   useEffect(() => {
     if (!selectedLang || reviews.length === 0 || isTranslating) return;
-  
-    if (selectedLang === 'KO') {
+
+    if (selectedLang === "KO") {
       // 한국어 선택 시 원본 복원
       const originalReviews = Array.from(originalReviewsRef.current.values());
       setReviews(originalReviews);
       return;
     }
-  
+
     // 번역이 필요한 리뷰만 필터링
-    const untranslatedReviews = reviews.filter(review => 
-      !review.translations?.[selectedLang] || 
-      !review.attraction.translations?.[selectedLang]
+    const untranslatedReviews = reviews.filter(
+      (review) =>
+        !review.translations?.[selectedLang] ||
+        !review.attraction.translations?.[selectedLang]
     );
-  
+
     if (untranslatedReviews.length === 0) return;
-  
+
     // 번역 실행
     const translateAll = async () => {
       setIsTranslating(true);
@@ -73,45 +152,54 @@ export default function Community() {
             if (review.translations?.[selectedLang]) {
               return review;
             }
-            
+
             // 원본 저장
             if (!originalReviewsRef.current.has(review._id)) {
               originalReviewsRef.current.set(review._id, { ...review });
             }
-            
+
             // 새로운 번역 수행
-            const translatedContent = await translateReviewContent(review.content, selectedLang);
-            const translatedName = await translateReviewContent(review.attraction.name, selectedLang);
-            const translatedLabel = await translateReviewContent("관광지 상세보기 →", selectedLang);
-            
+            const translatedContent = await translateReviewContent(
+              review.content,
+              selectedLang
+            );
+            const translatedName = await translateReviewContent(
+              review.attraction.name,
+              selectedLang
+            );
+            const translatedLabel = await translateReviewContent(
+              "관광지 상세보기 →",
+              selectedLang
+            );
+
             return {
               ...review,
               content: translatedContent,
               translations: {
                 ...(review.translations || {}),
-                [selectedLang]: translatedContent
+                [selectedLang]: translatedContent,
               },
               attraction: {
                 ...review.attraction,
                 name: translatedName,
                 translations: {
                   ...(review.attraction.translations || {}),
-                  [selectedLang]: translatedName
-                }
+                  [selectedLang]: translatedName,
+                },
               },
-              translatedLabel
+              translatedLabel,
             };
           })
         );
-        
+
         setReviews(translatedReviews);
       } catch (error) {
-        console.error('번역 중 오류 발생:', error);
+        console.error("번역 중 오류 발생:", error);
       } finally {
         setIsTranslating(false);
       }
     };
-  
+
     translateAll();
   }, [selectedLang, reviews]);
 
@@ -119,7 +207,7 @@ export default function Community() {
   const lastTimestampRef = useRef(null);
   const lastIdRef = useRef(null);
   const reviewsSetRef = useRef(new Set()); // Set to prevent duplicates
-  
+
   // Pull-to-refresh state
   const [pullStartY, setPullStartY] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
@@ -196,7 +284,7 @@ export default function Community() {
 
   // Infinite scroll
   useEffect(() => {
-    if (inView && !loading && hasMore && activeTab === 'reviews') {
+    if (inView && !loading && hasMore && activeTab === "reviews") {
       fetchReviews();
     }
   }, [inView, loading, hasMore, activeTab]);
@@ -214,7 +302,7 @@ export default function Community() {
         currentScrollY === 0 &&
         lastScrollY > currentScrollY &&
         !isRefreshing &&
-        activeTab === 'reviews'
+        activeTab === "reviews"
       ) {
         clearTimeout(refreshTimeout);
         refreshTimeout = setTimeout(() => {
@@ -241,7 +329,7 @@ export default function Community() {
   };
 
   const handleTouchMove = (e) => {
-    if (pullStartY === 0 || isRefreshing || activeTab !== 'reviews') return;
+    if (pullStartY === 0 || isRefreshing || activeTab !== "reviews") return;
 
     const pullDistance = e.touches[0].clientY - pullStartY;
     if (pullDistance > 0 && window.scrollY === 0) {
@@ -252,7 +340,7 @@ export default function Community() {
   };
 
   const handleTouchEnd = async () => {
-    if (!isPulling || isRefreshing || activeTab !== 'reviews') return;
+    if (!isPulling || isRefreshing || activeTab !== "reviews") return;
 
     setIsPulling(false);
     setPullStartY(0);
@@ -292,10 +380,8 @@ export default function Community() {
     <div className={styles.reviewCard}>
       {/* User name & date */}
       <div className={styles.reviewHeader}>
-        <span className={styles.userName}>{review.user?.name || '익명'}</span>
-        <span className={styles.date}>
-          {formatDate(review.createdAt)}
-        </span>
+        <span className={styles.userName}>{review.user?.name || "익명"}</span>
+        <span className={styles.date}>{formatDate(review.createdAt)}</span>
       </div>
 
       {/* Container that wraps attraction and review */}
@@ -326,7 +412,7 @@ export default function Community() {
                   </h3>
                 </div>
                 <div className={styles.viewDetailText}>
-                {review.translatedLabel || "관광지 상세보기 →"}
+                  {review.translatedLabel || "관광지 상세보기 →"}
                 </div>
               </div>
 
@@ -357,9 +443,9 @@ export default function Community() {
   const fetchQuizData = async () => {
     try {
       setQuizLoading(true);
-      const response = await fetch('/api/quiz/quiz');
+      const response = await fetch("/api/quiz/quiz");
       if (!response.ok) {
-        throw new Error('퀴즈 데이터를 가져오는데 실패했습니다');
+        throw new Error("퀴즈 데이터를 가져오는데 실패했습니다");
       }
       const data = await response.json();
       setQuizData(data);
@@ -372,7 +458,7 @@ export default function Community() {
 
   // 탭이 변경될 때 해당 데이터 로드
   useEffect(() => {
-    if (activeTab === 'quiz' && quizData.length === 0) {
+    if (activeTab === "quiz" && quizData.length === 0) {
       fetchQuizData();
     }
   }, [activeTab]);
@@ -414,23 +500,27 @@ export default function Community() {
 
       <main className={styles.container}>
         <h1 className={styles.title}>커뮤니티</h1>
-        
+
         <div className={styles.tabContainer}>
-          <button 
-            className={`${styles.tabButton} ${activeTab === 'reviews' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('reviews')}
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "reviews" ? styles.activeTab : ""
+            }`}
+            onClick={() => setActiveTab("reviews")}
           >
             리뷰
           </button>
-          <button 
-            className={`${styles.tabButton} ${activeTab === 'quiz' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('quiz')}
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "quiz" ? styles.activeTab : ""
+            }`}
+            onClick={() => setActiveTab("quiz")}
           >
             퀴즈
           </button>
         </div>
 
-        {activeTab === 'reviews' ? (
+        {activeTab === "reviews" ? (
           <div className={styles.reviewList}>
             {reviews.map((review, index) => (
               <ReviewCard
@@ -463,8 +553,27 @@ export default function Community() {
               </div>
             ) : (
               <>
-                <p className={styles.subtitle}>한국의 관광지에 대한 퀴즈를 풀어보세요!</p>
-                <Quiz questions={quizData} />
+                <p className={styles.subtitle}>
+                  {isTranslating ? "번역 중..." : translatedSubtitle}
+                </p>
+                {quizData.length === 0 ? (
+                  <div className={styles.loading}>
+                    퀴즈 데이터를 불러올 수 없습니다.
+                  </div>
+                ) : isTranslating ? (
+                  <div className={styles.loading}>
+                    <div className={styles.loadingSpinner} />
+                    번역 중...
+                  </div>
+                ) : (
+                  <Quiz
+                    questions={
+                      translatedQuizData.length > 0
+                        ? translatedQuizData
+                        : quizData
+                    }
+                  />
+                )}
               </>
             )}
           </div>
