@@ -16,6 +16,12 @@
   max-width: 400px;
 }
 
+.nicknameInfo {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
 .title {
   text-align: center;
   font-size: 1.8rem;

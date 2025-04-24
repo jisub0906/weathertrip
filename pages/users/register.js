@@ -186,6 +186,7 @@ export default function Register() {
                 value={formData.nickname}
                 onChange={handleChange}
               />
+              <p className={styles.nicknameInfo}>&#9940; 닉네임은 최초 설정 이후 변경이 불가능합니다.</p>
               {errors.nickname && <p className={styles.errorText}>{errors.nickname}</p>}
             </div>
 

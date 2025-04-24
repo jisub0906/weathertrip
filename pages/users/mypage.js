@@ -124,22 +124,22 @@ export default function MyPage() {
                         )}
                         <div className={styles.formGroup}>
                             <label className={styles.label} htmlFor="nickname">닉네임</label>
-                            <input type="text" id="nickname" name="nickname" className={styles.input} value={editData.nickname || ''} onChange={handleChange} disabled={!isEditing} />
+                            <input type="text" id="nickname" name="nickname" className={styles.input} value={editData.nickname || ''} onChange={handleChange} disabled/>
                         </div>
                         <div className={styles.formGroup}>
                             <label className={styles.label}>성별</label>
                             <div className={styles.radioGroup}>
                                 <label className={styles.radioLabel}>
-                                    <input type="radio" name="gender" value="남성" checked={editData.gender === '남성'} onChange={handleChange} disabled={!isEditing} /> 남성
+                                    <input type="radio" name="gender" value="남성" checked={editData.gender === '남성'} onChange={handleChange} disabled/> 남성
                                 </label>
                                 <label className={styles.radioLabel}>
-                                    <input type="radio" name="gender" value="여성" checked={editData.gender === '여성'} onChange={handleChange} disabled={!isEditing} /> 여성
+                                    <input type="radio" name="gender" value="여성" checked={editData.gender === '여성'} onChange={handleChange} disabled/> 여성
                                 </label>
                             </div>
                         </div>
                         <div className={styles.formGroup}>
                             <label className={styles.label} htmlFor="birthdate">생년월일</label>
-                            <input type="date" id="birthdate" name="birthdate" className={styles.input} value={editData.birthdate || ''} onChange={handleChange} disabled={!isEditing} />
+                            <input type="date" id="birthdate" name="birthdate" className={styles.input} value={editData.birthdate || ''} onChange={handleChange} disabled/>
                         </div>
                         <div className={styles.formGroup}>
                             <label className={styles.label} htmlFor="phone">전화번호</label>
