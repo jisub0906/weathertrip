@@ -48,7 +48,7 @@ export default async function handler(req, res) {
                 images: 1,
                 createdAt: 1,
                 'user._id': 1,
-                'user.name': 1,
+                'user.nickname': 1,
                 'user.profileImage': 1
               }
             }

@@ -275,7 +275,7 @@ export default function AttractionDetail({ attraction, onClose }) {
               <div key={review._id} className={styles.reviewItem}>
                 <div className={styles.reviewHeader}>
                   <div className={styles.userInfo}>
-                    <span className={styles.userName}>{review.user?.name || '익명'}</span>
+                    <span className={styles.userName}>{review.user?.nickname || '익명'}</span>
                   </div>
                 </div>
                 <div className={styles.reviewContent}>
