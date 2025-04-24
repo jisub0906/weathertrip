@@ -60,7 +60,7 @@ export default withErrorHandler(async (req, res) => {
       content,
       status: 'pending',
       email: session.user.email,
-      nickname: session.user.nickname || session.user.name || '익명',
+      nickname: session.user.nickname ,
       createdAt: new Date(),
       updatedAt: new Date(),
       answeredAt: null,

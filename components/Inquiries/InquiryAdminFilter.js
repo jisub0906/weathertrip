@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from '../../styles/Inquiries.module.css';
 import SearchBar from '../Search/SearchBar';
 
@@ -6,13 +6,15 @@ const InquiryAdminFilter = ({ onFilter, attractions = [], onSearch }) => {
   const [type, setType] = useState('');
   const [locationId, setLocationId] = useState('');
   const [status, setStatus] = useState('');
+  const [email, setEmail] = useState(''); // ✅ 이메일 검색 추가
 
   const handleFilter = () => {
     const filters = {};
     if (type) filters.type = type;
     if (locationId) filters.locationId = locationId;
     if (status) filters.status = status;
-    onFilter(filters); // 부모에게 전달
+    if (email.trim()) filters.email = email.trim(); // ✅ 필터에 추가
+    onFilter(filters);
   };
 
   return (
@@ -44,7 +46,6 @@ const InquiryAdminFilter = ({ onFilter, attractions = [], onSearch }) => {
           initialValue={''}
           disabled={type !== 'tourist'}
         />
-
         <select
           className={styles.placeSelect}
           value={locationId}
@@ -72,6 +73,18 @@ const InquiryAdminFilter = ({ onFilter, attractions = [], onSearch }) => {
           <option value="pending">답변 대기</option>
           <option value="answered">답변 완료</option>
         </select>
+      </div>
+
+      {/* 이메일로 검색 */}
+      <div className={styles.formGroup}>
+        <label className={styles.label}>이메일로 검색</label>
+        <input
+          type="text"
+          className={styles.input}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="고객 이메일을 입력하세요"
+        />
       </div>
 
       <div className={styles.buttonRow}>
