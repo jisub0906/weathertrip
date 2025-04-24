@@ -52,9 +52,9 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.overlay .address {
+.overlay .location {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
   opacity: 0;
   transform: translateY(10px);
   animation: fadeInUp 0.5s ease-out forwards;
@@ -191,8 +191,8 @@
     font-size: 1.5rem;
   }
   
-  .overlay .address {
-    font-size: 0.9rem;
+  .overlay .location {
+    font-size: 1.1rem;
   }
 
   .overlay .description {
@@ -221,17 +221,13 @@
     margin-bottom: 0.3rem;
   }
   
-  .overlay .address {
-    font-size: 0.9rem;
+  .overlay .location {
+    font-size: 1rem;
   }
 
   .overlay .description {
-    font-size: 1rem;
+    font-size: 0.8rem;
     margin-top: 0.3rem;
-    -webkit-line-clamp: 2;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
   
   .prev,
@@ -269,16 +265,12 @@
     margin-bottom: 0.25rem;
   }
   
-  .overlay .address {
-    font-size: 0.75rem;
+  .overlay .location {
+    font-size: 0.9rem;
   }
 
   .overlay .description {
     font-size: 0.7rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
     margin-top: 0.25rem;
   }
   

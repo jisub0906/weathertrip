@@ -1,5 +1,4 @@
 import { getDatabase } from '../../../lib/db/mongodb';
-import { getRecommendedAttractionType } from '../../../utils/weather';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
