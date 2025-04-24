@@ -25,12 +25,10 @@ export default function Header() {
     };
   }, []);
 
-  // 현재 경로에 따라 활성 링크 확인
   const isActive = (path) => {
     return router.pathname === path;
   };
 
-  // 스크롤 이벤트 리스너
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -90,10 +88,18 @@ export default function Header() {
                 </button>
                 {isDropdownOpen && (
                   <div className={styles.dropdownMenu}>
-                    <Link href="/users/mypage" className={styles.dropdownItem}>회원정보</Link>
-                    <Link href="/inquiries" className={styles.dropdownItem}>고객센터</Link>
-                    <Link href="/users/mypage" className={styles.dropdownItem}>FAQ</Link>
-
+                    {session.user.role === 'admin' ? (
+                      <>
+                        <Link href="/admin/users" className={styles.dropdownItem}>회원관리</Link>
+                        <Link href="/inquiries" className={styles.dropdownItem}>고객센터(관리자)</Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/users/mypage" className={styles.dropdownItem}>회원정보</Link>
+                        <Link href="/inquiries" className={styles.dropdownItem}>고객센터</Link>
+                        <Link href="/faq" className={styles.dropdownItem}>FAQ</Link>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

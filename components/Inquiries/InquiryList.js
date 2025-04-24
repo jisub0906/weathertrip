@@ -1,5 +1,6 @@
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
+import Pagination from '../Page/Pagination'; // ✅ 추가
 import styles from '../../styles/Inquiries.module.css';
 
 export default function InquiryList({ inquiries, onDelete, onAttractionClick, onFilter }) {
@@ -7,8 +8,14 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
   const [openId, setOpenId] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [replyText, setReplyText] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(inquiries.length / itemsPerPage);
 
   const toggleOpen = (id) => setOpenId((prev) => (prev === id ? null : id));
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentInquiries = inquiries.slice(startIndex, startIndex + itemsPerPage);
 
   const safeRefresh = () => {
     if (isRefreshing) return;
@@ -19,7 +26,7 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
 
   return (
     <div className={styles.inquiryList}>
-      {inquiries.map((inquiry) => {
+      {currentInquiries.map((inquiry) => {
         const isOwner = session?.user?.email === inquiry.email;
         const isAdmin = session?.user?.role === 'admin';
         const isOpen = openId === inquiry._id;
@@ -123,7 +130,6 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
                   </div>
                 ))}
 
-                {/* 삭제된 답변만 있을 경우에만 다시 작성 가능 */}
                 {isAdmin && !hasVisibleAnswer && (
                   <div className={styles.answerBox}>
                     <textarea
@@ -163,6 +169,13 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
           </div>
         );
       })}
+
+      {/* ✅ 페이징 하단 추가 */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
