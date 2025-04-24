@@ -60,7 +60,9 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
               >
                 {displayName}
               </span>
-              <span className={styles.email}>({inquiry.email})</span>
+              <span className={styles.date}>
+                {new Date(inquiry.createdAt).toLocaleDateString()}
+              </span>
             </div>
 
             <div className={styles.titleRow}>
@@ -79,12 +81,16 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
 
                 {inquiry.answers?.map((ans) => (
                   <div key={ans._id} className={styles.answerBox}>
-                    <div className={styles.answerLabel}>💬 관리자 답변</div>
+                    <div className={styles.answerLabelRow}>
+                      <span className={styles.answerLabel}>💬 관리자 답변</span>
+                      <span className={styles.date}>
+                        {new Date(ans.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+
                     <div className={styles.answerContent}>
                       {ans.isDeleted ? (
-                        <span className={styles.deletedAnswer}>
-                          🗑 삭제된 답변입니다.
-                        </span>
+                        <span className={styles.deletedAnswer}>🗑 삭제된 답변입니다.</span>
                       ) : (
                         ans.text
                       )}

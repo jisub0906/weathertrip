@@ -38,32 +38,49 @@
 
 .selectFull,
 .input,
-.textarea,
 .placeSelect {
+  height: 36px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
   box-sizing: border-box;
+  width: 100%;
 }
 
-.selectFull:disabled,
-.placeSelect:disabled,
-.searchInput:disabled {
-  background-color: #f5f5f5;
-  color: #aaa;
-  cursor: not-allowed;
+.textarea {
+  min-height: 80px; /* ✅ 최소 3~4줄 */
+  height: 100px;     /* ✅ 기본 5줄 정도 */
+  resize: vertical;
+  overflow-y: auto;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
+/* ✅ 높이 통일 */
+.form select {
+  height: 36px;
+}
+
+.form select:disabled {
+  height: 36px;
+}
+
+/* ✅ 관광지 검색창 + 드롭다운 (모바일 대응) */
 .searchRow {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
 }
-
+.searchRow > * {
+  width: 100%;
+}
 .searchRow input,
 .searchRow select {
-  flex: 1;
   height: 36px;
   font-size: 14px;
   padding: 0 10px;
@@ -72,13 +89,12 @@
   box-sizing: border-box;
 }
 
-/* ✅ InquiryList 스타일 */
+/* ✅ 기타 UI 요소들 (그대로 유지) */
 .inquiryList {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
-
 .inquiryCard {
   background-color: #fff;
   border: 1px solid #ddd;
@@ -86,13 +102,10 @@
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s ease;
-  border-left: 4px solid #ffa500;
 }
-
 .inquiryCard:hover {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
 }
-
 .inquiryType {
   display: flex;
   align-items: center;
@@ -102,11 +115,6 @@
   margin-bottom: 4px;
   gap: 8px;
 }
-
-.inquiryTypeIcon {
-  color: #444;
-}
-
 .inquiryHeader {
   display: flex;
   justify-content: space-between;
@@ -114,50 +122,38 @@
   font-size: 14px;
   color: #666;
 }
-
 .nickname {
   font-weight: 600;
   color: #444;
 }
-
 .date {
   font-size: 13px;
   color: #888;
 }
-
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
 .title {
   font-weight: bold;
   font-size: 15px;
-  margin-bottom: 6px;
+  margin-right: 8px;
   color: #222;
 }
-
 .content {
   white-space: pre-wrap;
   line-height: 1.5;
   font-size: 14px;
   color: #444;
 }
-
-.attractionName {
-  color: #0074cc;
-  cursor: pointer;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.attractionName:hover {
-  color: #005fa3;
-}
-
-/* ✅ 상태 뱃지 */
 .badgeAnswered {
   margin-left: 8px;
   font-size: 12px;
   color: green;
   font-weight: 600;
 }
-
 .badgePending {
   margin-left: 8px;
   font-size: 12px;
@@ -165,70 +161,35 @@
   font-weight: 600;
 }
 
-/* ✅ 삭제 버튼들 */
-.deleteButton,
-.deleteInquiryButton {
-  background-color: #f2f2f2;
-  color: #444;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.deleteButton:hover,
-.deleteInquiryButton:hover {
-  background-color: #e0e0e0;
-}
-
-/* ✅ 답변 계층 구조 */
+/* ✅ 관리자 답변 */
 .answerBox {
-  background-color: #f0f8ff;
+  background-color: #f8fbff;
   padding: 12px;
-  border-left: 4px solid #0074cc;
   border-radius: 6px;
   margin-top: 12px;
 }
-
+.answerLabelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
 .answerLabel {
   font-weight: bold;
   margin-bottom: 4px;
   color: #0074cc;
 }
-
 .answerContent {
   color: #333;
   font-size: 14px;
   white-space: pre-wrap;
 }
-
 .deletedAnswer {
   font-style: italic;
   color: #888;
 }
 
-.cardActions {
-  border-top: 1px solid #ddd;
-  margin-top: 16px;
-  padding-top: 12px;
-  text-align: right;
-}
-
-.textarea {
-  width: 100%;
-  height: 80px;
-  resize: none;
-  overflow-y: auto;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-/* ✅ 공통 버튼 */
+/* ✅ 버튼 */
 .submitButton {
   padding: 10px 18px;
   font-size: 14px;
@@ -240,16 +201,13 @@
   transition: background-color 0.2s;
   width: auto;
 }
-
 .submitButton:hover {
   background-color: #1976d2;
 }
-
 .submitButton:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
-
 .buttonRow {
   display: flex;
   justify-content: center;
@@ -257,7 +215,6 @@
   margin-top: 12px;
   flex-wrap: wrap;
 }
-
 .buttonRowRight {
   display: flex;
   justify-content: flex-end;
@@ -265,7 +222,6 @@
   margin-top: 12px;
   flex-wrap: wrap;
 }
-
 .blueButton {
   padding: 10px 18px;
   font-size: 14px;
@@ -276,11 +232,9 @@
   cursor: pointer;
   transition: background-color 0.2s;
 }
-
 .blueButton:hover {
   background-color: #1976d2;
 }
-
 .grayButton {
   padding: 10px 18px;
   font-size: 14px;
@@ -291,7 +245,6 @@
   cursor: pointer;
   transition: background-color 0.2s;
 }
-
 .grayButton:hover {
   background-color: #e0e0e0;
 }

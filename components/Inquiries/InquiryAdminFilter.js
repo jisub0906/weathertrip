@@ -47,7 +47,7 @@ const InquiryAdminFilter = ({ onFilter, attractions = [], onSearch }) => {
           disabled={type !== 'tourist'}
         />
         <select
-          className={styles.placeSelect}
+          className={`${styles.selectFull} ${styles.placeSelect}`}
           value={locationId}
           onChange={(e) => setLocationId(e.target.value)}
           disabled={type !== 'tourist'}
@@ -73,18 +73,6 @@ const InquiryAdminFilter = ({ onFilter, attractions = [], onSearch }) => {
           <option value="pending">답변 대기</option>
           <option value="answered">답변 완료</option>
         </select>
-      </div>
-
-      {/* 이메일로 검색 */}
-      <div className={styles.formGroup}>
-        <label className={styles.label}>이메일로 검색</label>
-        <input
-          type="text"
-          className={styles.input}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="고객 이메일을 입력하세요"
-        />
       </div>
 
       <div className={styles.buttonRow}>
