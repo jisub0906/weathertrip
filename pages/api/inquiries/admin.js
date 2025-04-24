@@ -14,7 +14,7 @@ export default withErrorHandler(async (req, res) => {
     return res.status(403).json({ message: '관리자만 접근할 수 있습니다.' });
   }
 
-  const { type, locationId, status } = req.query;
+  const { type, locationId, status, email } = req.query;
   const filter = {};
 
   if (type === 'general' || type === 'tourist') {
@@ -27,6 +27,10 @@ export default withErrorHandler(async (req, res) => {
 
   if (status === 'pending' || status === 'answered') {
     filter.status = status;
+  }
+
+  if (email?.trim()) {
+    filter.email = email.trim(); // ✅ 이메일 필터 추가
   }
 
   const inquiries = await getCollection('inquiries');

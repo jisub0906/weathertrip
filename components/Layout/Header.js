@@ -85,7 +85,7 @@ export default function Header() {
                   className={`${styles.navItem} ${styles.dropdownTrigger}`}
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 >
-                  {session.user.name} 님&nbsp;
+                  {session.user.nickname} ({session.user.name}) 님&nbsp;
                   <span className={styles.hamburgerIcon}>☰</span>
                 </button>
                 {isDropdownOpen && (

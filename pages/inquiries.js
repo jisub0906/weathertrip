@@ -12,6 +12,10 @@ export default function InquiriesPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const { data: session } = useSession();
 
+  useEffect(() => {
+    console.log('현재 세션 유저:', session?.user);
+  }, [session]);
+
   const fetchMyInquiries = async () => {
     try {
       const res = await fetch('/api/inquiries');
@@ -94,6 +98,10 @@ export default function InquiriesPage() {
     setSearchKeyword(keyword);
   };
 
+  const handleAdminFilter = (filters) => {
+    fetchAdminInquiries(filters); // ✅ 필터 from 필터 컴포넌트 or InquiryList
+  };
+
   useEffect(() => {
     fetchAttractions();
   }, []);
@@ -118,7 +126,7 @@ export default function InquiriesPage() {
 
         {session?.user?.role === 'admin' ? (
           <InquiryAdminFilter
-            onFilter={fetchAdminInquiries}
+            onFilter={handleAdminFilter}
             attractions={filteredAttractions}
             onSearch={handleSearch}
           />
@@ -138,6 +146,7 @@ export default function InquiriesPage() {
           inquiries={inquiries}
           onDelete={handleDelete}
           onAttractionClick={handleAttractionClick}
+          onFilter={handleAdminFilter} // ✅ 닉네임 클릭 → 필터 적용
         />
       </div>
     </>
