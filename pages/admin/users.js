@@ -1,7 +1,12 @@
+// pages/admin/users.js
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Pagination from '../../components/Page/Pagination';
+import DeleteUserModal from '../../components/Admin/UserDeleteModal';
+import UserEditModal from '../../components/Admin/UserEditModal';
+import styles from '../../styles/AdminUsers.module.css';
+import Header from '@/components/Layout/Header';
 
 export default function AdminUsersPage() {
   const { data: session, status } = useSession();
@@ -10,6 +15,9 @@ export default function AdminUsersPage() {
   const [regulars, setRegulars] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -19,15 +27,16 @@ export default function AdminUsersPage() {
     }
   }, [session, status]);
 
+  const fetchUsers = async () => {
+    const res = await fetch('/api/admin/users');
+    const data = await res.json();
+    if (res.ok) {
+      setAdmins(data.users.filter(u => u.role === 'admin'));
+      setRegulars(data.users.filter(u => u.role !== 'admin'));
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      const res = await fetch('/api/admin/users');
-      const data = await res.json();
-      if (res.ok) {
-        setAdmins(data.users.filter(u => u.role === 'admin'));
-        setRegulars(data.users.filter(u => u.role !== 'admin'));
-      }
-    };
     if (session?.user.role === 'admin') {
       fetchUsers();
     }
@@ -41,35 +50,102 @@ export default function AdminUsersPage() {
     currentPage * itemsPerPage
   );
 
+  const handleSaveUser = async (updatedData) => {
+    try {
+      const res = await fetch(`/api/admin/users/${updatedData.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('[서버 응답 에러 내용]', errorText);
+        alert("수정 실패: 서버 응답 에러");
+        return;
+      }
+
+      alert("회원 정보가 수정되었습니다.");
+      setShowEditModal(false);
+      setSelectedUser(null);
+      await fetchUsers();
+    } catch (err) {
+      console.error('PATCH 요청 실패:', err);
+      alert('서버 오류로 수정 실패');
+    }
+  };
+
+  const handleConfirmDelete = async (adminPassword) => {
+    try {
+      const res = await fetch(`/api/admin/users/${selectedUser._id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminPassword }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("회원이 탈퇴되었습니다.");
+        setShowModal(false);
+        setSelectedUser(null);
+        await fetchUsers();
+      } else {
+        alert(data.message || "탈퇴 실패");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("서버 오류로 탈퇴에 실패했습니다.");
+    }
+  };
+
   const renderTable = (users, title) => (
     <div style={{ marginTop: '40px' }}>
       <h2>{title}</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '16px' }}>
+      <table className={styles.table}>
         <thead>
-          <tr style={{ backgroundColor: '#f0f0f0' }}>
-            <th style={{ padding: '8px', border: '1px solid #ddd' }}>이름</th>
-            <th style={{ padding: '8px', border: '1px solid #ddd' }}>닉네임</th>
-            <th style={{ padding: '8px', border: '1px solid #ddd' }}>이메일</th>
-            <th style={{ padding: '8px', border: '1px solid #ddd' }}>전화번호</th>
-            <th style={{ padding: '8px', border: '1px solid #ddd' }}>성별</th>
-            <th style={{ padding: '8px', border: '1px solid #ddd' }}>생일</th>
-            <th style={{ padding: '8px', border: '1px solid #ddd' }}>가입일</th>
-            <th style={{ padding: '8px', border: '1px solid #ddd' }}>수정/삭제</th>
+          <tr>
+            <th>이름</th>
+            <th>닉네임</th>
+            <th>이메일</th>
+            <th>전화번호</th>
+            <th>성별</th>
+            <th>생일</th>
+            <th>가입일</th>
+            <th>수정/탈퇴</th>
           </tr>
         </thead>
         <tbody>
           {users.map((user) => (
             <tr key={user._id}>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{user.name}</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{user.nickname}</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{user.email}</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{user.phone}</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{user.gender}</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{user.birthdate || '-'}</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                <button style={{ marginRight: '6px' }}>수정</button>
-                <button>탈퇴</button>
+              <td>{user.name}</td>
+              <td>{user.nickname}</td>
+              <td>{user.email}</td>
+              <td>{user.phone}</td>
+              <td>{user.gender}</td>
+              <td>{user.birthdate || '-'}</td>
+              <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+              <td>
+                <div className={styles.actionButtons}>
+                  <button
+                    className={styles.editButton}
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setShowEditModal(true);
+                    }}
+                  >
+                    수정
+                  </button>
+                  <button
+                    className={styles.grayButton}
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setShowModal(true);
+                    }}
+                  >
+                    탈퇴
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -79,15 +155,48 @@ export default function AdminUsersPage() {
   );
 
   return (
-    <div style={{ padding: '40px' }}>
-      <h1>👥 회원관리 페이지</h1>
-      {renderTable(currentUsers, '일반 회원')}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
-      {admins.length > 0 && renderTable(admins, '관리자 계정')}
-    </div>
+    <>
+      <Header />
+      <div className={styles.pageContainer}>
+        <h1 className={styles.title}>👥 회원관리 페이지</h1>
+
+        {renderTable(currentUsers, '일반 회원')}
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+
+        {admins.length > 0 && renderTable(admins, '관리자 계정')}
+
+        {/* ✅ 최하단 중앙 홈 버튼 위치 */}
+        <div className={styles.quickLinks}>
+          <a href="/" className={styles.linkButton}>홈으로</a>
+        </div>
+
+        {showEditModal && selectedUser && (
+          <UserEditModal
+            user={selectedUser}
+            onClose={() => {
+              setShowEditModal(false);
+              setSelectedUser(null);
+            }}
+            onSave={handleSaveUser}
+          />
+        )}
+
+        {showModal && selectedUser && (
+          <DeleteUserModal
+            user={selectedUser}
+            onClose={() => {
+              setShowModal(false);
+              setSelectedUser(null);
+            }}
+            onConfirm={handleConfirmDelete}
+          />
+        )}
+      </div>
+    </>
   );
 }

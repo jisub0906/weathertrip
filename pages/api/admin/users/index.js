@@ -1,6 +1,6 @@
-import { getCollection } from '../../../lib/db/mongodb';
+import { getCollection } from '../../../../lib/db/mongodb';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
+import { authOptions } from '../../auth/[...nextauth]';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {

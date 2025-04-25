@@ -90,6 +90,7 @@ export default function Header() {
                   <div className={styles.dropdownMenu}>
                     {session.user.role === 'admin' ? (
                       <>
+                        <Link href="/admin/dashboard" className={styles.dropdownItem}>대시보드</Link>
                         <Link href="/admin/users" className={styles.dropdownItem}>회원관리</Link>
                         <Link href="/inquiries" className={styles.dropdownItem}>고객센터(관리자)</Link>
                       </>
