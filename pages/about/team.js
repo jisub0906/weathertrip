@@ -3,8 +3,7 @@ import Head from "next/head";
 import Header from "../../components/Layout/Header";
 import Footer from "../../components/Layout/Footer";
 import styles from "../../styles/AboutTeam.module.css";
-import Image from 'next/image';
-
+import Image from "next/image";
 
 const Team = () => {
   return (
@@ -35,16 +34,23 @@ const Team = () => {
             <div className={styles.teamMembers}>
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
-                  <Image src="/김성현.png" alt="김성현 프로필 사진" width={120} height={120} style={{ borderRadius: '50%', objectFit: 'cover' }} />
+                  <Image
+                    src="/김성현.png"
+                    alt="김성현 프로필 사진"
+                    width={120}
+                    height={120}
+                    style={{ borderRadius: "50%", objectFit: "cover" }}
+                  />
                 </div>
                 <div className={styles.memberInfo}>
                   <h3>김성현</h3>
                   <p className={styles.memberRole}>팀장</p>
                   <p className={styles.memberBio}>
                     프로젝트의 기획과 전체 설계를 주도하고, AI 추천 및 다국어
-                    번역 기능을 개발했습니다. 배너 UI/기능 로직을 구성하고, API
-                    활용 체계를 정립했으며, 컴포넌트 최적화 및 UI/UX 품질 향상에
-                    기여했습니다.
+                    번역 기능을 개발했습니다. 프로젝트의 기획과 전체 설계를
+                    리드하며, AI 추천 및 번역 기능을 구축했습니다. 배너 영역과
+                    API 통합 로직을 설계하고, 컴포넌트 구조 최적화와 UI/UX 품질
+                    향상에 집중했습니다.
                   </p>
                   <div className={styles.memberSkills}>
                     <span className={styles.skillTag}>React</span>
@@ -61,7 +67,13 @@ const Team = () => {
 
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
-                  <Image src="/이민호.png" alt="이민호 프로필 사진" width={120} height={120} style={{ borderRadius: '50%', objectFit: 'cover' }} />
+                  <Image
+                    src="/이민호.png"
+                    alt="이민호 프로필 사진"
+                    width={120}
+                    height={120}
+                    style={{ borderRadius: "50%", objectFit: "cover" }}
+                  />
                 </div>
                 <div className={styles.memberInfo}>
                   <h3>이민호</h3>
@@ -87,7 +99,13 @@ const Team = () => {
 
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
-                  <Image src="/이지섭.png" alt="이지섭 프로필 사진" width={120} height={120} style={{ borderRadius: '50%', objectFit: 'cover' }} />
+                  <Image
+                    src="/이지섭.png"
+                    alt="이지섭 프로필 사진"
+                    width={120}
+                    height={120}
+                    style={{ borderRadius: "50%", objectFit: "cover" }}
+                  />
                 </div>
                 <div className={styles.memberInfo}>
                   <h3>이지섭</h3>
@@ -117,7 +135,7 @@ const Team = () => {
             <h2>Weather-Trip 소개</h2>
             <div className={styles.teamDescription}>
               <p>
-                Weather Trip은 날씨 정보를 활용하여 사용자의 현재 위치를
+                 Weather Trip은 날씨 정보를 활용하여 사용자의 현재 위치를
                 기반으로 최적의 관광지를 추천하는 맞춤형 여행 도우미
                 애플리케이션입니다. 우리 팀은 사용자가 실시간 날씨 정보에 따라
                 가장 알맞은 여행 계획을 세울 수 있도록 지원하고, 주변 관광지를
@@ -126,8 +144,9 @@ const Team = () => {
                 통해 다른 사용자들과 소통할 수 있는 커뮤니티 기능도 함께
                 마련하여, 여행 경험을 풍성하게 만들고자 노력했습니다.
               </p>
+              <h2>프로젝트 제작 이야기</h2>
               <p>
-                이 프로젝트는 개발에 첫발을 내디딘 우리 팀이 학원에서 함께 땀
+                 이 프로젝트는 개발에 첫발을 내디딘 우리 팀이 학원에서 함께 땀
                 흘리며 완성해낸 첫 번째 결과물이자, 수많은 고민과 시행착오,
                 그리고 끊임없는 학습의 과정을 통해 만들어낸 소중한 성과입니다.
                 모두가 생소한 기술들을 하나하나 익혀가며, 보다 사용자 친화적인

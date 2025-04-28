@@ -27,6 +27,8 @@ export default function Footer() {
       
       <div className={styles.footerBottom}>
         <p>&copy; {new Date().getFullYear()} WeatherTrip. All rights reserved.</p>
+        <p>본 페이지는 상업적 목적이 아닌 교육용 목적으로 제작되었습니다.</p> 
+        <p>이미지의 무단 복제 및 배포를 일체 허용하지 않습니다.</p>
       </div>
     </footer>
   );
