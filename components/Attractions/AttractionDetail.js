@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaArrowLeft } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
 import styles from '../../styles/AttractionDetail.module.css';
@@ -7,8 +7,8 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 
 // 관광지 상세 정보 컴포넌트
-// props: attraction (관광지 정보), onClose (닫기 함수)
-export default function AttractionDetail({ attraction, onClose }) {
+// props: attraction (관광지 정보), onClose (닫기 함수), onDetailOpen (상세정보 열기 함수)
+export default function AttractionDetail({ attraction, onClose, onDetailOpen }) {
   const { data: session, status } = useSession(); // 로그인 상태 확인
   const [liked, setLiked] = useState(null); // 좋아여 여부
   const [review, setReview] = useState(''); // 입력 중인 리뷰
@@ -20,9 +20,42 @@ export default function AttractionDetail({ attraction, onClose }) {
   const [loadedImages, setLoadedImages] = useState(new Set());
   const [preloadedImages, setPreloadedImages] = useState(new Set());
   const [visibleImages, setVisibleImages] = useState(3); // 초기에 보여줄 이미지 수
+  const [isLoading, setIsLoading] = useState(true);
+  const [images, setImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [weather, setWeather] = useState(null);
+  const [isWeatherLoading, setIsWeatherLoading] = useState(true);
+  const [isMapVisible, setIsMapVisible] = useState(false);
+  const [isNearbyMode, setIsNearbyMode] = useState(false);
+  const [nearbyAttractions, setNearbyAttractions] = useState([]);
+  const [isNearbyLoading, setIsNearbyLoading] = useState(false);
+  const mapRef = useRef(null);
+  const detailRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 모바일 여부 감지
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    if (typeof window !== 'undefined') {
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      return () => window.removeEventListener('resize', checkMobile);
+    }
+  }, []);
+
+  // 관광지 상세정보가 열릴 때 부모 컴포넌트에 알림
+  useEffect(() => {
+    if (attraction && onDetailOpen) {
+      onDetailOpen();
+    }
+  }, [attraction, onDetailOpen]);
 
   // 이미지 배열이 없거나 비어있는 경우 기본 이미지 사용
-  const images = attraction.images && attraction.images.length > 0
+  const initialImages = attraction.images && attraction.images.length > 0
     ? attraction.images
     : ['/next.svg'];
 

@@ -415,28 +415,65 @@
     top: 107px;
     left: 0;
     right: 0;
-    bottom: 42%;
+    bottom: 0%;
   }
 
   .attractionsSidebar {
-    top: auto;
-    width: 100%;
-    height: 42.5%;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 0;
-    border-right: none;
+    top: auto;
+    width: 100vw;
+    height: 55vh;
+    max-height: 75vh;
+    min-height: 80px;
+    border-radius: 16px 16px 0 0;
     border-top: 1px solid #e0e0e0;
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
+    border-right: none;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+    z-index: 100;
+    background: #fff;
+    transition: transform 0.3s;
+    transform: translateY(0);
+    display: flex;
+    flex-direction: column;
   }
-
+  .attractionsSidebar.closed {
+    transform: translateY(100%);
+  }
   .sidebarHeader {
     padding: 1rem;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-
+  .closeBtn {
+    background: #f5f5f5;
+    border: none;
+    font-size: 2.2rem;
+    color: #333;
+    cursor: pointer;
+    margin-left: 8px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+  .closeBtn:active, .closeBtn:hover {
+    background: #e0e0e0;
+    color: #d32f2f;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
   .attractionsList {
     padding: 1rem;
+    overflow-y: auto;
   }
   .searchBarContainer {
     padding: 1rem;

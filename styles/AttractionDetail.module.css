@@ -427,6 +427,7 @@
     .detailContainer {
       width: 100%;
       top: 108px;
+      z-index: 2000;
     }
   
     .imageContainer {

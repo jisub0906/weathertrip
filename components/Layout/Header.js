@@ -98,7 +98,6 @@ export default function Header() {
                       <>
                         <Link href="/users/mypage" className={styles.dropdownItem}>회원정보</Link>
                         <Link href="/inquiries" className={styles.dropdownItem}>고객센터</Link>
-                        <Link href="/faq" className={styles.dropdownItem}>FAQ</Link>
                       </>
                     )}
                   </div>

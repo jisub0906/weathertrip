@@ -17,6 +17,8 @@ export default function Map() {
   const [filteredAttractions, setFilteredAttractions] = useState([]);
   const [isNearbyMode, setIsNearbyMode] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   const router = useRouter();
   const keyword = router.query.keyword || "";
@@ -115,13 +117,22 @@ export default function Map() {
     setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
   }, [isNearbyMode, nearbyAttractions, allAttractions]);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    if (typeof window !== 'undefined') {
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      return () => window.removeEventListener('resize', checkMobile);
+    }
+  }, []);
+
   const handleAttractionClick = useCallback((attraction) => {
     setSelectedAttraction(attraction);
-
     if (mapRef.current?.handleAttractionClick) {
       mapRef.current.handleAttractionClick(attraction);
     }
-
     if (mapRef.current?.moveToCoords) {
       const lat = attraction.location?.coordinates?.[1] || attraction["위도(도)"];
       const lng = attraction.location?.coordinates?.[0] || attraction["경도(도)"];
@@ -131,11 +142,14 @@ export default function Map() {
         mapRef.current.addSearchMarker(lat, lng);
       }
     }
-
-    if (window.innerWidth <= 768) {
-      setShowSidebar(true);
+    if (isMobile) {
+      setSidebarOpen(true);
     }
-  }, []);
+  }, [isMobile]);
+
+  const handleCloseSidebar = () => {
+    setSidebarOpen(false);
+  };
 
   const handleSearch = (keyword, attractionId) => {
     console.log('검색 실행:', keyword, attractionId);
@@ -173,19 +187,20 @@ export default function Map() {
 
       <Header />
 
-      <aside className={styles.attractionsSidebar}>
+      <aside className={`${styles.attractionsSidebar} ${isMobile && !sidebarOpen ? styles.closed : ''}`}>
         <div className={styles.sidebarHeader}>
           <h2>관광지</h2>
           <div className={styles.buttonGroup}>
             <button className={`${styles.modeButton} ${!isNearbyMode ? styles.active : ''}`} onClick={handleShowAll}>전체 관광지</button>
             <button className={`${styles.modeButton} ${isNearbyMode ? styles.active : ''}`} onClick={handleShowNearby}>내 주변 관광지</button>
           </div>
+          {isMobile && (
+            <button className={styles.closeBtn} onClick={handleCloseSidebar} aria-label="닫기">×</button>
+          )}
         </div>
-
         <div className={styles.searchBarContainer}>
           {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
         </div>
-
         {filteredAttractions.length === 0 ? (
           <div className={styles.emptyMessage}>
             <p>관광지가 로드되지 않았습니다.</p>
@@ -215,6 +230,24 @@ export default function Map() {
         )}
       </aside>
 
+      {/* 모바일에서 sidebar가 닫혀있을 때만 floating 열기 버튼 */}
+      {isMobile && !sidebarOpen && (
+        <button
+          style={{
+            position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 200, background: '#3498db', color: '#fff', borderRadius: '50%', width: 48, height: 48, fontSize: 28, border: 'none'
+          }}
+          onClick={() => {
+            setSidebarOpen(true);
+            setSelectedAttraction(null);
+            if (mapRef.current?.closeDetail) {
+              mapRef.current.closeDetail();
+            }
+          }}
+          aria-label="관광지 목록 열기"
+        >📍</button>
+      )}
+
       <main className={styles.mapArea}>
         {locationLoading && (
           <div className={styles.mapLoadingOverlay}>
@@ -239,10 +272,11 @@ export default function Map() {
             onAllAttractionsLoad={handleAllAttractionsLoad}
             onCloseDetail={() => {
               setSelectedAttraction(null);
-              setShowSidebar(true);
+              setSidebarOpen(true);
             }}
             isNearbyMode={isNearbyMode}
             initialKeyword={keyword || searchKeyword}
+            onListClose={() => setSidebarOpen(false)}
           />
         )}
       </main>

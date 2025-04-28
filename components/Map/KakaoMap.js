@@ -29,6 +29,7 @@ const MARKER_CONFIG = {
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.9780 };
 const DEFAULT_ZOOM_LEVEL = 5;
 const DEFAULT_RADIUS = 6;
+const MOBILE_CENTER_OFFSET_RATIO = 0.25; // 모바일에서 지도 중심을 위로 올릴 비율
 
 const KakaoMap = forwardRef(function KakaoMap({ 
   center, 
@@ -36,7 +37,8 @@ const KakaoMap = forwardRef(function KakaoMap({
   onNearbyAttractionsLoad, 
   onAllAttractionsLoad, 
   onCloseDetail, 
-  isNearbyMode 
+  isNearbyMode,
+  onListClose
 }, ref) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -52,6 +54,20 @@ const KakaoMap = forwardRef(function KakaoMap({
   const infoWindowRef = useRef(null); // 현재 열린 정보창 참조를 위해 추가
   const [loadedImages, setLoadedImages] = useState(new Set());
   const [preloadedImages, setPreloadedImages] = useState(new Set());
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 모바일 여부 감지
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    if (typeof window !== 'undefined') {
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      return () => window.removeEventListener('resize', checkMobile);
+    }
+  }, []);
 
   const preloadImage = useCallback((url) => {
     return new Promise((resolve) => {
@@ -349,21 +365,42 @@ const KakaoMap = forwardRef(function KakaoMap({
     }
   }, [clearMarkers, onNearbyAttractionsLoad, showCurrentLocationMarker, createAttractionMarker]);
 
-  // 현재 위치로 이동 및 주변 정보 표시 (개선)
+  // 지도 중심점 이동 시 모바일 offset 적용
+  const moveToPosition = useCallback((lat, lng) => {
+    if (!mapInstanceRef.current) return;
+
+    const position = new window.kakao.maps.LatLng(lat, lng);
+    
+    if (isMobile) {
+      // 모바일에서는 지도 중심을 약간 위로 이동 (화면 높이의 MOBILE_CENTER_OFFSET_RATIO 만큼)
+      const height = mapRef.current?.clientHeight || 0;
+      const offset = height * MOBILE_CENTER_OFFSET_RATIO;
+      
+      // LatLngBounds를 사용하여 지도 영역 계산
+      const bounds = mapInstanceRef.current.getBounds();
+      const boundsHeight = bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
+      const latOffset = (boundsHeight * offset) / height;
+      
+      // offset을 적용한 새로운 중심점
+      const offsetPosition = new window.kakao.maps.LatLng(lat - latOffset, lng);
+      mapInstanceRef.current.setCenter(offsetPosition);
+    } else {
+      mapInstanceRef.current.setCenter(position);
+    }
+  }, [isMobile]);
+
+  // moveToCoords 함수 수정
+  const moveToCoords = useCallback((lat, lng) => {
+    moveToPosition(lat, lng);
+  }, [moveToPosition]);
+
+  // 현재 위치로 이동 함수 수정
   const moveToCurrentLocation = useCallback(() => {
     if (!mapInstanceRef.current || !center) return;
-
-    // 지도 중앙 위치 변경
-    const newCenter = new window.kakao.maps.LatLng(center.latitude, center.longitude);
-    mapInstanceRef.current.setCenter(newCenter);
-
-    // 현재 위치 마커 표시
+    moveToPosition(center.latitude, center.longitude);
     showCurrentLocationMarker(center, mapInstanceRef.current);
-
-    // 주변 관광지 정보 가져오기
     fetchNearbyAttractions(center, mapInstanceRef.current);
-
-  }, [center, fetchNearbyAttractions, showCurrentLocationMarker]);
+  }, [center, fetchNearbyAttractions, showCurrentLocationMarker, moveToPosition]);
 
   // 카카오맵 초기화 (한 번만 실행)
   useEffect(() => {
@@ -411,8 +448,9 @@ const KakaoMap = forwardRef(function KakaoMap({
         isMapInitializedRef.current = true;
         setIsMapReady(true);
 
-        // 현재 위치 표시
+        // 현재 위치 표시 및 중심점 이동 (모바일 offset 적용)
         if (center) {
+          moveToPosition(center.latitude, center.longitude);
           showCurrentLocationMarker(center, map);
         }
 
@@ -454,14 +492,6 @@ const KakaoMap = forwardRef(function KakaoMap({
     }
   }, [onCloseDetail]);
 
-  // 좌표로 지도 이동
-  const moveToCoords = useCallback((lat, lng) => {
-    if (!mapInstanceRef.current) return;
-    
-    const center = new window.kakao.maps.LatLng(lat, lng);
-    mapInstanceRef.current.setCenter(center);
-  }, []);
-
   // 검색 마커 추가
   const addSearchMarker = useCallback((lat, lng) => {
     if (!mapInstanceRef.current) return;
@@ -493,14 +523,16 @@ const KakaoMap = forwardRef(function KakaoMap({
     moveToCoords,
     addSearchMarker,
     mapInstance: mapInstanceRef.current,
-    mapReady: isMapReady
+    mapReady: isMapReady,
+    closeDetail: handleCloseDetail
   }), [
     handleAttractionClick, 
     moveToCurrentLocation, 
     fetchAllAttractions, 
     moveToCoords,
     addSearchMarker,
-    isMapReady
+    isMapReady,
+    handleCloseDetail
   ]);
 
   // isNearbyMode가 변경될 때 마커 업데이트
@@ -521,6 +553,13 @@ const KakaoMap = forwardRef(function KakaoMap({
 
     updateMarkers();
   }, [isNearbyMode, center, clearMarkers, fetchAllAttractions, fetchNearbyAttractions]);
+
+  // 관광지 상세정보가 열릴 때 목록 닫기
+  useEffect(() => {
+    if (selectedAttraction && onListClose) {
+      onListClose();
+    }
+  }, [selectedAttraction, onListClose]);
 
   return (
     <div className={styles.mapContainer}>
