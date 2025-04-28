@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Header from '../../components/Layout/Header';
 import Footer from '../../components/Layout/Footer';
 import styles from '../../styles/AboutTeam.module.css';
+import Image from 'next/image';
 
 const Team = () => {
   return (
@@ -29,7 +30,7 @@ const Team = () => {
             <div className={styles.teamMembers}>
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
-                  {/* 프로필 이미지 추가 예정 */}
+                  <Image src="/김성현.png" alt="김성현 프로필 사진" width={120} height={120} style={{ borderRadius: '50%', objectFit: 'cover' }} />
                 </div>
                 <div className={styles.memberInfo}>
                   <h3>김성현</h3>
@@ -50,7 +51,7 @@ const Team = () => {
 
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
-                  {/* 프로필 이미지 추가 예정 */}
+                  <Image src="/이민호.png" alt="이민호 프로필 사진" width={120} height={120} style={{ borderRadius: '50%', objectFit: 'cover' }} />
                 </div>
                 <div className={styles.memberInfo}>
                   <h3>이민호</h3>
@@ -72,7 +73,7 @@ const Team = () => {
 
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
-                  {/* 프로필 이미지 추가 예정 */}
+                  <Image src="/이지섭.png" alt="이지섭 프로필 사진" width={120} height={120} style={{ borderRadius: '50%', objectFit: 'cover' }} />
                 </div>
                 <div className={styles.memberInfo}>
                   <h3>이지섭</h3>
