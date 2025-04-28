@@ -312,11 +312,10 @@ const handleCardClick = (attraction) => {
     if (!weather?.condition) return;
 
     const recommendedType = getRecommendedType(weather.condition);
-    const recommendedCategory = getRandomCategory(recommendedType);
-
+    // 카테고리는 항상 '전체'로 설정
     setActiveFilters(prev => ({
       type: recommendedType,
-      tag: recommendedCategory
+      tag: '전체'
     }));
   }, [weather]);
 

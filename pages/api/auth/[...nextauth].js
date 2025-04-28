@@ -6,6 +6,7 @@ import { connectToDatabase } from '../../../lib/db/mongodb';
 export const authOptions = {
   session: {
     strategy: 'jwt',
+    maxAge: 60 * 60, // 1시간(3600초) 동안만 세션 유지
   },
   providers: [
     CredentialsProvider({
