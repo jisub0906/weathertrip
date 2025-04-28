@@ -3,11 +3,6 @@ import Head from "next/head";
 import Header from "../../components/Layout/Header";
 import Footer from "../../components/Layout/Footer";
 import styles from "../../styles/AboutTeam.module.css";
-import React from 'react';
-import Head from 'next/head';
-import Header from '../../components/Layout/Header';
-import Footer from '../../components/Layout/Footer';
-import styles from '../../styles/AboutTeam.module.css';
 import Image from 'next/image';
 
 
@@ -24,7 +19,7 @@ const Team = () => {
         <main className={styles.main}>
           <div className={styles.title}>
             <h1>Weather Trip 팀</h1>
-            <p>"날씨와 여행을 연결하다!!"</p>
+            <p>날씨와 여행을 연결하다!!</p>
             <p>
               현재 날씨와 위치를 기반으로 가장 가까운 최적의 여행지를 추천하는
               서비스를 만들었습니다.
