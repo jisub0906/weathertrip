@@ -55,7 +55,7 @@ export default function App({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <Script
-        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_JAVASCRIPT_KEY}&libraries=services&autoload=false`}
+        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.KAKAO_MAP_JAVASCRIPT_KEY}&libraries=services&autoload=false`}
         strategy="afterInteractive"
       />
       <Component {...pageProps} />
