@@ -206,7 +206,7 @@ export default function AttractionDetail({ attraction, onClose, onDetailOpen }) 
   };
 
   return (
-``    <div className={styles.detailContainer} style={isMobile ? { top: headerHeight } : undefined}>
+    <div className={styles.detailContainer} style={isMobile ? { top: headerHeight } : undefined}>
       <div className={styles.navigationButtons}>
         <button className={styles.backButton} onClick={onClose} aria-label="뒤로 가기">
           <FaArrowLeft size={18} />
