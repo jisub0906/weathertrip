@@ -7,6 +7,7 @@ import DeleteUserModal from '../../components/Admin/UserDeleteModal';
 import UserEditModal from '../../components/Admin/UserEditModal';
 import styles from '../../styles/AdminUsers.module.css';
 import Header from '@/components/Layout/Header';
+import Link from 'next/link';
 
 export default function AdminUsersPage() {
   const { data: session, status } = useSession();
@@ -178,7 +179,7 @@ export default function AdminUsersPage() {
 
         {/* ✅ 최하단 중앙 홈 버튼 위치 */}
         <div className={styles.quickLinks}>
-          <a href="/" className={styles.linkButton}>홈으로</a>
+          <Link href="/" className={styles.linkButton}>홈으로</Link>
         </div>
 
         {showEditModal && selectedUser && (

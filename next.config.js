@@ -23,26 +23,6 @@ const nextConfig = {
     // 타임아웃 설정 추가
     unoptimized: true, // 이미지 최적화 비활성화
   },
-  // API 요청 타임아웃 설정
-  api: {
-    bodyParser: {
-      sizeLimit: '1mb',
-    },
-    responseLimit: '4mb',
-  },
-  // 이미지 최적화 타임아웃 설정
-  experimental: {
-    images: {
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'i.ibb.co',
-          port: '',
-          pathname: '/**',
-        },
-      ],
-    },
-  },
   // 타임아웃 설정 추가
   webpack: (config, { isServer }) => {
     config.resolve.fallback = {
