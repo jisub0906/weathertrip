@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { connectToDatabase } from '../../../lib/db/mongodb';
+import { ObjectId } from 'mongodb';
 
 export const authOptions = {
   session: {
@@ -28,11 +29,17 @@ export const authOptions = {
           throw new Error('비밀번호가 일치하지 않습니다.');
         }
 
+        // ✅ 로그인 성공하면 lastLoginAt 업데이트
+        await db.collection('users').updateOne(
+          { _id: new ObjectId(user._id) },
+          { $set: { lastLoginAt: new Date() } }
+        );
+
         return {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
-          nickname: user.nickname,         // ✅ 닉네임 포함
+          nickname: user.nickname,
           role: user.role || 'user',
         };
       },
@@ -44,7 +51,7 @@ export const authOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.nickname = user.nickname; // ✅ 닉네임 전달
+        token.nickname = user.nickname;
         token.role = user.role;
       }
       return token;
@@ -54,7 +61,7 @@ export const authOptions = {
       session.user.id = token.id;
       session.user.email = token.email;
       session.user.name = token.name;
-      session.user.nickname = token.nickname; // ✅ 세션에 닉네임 포함!
+      session.user.nickname = token.nickname;
       session.user.role = token.role;
       return session;
     },

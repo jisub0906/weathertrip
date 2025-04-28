@@ -1,8 +1,6 @@
-// pages/api/admin/dashboard.js
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { getCollection } from '../../../lib/db/mongodb';
-import { ObjectId } from 'mongodb';
 
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
@@ -19,20 +17,44 @@ export default async function handler(req, res) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const newUsersToday = allUsers.filter(user => new Date(user.createdAt) >= today).length;
-    const deletedToday = 0; // 추후 삭제 여부 플래그가 있다면 계산 가능
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay()); // 이번주 시작
 
-    const unansweredInquiries = await inquiriesCol.countDocuments({ answer: { $exists: false } });
-    const recentInquiries = await inquiriesCol
-      .find({}, { projection: { title: 1 } })
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+    // 회원가입 통계
+    const newUsersToday = await usersCol.countDocuments({ createdAt: { $gte: today } });
+    const newUsersThisWeek = await usersCol.countDocuments({ createdAt: { $gte: startOfWeek } });
+    const newUsersThisMonth = await usersCol.countDocuments({ createdAt: { $gte: startOfMonth } });
+    const newUsersThisYear = await usersCol.countDocuments({ createdAt: { $gte: startOfYear } });
+
+    // 접속자 통계
+    const activeToday = await usersCol.countDocuments({ lastLoginAt: { $gte: today } });
+    const activeThisWeek = await usersCol.countDocuments({ lastLoginAt: { $gte: startOfWeek } });
+    const activeThisMonth = await usersCol.countDocuments({ lastLoginAt: { $gte: startOfMonth } });
+    const activeThisYear = await usersCol.countDocuments({ lastLoginAt: { $gte: startOfYear } });
+
+    // 최근 대기 문의
+    const unansweredInquiries = await inquiriesCol.countDocuments({ status: 'pending' });
+    const recentInquiries = await inquiriesCol.find(
+      { status: 'pending' },
+      { projection: { _id: 1, title: 1, content: 1, nickname: 1, email: 1, createdAt: 1 } }
+    )
       .sort({ createdAt: -1 })
-      .limit(5)
+      .limit(3)
       .toArray();
 
     return res.status(200).json({
       totalUsers: allUsers.length,
       newUsersToday,
-      deletedToday,
+      newUsersThisWeek,
+      newUsersThisMonth,
+      newUsersThisYear,
+      activeToday,
+      activeThisWeek,
+      activeThisMonth,
+      activeThisYear,
       pendingAnswers: unansweredInquiries,
       recentInquiries,
     });

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import InquiryForm from '../components/Inquiries/InquiryForm';
 import InquiryList from '../components/Inquiries/InquiryList';
@@ -11,10 +12,8 @@ export default function InquiriesPage() {
   const [attractions, setAttractions] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const { data: session } = useSession();
-
-  useEffect(() => {
-    console.log('현재 세션 유저:', session?.user);
-  }, [session]);
+  const router = useRouter();
+  const { email, filter } = router.query;
 
   const fetchMyInquiries = async () => {
     try {
@@ -99,7 +98,7 @@ export default function InquiriesPage() {
   };
 
   const handleAdminFilter = (filters) => {
-    fetchAdminInquiries(filters); // ✅ 필터 from 필터 컴포넌트 or InquiryList
+    fetchAdminInquiries(filters);
   };
 
   useEffect(() => {
@@ -107,12 +106,27 @@ export default function InquiriesPage() {
   }, []);
 
   useEffect(() => {
-    if (session?.user?.role === 'admin') {
-      fetchAdminInquiries();
+    if (!router.isReady || !session) return;
+
+    if (session.user?.role === 'admin') {
+      if (filter === 'unanswered') {
+        fetchAdminInquiries({ status: 'pending' });
+      } else {
+        fetchAdminInquiries();
+      }
     } else {
       fetchMyInquiries();
     }
-  }, [session]);
+  }, [router.isReady, session, filter]);
+
+  useEffect(() => {
+    if (router.asPath.includes('#list') && inquiries.length > 0) {
+      const listElement = document.getElementById('inquiry-list');
+      if (listElement) {
+        listElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [router.asPath, inquiries]);
 
   const filteredAttractions = attractions.filter((a) =>
     a.name.toLowerCase().includes(searchKeyword.toLowerCase())
@@ -142,12 +156,14 @@ export default function InquiriesPage() {
           {session?.user?.role === 'admin' ? '전체 문의 리스트' : '내 문의 리스트'}
         </h1>
 
-        <InquiryList
-          inquiries={inquiries}
-          onDelete={handleDelete}
-          onAttractionClick={handleAttractionClick}
-          onFilter={handleAdminFilter} // ✅ 닉네임 클릭 → 필터 적용
-        />
+        <div id="inquiry-list">
+          <InquiryList
+            inquiries={inquiries}
+            onDelete={handleDelete}
+            onAttractionClick={handleAttractionClick}
+            onFilter={handleAdminFilter}
+          />
+        </div>
       </div>
     </>
   );

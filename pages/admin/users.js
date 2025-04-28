@@ -110,8 +110,9 @@ export default function AdminUsersPage() {
             <th>이메일</th>
             <th>전화번호</th>
             <th>성별</th>
-            <th>생일</th>
+            <th>생년월일</th>
             <th>가입일</th>
+            <th>최근 접속일</th>
             <th>수정/탈퇴</th>
           </tr>
         </thead>
@@ -125,6 +126,11 @@ export default function AdminUsersPage() {
               <td>{user.gender}</td>
               <td>{user.birthdate || '-'}</td>
               <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+              <td>
+                {user.lastLoginAt
+                  ? new Date(user.lastLoginAt).toLocaleDateString()
+                  : '-'}
+              </td>
               <td>
                 <div className={styles.actionButtons}>
                   <button
