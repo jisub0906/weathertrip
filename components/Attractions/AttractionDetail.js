@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaArrowLeft } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
 import styles from '../../styles/AttractionDetail.module.css';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import { HeaderHeightContext } from '../../src/contexts/HeaderHeightContext';
 
 // 관광지 상세 정보 컴포넌트
 // props: attraction (관광지 정보), onClose (닫기 함수), onDetailOpen (상세정보 열기 함수)
@@ -33,6 +34,7 @@ export default function AttractionDetail({ attraction, onClose, onDetailOpen }) 
   const mapRef = useRef(null);
   const detailRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
+  const headerHeight = useContext(HeaderHeightContext);
 
   // 모바일 여부 감지
   useEffect(() => {
@@ -204,7 +206,7 @@ export default function AttractionDetail({ attraction, onClose, onDetailOpen }) 
   };
 
   return (
-    <div className={styles.detailContainer}>
+``    <div className={styles.detailContainer} style={isMobile ? { top: headerHeight } : undefined}>
       <div className={styles.navigationButtons}>
         <button className={styles.backButton} onClick={onClose} aria-label="뒤로 가기">
           <FaArrowLeft size={18} />

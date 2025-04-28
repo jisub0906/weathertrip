@@ -185,68 +185,68 @@ export default function Map() {
         <meta name="description" content="현재 위치 주변의 관광지를 지도에서 찾아보세요." />
       </Head>
 
-      <Header />
-
-      <aside className={`${styles.attractionsSidebar} ${isMobile && !sidebarOpen ? styles.closed : ''}`}>
-        <div className={styles.sidebarHeader}>
-          <h2>관광지</h2>
-          <div className={styles.buttonGroup}>
-            <button className={`${styles.modeButton} ${!isNearbyMode ? styles.active : ''}`} onClick={handleShowAll}>전체 관광지</button>
-            <button className={`${styles.modeButton} ${isNearbyMode ? styles.active : ''}`} onClick={handleShowNearby}>내 주변 관광지</button>
+      <Header>
+        <aside className={`${styles.attractionsSidebar} ${isMobile && !sidebarOpen ? styles.closed : ''}`}>
+          <div className={styles.sidebarHeader}>
+            <h2>관광지</h2>
+            <div className={styles.buttonGroup}>
+              <button className={`${styles.modeButton} ${!isNearbyMode ? styles.active : ''}`} onClick={handleShowAll}>전체 관광지</button>
+              <button className={`${styles.modeButton} ${isNearbyMode ? styles.active : ''}`} onClick={handleShowNearby}>내 주변 관광지</button>
+            </div>
+            {isMobile && (
+              <button className={styles.closeBtn} onClick={handleCloseSidebar} aria-label="닫기">×</button>
+            )}
           </div>
-          {isMobile && (
-            <button className={styles.closeBtn} onClick={handleCloseSidebar} aria-label="닫기">×</button>
-          )}
-        </div>
-        <div className={styles.searchBarContainer}>
-          {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
-        </div>
-        {filteredAttractions.length === 0 ? (
-          <div className={styles.emptyMessage}>
-            <p>관광지가 로드되지 않았습니다.</p>
-            <p>지도를 움직여 관광지를 찾아보세요.</p>
+          <div className={styles.searchBarContainer}>
+            {!isNearbyMode && <SearchBar onSearch={handleSearch} />}
           </div>
-        ) : (
-          <div className={styles.attractionsList}>
-            {filteredAttractions.map((attraction, index) => (
-              <div
-                key={attraction._id || index}
-                className={`${styles.attractionItem} ${selectedAttraction === attraction ? styles.selected : ""}`}
-                data-attraction-id={attraction._id}
-                onClick={() => handleAttractionClick(attraction)}
-              >
-                <h3>{attraction.name || "이름 없음"}</h3>
-                <div className={styles.attractionDetails}>
-                  <span className={styles.address}>{attraction.address || "주소 정보 없음"}</span>
-                  {attraction.distance && (
-                    <span className={styles.distance}>
-                      {attraction.distance.toFixed(1)}km
-                    </span>
-                  )}
+          {filteredAttractions.length === 0 ? (
+            <div className={styles.emptyMessage}>
+              <p>관광지가 로드되지 않았습니다.</p>
+              <p>지도를 움직여 관광지를 찾아보세요.</p>
+            </div>
+          ) : (
+            <div className={styles.attractionsList}>
+              {filteredAttractions.map((attraction, index) => (
+                <div
+                  key={attraction._id || index}
+                  className={`${styles.attractionItem} ${selectedAttraction === attraction ? styles.selected : ""}`}
+                  data-attraction-id={attraction._id}
+                  onClick={() => handleAttractionClick(attraction)}
+                >
+                  <h3>{attraction.name || "이름 없음"}</h3>
+                  <div className={styles.attractionDetails}>
+                    <span className={styles.address}>{attraction.address || "주소 정보 없음"}</span>
+                    {attraction.distance && (
+                      <span className={styles.distance}>
+                        {attraction.distance.toFixed(1)}km
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </aside>
+              ))}
+            </div>
+          )}
+        </aside>
 
-      {/* 모바일에서 sidebar가 닫혀있을 때만 floating 열기 버튼 */}
-      {isMobile && !sidebarOpen && (
-        <button
-          style={{
-            position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
-            zIndex: 200, background: '#3498db', color: '#fff', borderRadius: '50%', width: 48, height: 48, fontSize: 28, border: 'none'
-          }}
-          onClick={() => {
-            setSidebarOpen(true);
-            setSelectedAttraction(null);
-            if (mapRef.current?.closeDetail) {
-              mapRef.current.closeDetail();
-            }
-          }}
-          aria-label="관광지 목록 열기"
-        >📍</button>
-      )}
+        {/* 모바일에서 sidebar가 닫혀있을 때만 floating 열기 버튼 */}
+        {isMobile && !sidebarOpen && (
+          <button
+            style={{
+              position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+              zIndex: 200, background: '#3498db', color: '#fff', borderRadius: '50%', width: 48, height: 48, fontSize: 28, border: 'none'
+            }}
+            onClick={() => {
+              setSidebarOpen(true);
+              setSelectedAttraction(null);
+              if (mapRef.current?.closeDetail) {
+                mapRef.current.closeDetail();
+              }
+            }}
+            aria-label="관광지 목록 열기"
+          >📍</button>
+        )}
+      </Header>
 
       <main className={styles.mapArea}>
         {locationLoading && (

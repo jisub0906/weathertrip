@@ -1,16 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../../styles/Header.module.css';
+import { HeaderHeightProvider } from '../../src/contexts/HeaderHeightContext';
 
-export default function Header() {
+export default function Header({ children }) {
   const { data: session } = useSession();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(56);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -44,82 +47,91 @@ export default function Header() {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, []);
+
   return (
-    <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>
-          <Image
-            src="/logo.png"
-            alt="Weather Trip Logo"
-            width={160}
-            height={53}
-            priority
-            style={{
-              width: 'auto',
-              height: 'auto',
-              maxWidth: '160px',
-              maxHeight: '53px'
-            }}
-          />
-        </Link>
+    <HeaderHeightProvider value={headerHeight}>
+      <header ref={headerRef} className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
+        <nav className={styles.nav}>
+          <Link href="/" className={styles.logo}>
+            <Image
+              src="/logo.png"
+              alt="Weather Trip Logo"
+              width={160}
+              height={53}
+              priority
+              style={{
+                width: 'auto',
+                height: 'auto',
+                maxWidth: '160px',
+                maxHeight: '53px'
+              }}
+            />
+          </Link>
 
-        <div className={styles.navLinks}>
-          <Link href="/map" className={`${styles.navItem} ${isActive('/map') ? styles.active : ''}`}>
-            지도
-          </Link>
-          <Link href="/recommend" className={`${styles.navItem} ${isActive('/recommend') ? styles.active : ''}`}>
-            맞춤추천
-          </Link>
-          <Link href="/community" className={`${styles.navItem} ${isActive('/community') ? styles.active : ''}`}>
-            커뮤니티
-          </Link>
-        </div>
+          <div className={styles.navLinks}>
+            <Link href="/map" className={`${styles.navItem} ${isActive('/map') ? styles.active : ''}`}>
+              지도
+            </Link>
+            <Link href="/recommend" className={`${styles.navItem} ${isActive('/recommend') ? styles.active : ''}`}>
+              맞춤추천
+            </Link>
+            <Link href="/community" className={`${styles.navItem} ${isActive('/community') ? styles.active : ''}`}>
+              커뮤니티
+            </Link>
+          </div>
 
-        <div className={styles.authButtons}>
-          {session ? (
-            <>
-              <div className={styles.dropdown} ref={dropdownRef}>
-                <button
-                  className={`${styles.navItem} ${styles.dropdownTrigger}`}
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                >
-                  {session.user.nickname} ({session.user.name}) 님&nbsp;
-                  <span className={styles.hamburgerIcon}>☰</span>
+          <div className={styles.authButtons}>
+            {session ? (
+              <>
+                <div className={styles.dropdown} ref={dropdownRef}>
+                  <button
+                    className={`${styles.navItem} ${styles.dropdownTrigger}`}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  >
+                    {session.user.nickname} ({session.user.name}) 님&nbsp;
+                    <span className={styles.hamburgerIcon}>☰</span>
+                  </button>
+                  {isDropdownOpen && (
+                    <div className={styles.dropdownMenu}>
+                      {session.user.role === 'admin' ? (
+                        <>
+                          <Link href="/admin/dashboard" className={styles.dropdownItem}>대시보드</Link>
+                          <Link href="/admin/users" className={styles.dropdownItem}>회원관리</Link>
+                          <Link href="/inquiries" className={styles.dropdownItem}>고객센터(관리자)</Link>
+                        </>
+                      ) : (
+                        <>
+                          <Link href="/users/mypage" className={styles.dropdownItem}>회원정보</Link>
+                          <Link href="/inquiries" className={styles.dropdownItem}>고객센터</Link>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <button onClick={() => signOut()} className={styles.loginButton}>
+                  로그아웃
                 </button>
-                {isDropdownOpen && (
-                  <div className={styles.dropdownMenu}>
-                    {session.user.role === 'admin' ? (
-                      <>
-                        <Link href="/admin/dashboard" className={styles.dropdownItem}>대시보드</Link>
-                        <Link href="/admin/users" className={styles.dropdownItem}>회원관리</Link>
-                        <Link href="/inquiries" className={styles.dropdownItem}>고객센터(관리자)</Link>
-                      </>
-                    ) : (
-                      <>
-                        <Link href="/users/mypage" className={styles.dropdownItem}>회원정보</Link>
-                        <Link href="/inquiries" className={styles.dropdownItem}>고객센터</Link>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <button onClick={() => signOut()} className={styles.loginButton}>
-                로그아웃
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/users/login" className={styles.loginButton}>
-                로그인
-              </Link>
-              <Link href="/users/register" className={styles.registerButton}>
-                회원가입
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
-    </header>
+              </>
+            ) : (
+              <>
+                <Link href="/users/login" className={styles.loginButton}>
+                  로그인
+                </Link>
+                <Link href="/users/register" className={styles.registerButton}>
+                  회원가입
+                </Link>
+              </>
+            )}
+          </div>
+        </nav>
+      </header>
+      {children}
+    </HeaderHeightProvider>
   );
 }
