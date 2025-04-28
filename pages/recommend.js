@@ -112,75 +112,103 @@ export default function Recommend() {
     fetchWeather();
   }, [location]);
 
-  // 관광지 정보 가져오기 함수 분리
-  const fetchAttractions = useCallback(async (locationParam, weatherConditionParam, type, tag) => {
-    if (!locationParam || !weatherConditionParam) return;
-    try {
-      const response = await axios.get('/api/attractions/attractions', {
-        params: {
-          latitude: locationParam.latitude,
-          longitude: locationParam.longitude,
-          weatherCondition: weatherConditionParam,
-          type: type !== '전체' ? type : undefined,
-          tag: tag !== '전체' ? tag : undefined,
-          limit: 50
-        }
-      });
-      if (response.data.attractions) {
-        const modifiedAttractions = response.data.attractions.map(attraction => {
-          if (!attraction.tags || !Array.isArray(attraction.tags) || attraction.tags.length === 0) {
-            if (attraction.테마명) {
-              attraction.tags = [attraction.테마명];
-            } else {
-              attraction.tags = ['문화/예술'];
-            }
-          }
-          if (!attraction.type) {
-            if (attraction.실내구분 === '실내') {
-              attraction.type = 'indoor';
-            } else if (attraction.실내구분 === '실외') {
-              attraction.type = 'outdoor';
-            }
-          }
-          return attraction;
-        });
-        setAttractions(modifiedAttractions);
-        setFilteredAttractions(modifiedAttractions);
-        setPage(1);
-        setHasMore(true);
-      }
-    } catch (err) {
-      console.error('관광지 데이터 오류:', err);
-    }
-  }, []);
-
-  // 기존 관광지 useEffect를 fetchAttractions로 대체
+  // 관광지 정보 가져오기
   useEffect(() => {
     if (!location || !weather?.condition) return;
-    fetchAttractions(location, weather.condition, activeFilters.type, activeFilters.tag);
-  }, [location, weather, activeFilters.type, activeFilters.tag, fetchAttractions]);
 
-  // 필터 변경 핸들러에서 관광지 목록 재요청
-  const handleFilterChange = (filterType, value) => {
-    if (filterType === 'type') {
-      setActiveFilters(prev => ({
-        ...prev,
-        type: value,
-        tag: '전체'
-      }));
-    } else {
-      setActiveFilters(prev => ({
-        ...prev,
-        [filterType]: value
-      }));
+    async function fetchAttractions() {
+      try {
+        const response = await axios.get('/api/attractions/attractions', {
+          params: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            weatherCondition: weather.condition,
+            limit: 50 // 더 많은 데이터 로드
+          }
+        });
+
+        if (response.data.attractions) {
+          console.log('관광지 데이터 로드:', response.data.attractions.slice(0, 3)); // 처음 3개 관광지 데이터 출력
+          const modifiedAttractions = response.data.attractions.map(attraction => {
+            // 태그 처리
+            if (!attraction.tags || !Array.isArray(attraction.tags) || attraction.tags.length === 0) {
+              // tags가 없는 경우 테마명을 사용
+              if (attraction.테마명) {
+                attraction.tags = [attraction.테마명];
+              } else {
+                attraction.tags = ['문화/예술'];
+              }
+            }
+            
+            // 실내/야외 타입 처리
+            if (!attraction.type) {
+              if (attraction.실내구분 === '실내') {
+                attraction.type = 'indoor';
+              } else if (attraction.실내구분 === '실외') {
+                attraction.type = 'outdoor';
+              }
+            }
+            
+            return attraction;
+          });
+          
+          setAttractions(modifiedAttractions);
+          setFilteredAttractions(modifiedAttractions);
+          setPage(1);
+          setHasMore(true);
+        }
+      } catch (err) {
+        console.error('관광지 데이터 오류:', err);
+      }
     }
-  };
 
-  // 날씨 변화 시 type, tag 모두 '전체'로 초기화
+    fetchAttractions();
+  }, [location, weather]);
+
+  // 필터 적용
   useEffect(() => {
-    if (!weather?.condition) return;
-    setActiveFilters({ type: '전체', tag: '전체' });
-  }, [weather]);
+    if (!attractions.length) return;
+  
+    let filtered = [...attractions];
+  
+    // 실내/야외 필터 적용
+    if (activeFilters.type !== '전체') {
+      const typeMap = {
+        '실내': 'indoor',
+        '야외': 'outdoor'
+      };
+      const filterType = typeMap[activeFilters.type] || '';
+      filtered = filtered.filter(item => {
+        if (item.type) {
+          return item.type === filterType;
+        } else if (item.실내구분) {
+          return (filterType === 'indoor' && item.실내구분 === '실내') || 
+                 (filterType === 'outdoor' && item.실내구분 === '실외');
+        }
+        return false;
+      });
+    }
+  
+    // 태그 기반 대분류 필터 적용
+    if (activeFilters.tag !== '전체') {
+      filtered = filtered.filter(item => {
+        // tags 배열로 체크
+        if (Array.isArray(item.tags) && item.tags.includes(activeFilters.tag)) {
+          return true;
+        }
+        // 테마명으로 체크
+        if (item.테마명 === activeFilters.tag) {
+          return true;
+        }
+        return false;
+      });
+    }
+  
+    console.log('필터링된 결과:', filtered.length, '태그 필터:', activeFilters.tag);
+    setFilteredAttractions(filtered);
+    setPage(1);
+    setHasMore(true);
+  }, [attractions, activeFilters]);
 
   // 무작위 스크롤 구현을 위한 페이지네이션 효과
   useEffect(() => {
@@ -228,6 +256,16 @@ export default function Recommend() {
   useEffect(() => {
     applySearchFilter(searchTerm);
   }, [searchTerm, applySearchFilter]);
+
+  useEffect(() => {
+    if (!weather?.condition) return;
+
+    // 대분류(type)와 카테고리(tag) 모두 '전체'로 초기화
+    setActiveFilters({
+      type: '전체',
+      tag: '전체'
+    });
+  }, [weather]);
 
   // 필터 UI 부분
   const locationTypes = ['전체', '실내', '야외'];
@@ -290,6 +328,30 @@ export default function Recommend() {
         return '온천/실내 휴양지';
       default:
         return '다양한 활동';
+    }
+  };
+
+  // 필터 변경 핸들러
+  const handleFilterChange = (filterType, value) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  // 날씨 상태에 따라 추천 타입을 반환하는 함수
+  const getRecommendedType = (condition) => {
+    switch (condition) {
+      case 'Clear':
+        return '야외';
+      case 'Clouds':
+        // 흐림일 때는 실내/야외 중 랜덤 선택
+        return Math.random() > 0.5 ? '실내' : '야외';
+      case 'Rain':
+      case 'Snow':
+        return '실내';
+      default:
+        return '전체';
     }
   };
 
