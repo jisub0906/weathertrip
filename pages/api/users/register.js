@@ -15,21 +15,12 @@ async function registerHandler(req, res) {
     name,
     email,
     password,
-    confirmPassword, // ✅ 확인 비밀번호 받기
+    confirmPassword,
     nickname,
     gender,
     birthdate,
     phone
   } = req.body;
-
-  console.log('회원가입 요청 데이터:', {
-    name,
-    email,
-    nickname,
-    phone,
-    gender,
-    birthdate
-  });
 
   // 1️⃣ 필수값 체크
   const missingFields = {};
@@ -41,7 +32,6 @@ async function registerHandler(req, res) {
   if (!phone) missingFields.phone = true;
 
   if (Object.keys(missingFields).length > 0) {
-    console.log('필수값 누락:', missingFields);
     return validationError(res, '필수 항목을 모두 입력해주세요.', missingFields);
   }
 
@@ -51,20 +41,24 @@ async function registerHandler(req, res) {
     return validationError(res, '유효하지 않은 이메일 형식입니다.', { email: true });
   }
 
-  // 3️⃣ 비밀번호 길이 검증
+  // 3️⃣ 비밀번호 복잡성 검증
   if (password.length < 8) {
     return validationError(res, '비밀번호는 최소 8자리 이상이어야 합니다.', { password: true });
-  } else if (!/(?=.*[a-z])/.test(password)) {
+  }
+  if (!/(?=.*[a-z])/.test(password)) {
     return validationError(res, '비밀번호는 소문자를 포함해야 합니다.', { password: true });
-  } else if (!/(?=.*[A-Z])/.test(password)) {
+  }
+  if (!/(?=.*[A-Z])/.test(password)) {
     return validationError(res, '비밀번호는 대문자를 포함해야 합니다.', { password: true });
-  } else if (!/(?=.*\d)/.test(password)) {
+  }
+  if (!/(?=.*\d)/.test(password)) {
     return validationError(res, '비밀번호는 숫자를 포함해야 합니다.', { password: true });
-  } else if (!/(?=.*[!@#$%^&*])/.test(password)) {
+  }
+  if (!/(?=.*[!@#$%^&*])/.test(password)) {
     return validationError(res, '비밀번호는 특수문자(!@#$%^&*)를 포함해야 합니다.', { password: true });
   }
 
-  // ✅ 4️⃣ 비밀번호 일치 여부
+  // 4️⃣ 비밀번호 일치 여부
   if (password !== confirmPassword) {
     return validationError(res, '비밀번호가 일치하지 않습니다.', { confirmPassword: true });
   }
@@ -73,7 +67,6 @@ async function registerHandler(req, res) {
   if (nickname.length < 1) {
     return validationError(res, '닉네임은 최소 1글자 이상이어야 합니다.', { nickname: true });
   }
-
   if (/^\d/.test(nickname)) {
     return validationError(res, '닉네임은 숫자로 시작할 수 없습니다.', { nickname: true });
   }
@@ -84,10 +77,10 @@ async function registerHandler(req, res) {
   }
 
   try {
-    // ✅ 7️⃣ 비밀번호 해시
+    // 7️⃣ 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ 8️⃣ 사용자 생성
+    // 8️⃣ 사용자 생성
     const user = await User.create({
       name,
       email,
@@ -100,7 +93,7 @@ async function registerHandler(req, res) {
       updatedAt: new Date()
     });
 
-    // ✅ 9️⃣ 성공 응답
+    // 9️⃣ 성공 응답
     return res.status(201).json({
       message: '회원가입이 완료되었습니다.',
       user: {
@@ -111,14 +104,10 @@ async function registerHandler(req, res) {
       }
     });
   } catch (error) {
-    console.error('회원가입 오류:', error);
-
-    // 🔟 중복 오류 처리
+    // 🔟 오류 처리
     if (error.message.includes('이미 사용 중인')) {
       return duplicateError(res, error.message);
     }
-
-    // 🔚 그 외 오류 처리
     return res.status(500).json({
       message: '회원가입 중 오류가 발생했습니다.',
       error: error.message

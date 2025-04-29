@@ -10,7 +10,7 @@ export default function Register() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '', // ✅ 추가
+    confirmPassword: '',
     nickname: '',
     gender: '',
     birthdate: '',
@@ -38,10 +38,8 @@ export default function Register() {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = '이름을 입력해주세요';
-    }
-
+    // 필수 입력값 검증
+    if (!formData.name.trim()) newErrors.name = '이름을 입력해주세요';
     if (!formData.email.trim()) {
       newErrors.email = '이메일을 입력해주세요';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -77,7 +75,7 @@ export default function Register() {
     if (!formData.phone.trim()) {
       newErrors.phone = '전화번호를 입력해주세요';
     } else if (!/^(010|011|016|017|018|019)-\d{4}-\d{4}$/.test(formData.phone)) {
-      newErrors.phone = '올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)';
+      newErrors.phone = '올바른 전화번호 형식입니다 (예: 010-1234-5678)';
     }
 
     setErrors(newErrors);
@@ -86,7 +84,6 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -95,7 +92,7 @@ export default function Register() {
       const response = await fetch('/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData) // ✅ confirmPassword 포함
+        body: JSON.stringify(formData)
       });
 
       const data = await response.json();
@@ -121,8 +118,8 @@ export default function Register() {
       <div className={styles.container}>
         <div className={styles.registerBox}>
           <h1 className={styles.title}>회원가입</h1>
-
           <form onSubmit={handleSubmit}>
+            {/* 이름 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="name">이름</label>
               <input
@@ -136,6 +133,7 @@ export default function Register() {
               {errors.name && <p className={styles.errorText}>{errors.name}</p>}
             </div>
 
+            {/* 이메일 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="email">이메일</label>
               <input
@@ -149,6 +147,7 @@ export default function Register() {
               {errors.email && <p className={styles.errorText}>{errors.email}</p>}
             </div>
 
+            {/* 비밀번호 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="password">비밀번호</label>
               <input
@@ -162,7 +161,7 @@ export default function Register() {
               {errors.password && <p className={styles.errorText}>{errors.password}</p>}
             </div>
 
-            {/* ✅ 비밀번호 확인 입력칸 */}
+            {/* 비밀번호 확인 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="confirmPassword">비밀번호 확인</label>
               <input
@@ -176,6 +175,7 @@ export default function Register() {
               {errors.confirmPassword && <p className={styles.errorText}>{errors.confirmPassword}</p>}
             </div>
 
+            {/* 닉네임 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="nickname">닉네임</label>
               <input
@@ -190,6 +190,7 @@ export default function Register() {
               {errors.nickname && <p className={styles.errorText}>{errors.nickname}</p>}
             </div>
 
+            {/* 성별 선택 */}
             <div className={styles.formGroup}>
               <label className={styles.label}>성별</label>
               <div className={styles.radioGroup}>
@@ -218,6 +219,7 @@ export default function Register() {
               </div>
             </div>
 
+            {/* 생년월일 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="birthdate">생년월일</label>
               <input
@@ -230,6 +232,7 @@ export default function Register() {
               />
             </div>
 
+            {/* 전화번호 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="phone">전화번호</label>
               <input
@@ -255,6 +258,7 @@ export default function Register() {
             {errors.submit && <p className={styles.errorText}>{errors.submit}</p>}
           </form>
 
+          {/* 로그인/홈 이동 링크 */}
           <div className={styles.linkContainer}>
             <Link href="/users/login" className={styles.link}>
               로그인

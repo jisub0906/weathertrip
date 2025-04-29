@@ -14,6 +14,7 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // 입력값 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -29,6 +30,7 @@ export default function Login() {
     }
   };
 
+  // 입력값 검증
   const validateForm = () => {
     const newErrors = {};
 
@@ -46,6 +48,7 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // 로그인 요청
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -60,7 +63,7 @@ export default function Login() {
         redirect: false,
         email: formData.email,
         password: formData.password,
-        callbackUrl: '/' // ✅ 로그인 후 홈으로 이동
+        callbackUrl: '/'
       });
 
       if (result.error) {
@@ -83,6 +86,7 @@ export default function Login() {
           <h1 className={styles.title}>로그인</h1>
 
           <form onSubmit={handleSubmit}>
+            {/* 이메일 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="email">이메일</label>
               <input
@@ -97,6 +101,7 @@ export default function Login() {
               {errors.email && <p className={styles.errorText}>{errors.email}</p>}
             </div>
 
+            {/* 비밀번호 입력 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="password">비밀번호</label>
               <input
@@ -111,6 +116,7 @@ export default function Login() {
               {errors.password && <p className={styles.errorText}>{errors.password}</p>}
             </div>
 
+            {/* 로그인 버튼 */}
             <button
               type="submit"
               className={styles.submitButton}
@@ -122,6 +128,7 @@ export default function Login() {
             {errors.submit && <p className={styles.errorText}>{errors.submit}</p>}
           </form>
 
+          {/* 회원가입, 홈으로 이동 링크 */}
           <div className={styles.linkContainer}>
             <Link href="/users/register" className={styles.link}>
               회원가입
