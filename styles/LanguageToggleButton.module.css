@@ -1,3 +1,6 @@
+/* =========================
+   언어 토글 버튼 전체 컨테이너(고정 위치)
+   ========================= */
 .dropdownContainer {
     position: fixed;
     bottom: 20px;
@@ -5,6 +8,9 @@
     z-index: 9999;
   }
   
+  /* =========================
+     지구본(글로브) 버튼 스타일
+     ========================= */
   .globeButton {
     background: white;
     border: none;
@@ -19,6 +25,9 @@
     justify-content: center;
   }
   
+  /* =========================
+     언어 선택 드롭다운 메뉴
+     ========================= */
   .dropdownMenu {
     position: absolute;
     bottom: 100%;
@@ -32,6 +41,9 @@
     font-size: 14px;
   }
   
+  /* =========================
+     언어 선택 항목(리스트 아이템)
+     ========================= */
   .langItem {
     padding: 8px 16px;
     cursor: pointer;

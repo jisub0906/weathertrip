@@ -7,20 +7,35 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { HeaderHeightContext } from '../../src/contexts/HeaderHeightContext';
 
-// 관광지 상세 정보 컴포넌트
-// props: attraction (관광지 정보), onClose (닫기 함수), onDetailOpen (상세정보 열기 함수)
+/**
+ * 관광지 상세 정보 모달 컴포넌트
+ * @param attraction - 상세 정보를 표시할 관광지 객체
+ * @param onClose - 상세 모달 닫기 콜백 함수
+ * @param onDetailOpen - 상세 모달이 열릴 때 부모에 알리는 콜백 함수
+ * @returns 관광지 상세 정보 모달 UI
+ */
 export default function AttractionDetail({ attraction, onClose, onDetailOpen }) {
-  const { data: session, status } = useSession(); // 로그인 상태 확인
-  const [liked, setLiked] = useState(null); // 좋아여 여부
-  const [review, setReview] = useState(''); // 입력 중인 리뷰
-  const [reviews, setReviews] = useState([]); // 관광지에 달린 리뷰 목록
-  const [submitting, setSubmitting] = useState(false); // 리뷰 작성 여부
-  const [likeCount, setLikeCount] = useState(attraction.likeCount || 0); // 좋아요 수
-  const [loading, setLoading] = useState(true); // 리뷰 로딩 여부
-  const MAX_REVIEW_LENGTH = 100; // 리뷰 최대 길이
+  // 로그인 세션 정보
+  const { data: session, status } = useSession();
+  // 좋아요 여부 상태
+  const [liked, setLiked] = useState(null);
+  // 리뷰 입력값 상태
+  const [review, setReview] = useState('');
+  // 관광지에 달린 리뷰 목록
+  const [reviews, setReviews] = useState([]);
+  // 리뷰 작성 중 여부
+  const [submitting, setSubmitting] = useState(false);
+  // 좋아요 수
+  const [likeCount, setLikeCount] = useState(attraction.likeCount || 0);
+  // 리뷰 로딩 상태
+  const [loading, setLoading] = useState(true);
+  // 리뷰 최대 길이 상수
+  const MAX_REVIEW_LENGTH = 100;
+  // 이미지 로딩 관련 상태
   const [loadedImages, setLoadedImages] = useState(new Set());
   const [preloadedImages, setPreloadedImages] = useState(new Set());
   const [visibleImages, setVisibleImages] = useState(3); // 초기에 보여줄 이미지 수
+  // 기타 UI 상태
   const [isLoading, setIsLoading] = useState(true);
   const [images, setImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -31,17 +46,19 @@ export default function AttractionDetail({ attraction, onClose, onDetailOpen }) 
   const [isNearbyMode, setIsNearbyMode] = useState(false);
   const [nearbyAttractions, setNearbyAttractions] = useState([]);
   const [isNearbyLoading, setIsNearbyLoading] = useState(false);
+  // ref 및 컨텍스트
   const mapRef = useRef(null);
   const detailRef = useRef(null);
+  // 모바일 환경 여부
   const [isMobile, setIsMobile] = useState(false);
+  // 헤더 높이(모바일에서 위치 보정용)
   const headerHeight = useContext(HeaderHeightContext);
 
-  // 모바일 여부 감지
+  // 모바일 환경 감지 및 상태 반영
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
     if (typeof window !== 'undefined') {
       checkMobile();
       window.addEventListener('resize', checkMobile);
@@ -49,7 +66,7 @@ export default function AttractionDetail({ attraction, onClose, onDetailOpen }) 
     }
   }, []);
 
-  // 관광지 상세정보가 열릴 때 부모 컴포넌트에 알림
+  // 상세정보가 열릴 때 부모에 알림
   useEffect(() => {
     if (attraction && onDetailOpen) {
       onDetailOpen();
@@ -61,13 +78,17 @@ export default function AttractionDetail({ attraction, onClose, onDetailOpen }) 
     ? attraction.images
     : ['/next.svg'];
 
+  /**
+   * 이미지 프리로드 함수
+   * @param url - 프리로드할 이미지 URL
+   * @returns 프리로드 완료된 이미지 URL
+   */
   const preloadImage = useCallback((url) => {
     return new Promise((resolve) => {
       if (preloadedImages.has(url)) {
         resolve(url);
         return;
       }
-
       const img = new window.Image();
       img.onload = () => {
         setPreloadedImages(prev => new Set([...prev, url]));
@@ -78,95 +99,100 @@ export default function AttractionDetail({ attraction, onClose, onDetailOpen }) 
     });
   }, [preloadedImages]);
 
+  // 초기 이미지 및 리뷰 이미지 프리로드
   useEffect(() => {
-    // 초기 이미지 프리로드
     const initialImages = attraction.images?.slice(0, visibleImages) || [];
     const reviewImages = attraction.reviews?.slice(0, 2).map(review => review.image).filter(Boolean) || [];
-
     Promise.all([...initialImages, ...reviewImages].map(preloadImage))
-      .catch(error => console.error('이미지 프리로드 실패:', error));
+      .catch(() => {/* 프리로드 실패 시 무시 */});
   }, [attraction, preloadImage, visibleImages]);
 
+  /**
+   * 이미지 로드 완료 시 호출되는 콜백
+   * @param url - 로드된 이미지 URL
+   */
   const handleImageLoad = useCallback((url) => {
     setLoadedImages(prev => new Set([...prev, url]));
   }, []);
 
+  /**
+   * '더 보기' 버튼 클릭 시 추가 이미지 노출
+   */
   const loadMoreImages = useCallback(() => {
     setVisibleImages(prev => prev + 3);
   }, []);
 
-  // 컴포넌트가 마운트될 때 리뷰 데이터 불러오기
+  // 리뷰 데이터 불러오기 (컴포넌트 마운트 시)
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         setLoading(true);
         // 리뷰 데이터 API 호출
         const response = await axios.get(`/api/attractions/${attraction._id}/review`);
-        // 응답에 리뷰가 있다면 reviews 상태에 저장해서 화면에 표시되게 합니다.
+        // 응답에 리뷰가 있다면 reviews 상태에 저장
         if (response.data.reviews) {
           setReviews(response.data.reviews);
         }
-        // 오류가 발생해도 앱이 꺼지지 않도록 try-catch로 감싸고, 마지막에 로딩 상태를 끕니다.
       } catch (error) {
-        console.error('리뷰 데이터 불러오기 오류:', error);
+        // 리뷰 데이터 불러오기 실패 시 무시(앱 크래시 방지)
       } finally {
         setLoading(false);
       }
     };
-
     fetchReviews();
   }, [attraction._id]);
   
-  // 좋아요 데이터 불러오기
+  // 좋아요 상태 및 수 불러오기
   useEffect(() => {
     const fetchLikeStatus = async () => {
       try {
-        // 로그인한 사용자의 경우 좋아요 상태도 함께 조회
+        // 로그인한 사용자는 좋아요 상태와 수 모두 조회
         if (session?.user) {    
           const res = await axios.get(`/api/attractions/${attraction._id}/likeStatus?userId=${session.user.id}`);
           setLiked(res.data.liked);
           setLikeCount(res.data.count);
         } else {
-          // 로그인하지 않은 사용자의 경우 좋아요 수만 조회
+          // 비로그인 사용자는 좋아요 수만 조회
           const res = await axios.get(`/api/attractions/${attraction._id}/likeStatus`);
           setLikeCount(res.data.count);
         }
       } catch (error) {
-        console.error('좋아요 상태 조회 오류:', error);
+        // 좋아요 상태 조회 실패 시 무시
       }
     };
-
     fetchLikeStatus();
   }, [session, attraction._id]);
 
-  // 좋아요 버튼 클릭 처리
+  /**
+   * 좋아요 버튼 클릭 시 호출되는 함수
+   * - 로그인 필요, UI 즉시 반영, 서버에 상태 저장
+   */
   const handleLike = async () => {
     if (status !== 'authenticated') {
       alert('좋아요를 누르려면 로그인이 필요합니다.');
       return;
     }
-  
     try {
-      setLiked(!liked);
-      // 좋아요 상태 업데이트 (UI 즉시 반영)
+      setLiked(!liked); // UI 즉시 반영
       const newLikeCount = liked ? likeCount - 1 : likeCount + 1;
       setLikeCount(newLikeCount);
-      
-      // API 호출 : 좋아요 상태를 서버에 저장합니다.
+      // 서버에 좋아요 상태 저장
       const response = await axios.post(`/api/attractions/${attraction._id}/like`, { 
         userId: session.user.id,
         liked: !liked 
       });
-      setLikeCount(response.data.count); // 서버에서 받은 좋아요 수로 업데이트
+      setLikeCount(response.data.count); // 서버 응답으로 동기화
     } catch (error) {
-      console.error('좋아요 처리 오류:', error);
       // 오류 발생 시 원래 상태로 복구
       setLiked(liked);
       setLikeCount(likeCount);
     }
   };
 
-  // 리뷰 입력 처리
+  /**
+   * 리뷰 입력값 변경 시 호출되는 함수
+   * - 최대 글자 수 제한
+   */
   const handleReviewChange = (e) => {
     const value = e.target.value;
     if (value.length <= MAX_REVIEW_LENGTH) {
@@ -174,34 +200,32 @@ export default function AttractionDetail({ attraction, onClose, onDetailOpen }) 
     }
   };
 
-  // 리뷰 제출 처리
+  /**
+   * 리뷰 제출 시 호출되는 함수
+   * - 로그인 필요, 서버에 POST 요청, 성공 시 목록 갱신
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!review.trim()) return;
-
     if (status !== 'authenticated') {
       alert('리뷰를 작성하려면 로그인이 필요합니다.');
       return;
     }
-    // 서버에 리뷰 데이터를 POST 요청으로 보냅니다
     try {
-      setSubmitting(true); // 로딩 상태 시작
+      setSubmitting(true);
       const response = await axios.post(`/api/attractions/${attraction._id}/review`, {
         userId: session.user.id,
         content: review,
         images: [] // 이미지 업로드 기능이 있다면 추가
       });
-      // 서버에서 성공적으로 리뷰를 작성한 경우 리뷰 목록에 추가 후 입력창 초기화
       if (response.data.review) {
         setReviews([response.data.review, ...reviews]);
         setReview('');
       }
-      // 실패 시 경고 메시지 출력
     } catch (error) {
-      console.error('리뷰 작성 실패:', error);
       alert('리뷰 작성에 실패했습니다. 다시 시도해주세요.');
     } finally {
-      setSubmitting(false); // 로딩 상태 종료
+      setSubmitting(false);
     }
   };
 

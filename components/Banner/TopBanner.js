@@ -1,9 +1,14 @@
 import styles from '../../styles/TopBanner.module.css';
 
+/**
+ * 페이지 상단에 고정되어 오늘의 추천 관광지 안내 메시지를 보여주는 배너 컴포넌트
+ * @returns 상단 안내 배너 UI
+ */
 export default function TopBanner() {
   return (
     <div className={styles.topBanner}>
       <div className={styles.bannerContent}>
+        {/* 경고/안내 아이콘 SVG */}
         <span className={styles.icon}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -21,6 +26,7 @@ export default function TopBanner() {
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
         </span>
+        {/* 안내 메시지 텍스트 */}
         <p className={styles.text}>
           ICT 인재개발원 5조 프로젝트 오늘의 추천 관광지를 확인해보세요! 날씨에 맞는 여행지를 소개합니다 ☀️🌧️
         </p>

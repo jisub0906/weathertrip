@@ -3,17 +3,33 @@ import styles from '../../styles/Inquiries.module.css';
 import SearchBar from '../Search/SearchBar';
 import { useRouter } from 'next/router';
 
+/**
+ * 문의 등록 폼 컴포넌트
+ * @param attractions - 관광지 목록 배열 (관광지 문의 시 사용)
+ * @param onSearch - 관광지명 검색 콜백
+ * @param onSubmitted - 문의 등록 완료 후 콜백
+ * @returns 문의 등록 폼 UI
+ */
 const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
+  // 문의 유형 상태
   const [type, setType] = useState('일반 문의');
+  // 관광지명 검색어 상태
   const [searchKeyword, setSearchKeyword] = useState('');
+  // 선택된 관광지 ID/이름 상태
   const [selectedAttractionId, setSelectedAttractionId] = useState('');
   const [selectedAttractionName, setSelectedAttractionName] = useState('');
+  // 제목/내용 입력 상태
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
+  // 관광지 문의 여부
   const isTourist = type === '관광지 문의';
+  // 라우터 인스턴스
   const router = useRouter();
 
+  /**
+   * 관광지명 검색 시 상태 및 부모 콜백 동기화
+   */
   const handleSearch = (keyword) => {
     setSearchKeyword(keyword);
     setSelectedAttractionId('');
@@ -23,10 +39,14 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
     }
   };
 
+  // 검색어에 따라 관광지 필터링
   const filteredAttractions = attractions.filter((a) =>
     a.name.includes(searchKeyword)
   );
 
+  /**
+   * 폼 제출 시 문의 등록 API 호출 및 결과 처리
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -52,7 +72,6 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
         if (typeof onSubmitted === 'function') {
           onSubmitted();
         }
-
         // 폼 초기화
         setTitle('');
         setContent('');
@@ -63,14 +82,14 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
         alert(result.message || '등록에 실패했습니다.');
       }
     } catch (error) {
-      console.error('등록 오류:', error);
+      // 등록 중 오류 발생 시 사용자에게 알림
       alert('등록 중 오류가 발생했습니다.');
     }
   };
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      {/* 문의 유형 */}
+      {/* 문의 유형 선택 */}
       <div className={styles.formGroup}>
         <label className={styles.label}>문의 유형</label>
         <select
@@ -120,7 +139,7 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
               { value: 'policy', label: '이용 정책 문의' },
               { value: 'bug', label: '버그 제보' },
               { value: 'suggestion', label: '오류&개선 요청사항' },
-              { value: 'etc', label: '기타' }, // ✅ 추가
+              { value: 'etc', label: '기타' },
             ].map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))
@@ -128,7 +147,7 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
         </select>
       </div>
 
-      {/* 제목 */}
+      {/* 제목 입력 */}
       <div className={styles.formGroup}>
         <label className={styles.label}>제목</label>
         <input
@@ -141,7 +160,7 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
         />
       </div>
 
-      {/* 내용 */}
+      {/* 내용 입력 */}
       <div className={styles.formGroup}>
         <label className={styles.label}>내용</label>
         <textarea
@@ -153,7 +172,7 @@ const InquiryForm = ({ attractions = [], onSearch, onSubmitted }) => {
         />
       </div>
 
-      {/* 버튼 */}
+      {/* 버튼 영역 */}
       <div className={styles.buttonRow}>
         <button type="submit" className={styles.blueButton}>
           등록

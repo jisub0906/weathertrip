@@ -9,18 +9,35 @@ import styles from '../../styles/AdminUsers.module.css';
 import Header from '@/components/Layout/Header';
 import Link from 'next/link';
 
+/**
+ * 관리자 회원관리 페이지 컴포넌트
+ * - 일반 회원/관리자 계정 목록, 수정/탈퇴, 페이징 등 회원 관리 기능 제공
+ * - 모달을 통한 회원 정보 수정 및 탈퇴 처리
+ * @returns 회원관리 페이지(React 컴포넌트)
+ */
 export default function AdminUsersPage() {
+  // 세션 정보 및 인증 상태
   const { data: session, status } = useSession();
   const router = useRouter();
+  // 관리자 계정 목록
   const [admins, setAdmins] = useState([]);
+  // 일반 회원 목록
   const [regulars, setRegulars] = useState([]);
+  // 현재 페이지 번호(페이징)
   const [currentPage, setCurrentPage] = useState(1);
+  // 한 페이지당 회원 수
   const itemsPerPage = 20;
+  // 탈퇴 모달 표시 여부
   const [showModal, setShowModal] = useState(false);
+  // 수정 모달 표시 여부
   const [showEditModal, setShowEditModal] = useState(false);
+  // 선택된 회원 정보(수정/탈퇴용)
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
+    /**
+     * 인증/권한 체크: 관리자가 아니면 접근 차단 및 홈으로 이동
+     */
     if (status === 'loading') return;
     if (!session || session.user.role !== 'admin') {
       alert('관리자만 접근 가능합니다.');
@@ -28,6 +45,9 @@ export default function AdminUsersPage() {
     }
   }, [session, status]);
 
+  /**
+   * 전체 회원 목록을 서버에서 fetch하여 관리자/일반 회원으로 분리 저장
+   */
   const fetchUsers = async () => {
     const res = await fetch('/api/admin/users');
     const data = await res.json();
@@ -38,19 +58,28 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
+    // 세션이 관리자일 때만 회원 목록 fetch
     if (session?.user.role === 'admin') {
       fetchUsers();
     }
   }, [session]);
 
+  // 인증/권한 미달 시 렌더링 차단
   if (!session || session.user.role !== 'admin') return null;
 
+  // 전체 페이지 수 계산
   const totalPages = Math.ceil(regulars.length / itemsPerPage);
+  // 현재 페이지에 표시할 회원 목록 슬라이싱
   const currentUsers = regulars.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  /**
+   * 회원 정보 수정 저장 핸들러
+   * @param updatedData - 수정된 회원 정보 객체
+   * @returns void
+   */
   const handleSaveUser = async (updatedData) => {
     try {
       const res = await fetch(`/api/admin/users/${updatedData.id}`, {
@@ -60,6 +89,7 @@ export default function AdminUsersPage() {
       });
 
       if (!res.ok) {
+        // 서버 응답 에러 처리
         const errorText = await res.text();
         console.error('[서버 응답 에러 내용]', errorText);
         alert("수정 실패: 서버 응답 에러");
@@ -71,11 +101,17 @@ export default function AdminUsersPage() {
       setSelectedUser(null);
       await fetchUsers();
     } catch (err) {
+      // 네트워크/서버 오류 처리
       console.error('PATCH 요청 실패:', err);
       alert('서버 오류로 수정 실패');
     }
   };
 
+  /**
+   * 회원 탈퇴(삭제) 확정 핸들러
+   * @param adminPassword - 관리자 비밀번호(본인 인증)
+   * @returns void
+   */
   const handleConfirmDelete = async (adminPassword) => {
     try {
       const res = await fetch(`/api/admin/users/${selectedUser._id}`, {
@@ -95,11 +131,18 @@ export default function AdminUsersPage() {
         alert(data.message || "탈퇴 실패");
       }
     } catch (err) {
+      // 네트워크/서버 오류 처리
       console.error(err);
       alert("서버 오류로 탈퇴에 실패했습니다.");
     }
   };
 
+  /**
+   * 회원 목록 테이블 렌더링 함수
+   * @param users - 회원 배열
+   * @param title - 테이블 제목
+   * @returns JSX
+   */
   const renderTable = (users, title) => (
     <div style={{ marginTop: '40px' }}>
       <h2>{title}</h2>
@@ -118,6 +161,7 @@ export default function AdminUsersPage() {
           </tr>
         </thead>
         <tbody>
+          {/* 회원별 정보 행 렌더링 */}
           {users.map((user) => (
             <tr key={user._id}>
               <td>{user.name}</td>

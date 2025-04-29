@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 
-// IP 주소 기반으로 사용자 위치 정보를 조회하는 비동기 함수
+/**
+ * [목적] IP 주소 기반으로 사용자 위치 정보를 조회하는 비동기 함수
+ * @returns { latitude, longitude, city, country, source } 또는 기본값(서울)
+ */
 async function fetchLocationByIP() {
   try {
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
-    
     if (data.error) {
       throw new Error(data.reason || 'IP 위치 조회 실패');
     }
@@ -18,7 +20,6 @@ async function fetchLocationByIP() {
       source: 'ip'
     };
   } catch (error) {
-    console.error('IP 위치 조회 오류:', error);
     // 최종 폴백: 서울 좌표
     return {
       latitude: 37.5665,
@@ -30,28 +31,24 @@ async function fetchLocationByIP() {
   }
 }
 
-// 좌표를 주소로 변환하는 함수 (카카오맵 API 사용)
+/**
+ * [목적] 좌표를 주소로 변환 (카카오맵 API 사용)
+ * @param latitude - 위도
+ * @param longitude - 경도
+ * @returns { roadAddress, jibunAddress, displayAddress } 또는 null
+ */
 async function getAddressFromCoords(latitude, longitude) {
-   // 카카오맵 API가 로드되어 있는지 확인
   if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
-    console.warn('카카오맵 services 라이브러리가 로드되지 않았습니다.');
-    return null; // 로드되지 않은 경우 null 반환
+    return null;
   }
-  // 비동기 작업을 위해 Promise 객체를 반환
   return new Promise((resolve, reject) => {
-    // 카카오맵 Geocoder 객체 생성
     const geocoder = new window.kakao.maps.services.Geocoder();
-    
     geocoder.coord2Address(longitude, latitude, (result, status) => {
-      // 요청 성공 시 도로명 주소와 지번 주소를 반환
       if (status === window.kakao.maps.services.Status.OK) {
         if (result[0]) {
           const addressObj = result[0];
-          // 도로명 주소가 있으면 저장
           const roadAddr = addressObj.road_address ? addressObj.road_address.address_name : null;
-          // 지번 주소가 있으면 저장
           const jibunAddr = addressObj.address ? addressObj.address.address_name : null;
-          // 도로명 주소와 지번 주소 중 하나라도 있으면 반환
           resolve({
             roadAddress: roadAddr,
             jibunAddress: jibunAddr,
@@ -67,40 +64,49 @@ async function getAddressFromCoords(latitude, longitude) {
   });
 }
 
+/**
+ * 사용자 위치(좌표/주소) 및 로딩/에러 상태를 반환하는 커스텀 훅
+ * @returns { location, error, loading, source, address }
+ */
 export default function useLocation() {
+  // 위치 정보 상태
   const [location, setLocation] = useState(null);
+  // 에러 메시지 상태
   const [error, setError] = useState(null);
+  // 로딩 상태
   const [loading, setLoading] = useState(true);
+  // 위치 정보 소스(geolocation/ip/default)
   const [source, setSource] = useState(null);
+  // 좌표 → 주소 변환 결과
   const [address, setAddress] = useState(null);
 
-  // 좌표를 주소로 변환하는 효과
+  /**
+   * [목적] 좌표가 변경될 때마다 카카오맵 API로 주소를 역지오코딩
+   */
   useEffect(() => {
     if (!location || typeof window === 'undefined') return;
-    
-    // 카카오맵 API가 로드될 때까지 대기
+    // 카카오맵 API가 로드될 때까지 polling
     const checkKakaoAndGetAddress = async () => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
-        // 카카오맵이 아직 로드되지 않았으면 1초 후에 다시 시도
         setTimeout(checkKakaoAndGetAddress, 1000);
         return;
       }
-      
       try {
         const addr = await getAddressFromCoords(location.latitude, location.longitude);
         setAddress(addr);
       } catch (err) {
-        console.warn('주소 변환 오류:', err);
+        // 주소 변환 실패 시 무시
       }
     };
-    
     checkKakaoAndGetAddress();
   }, [location]);
 
+  /**
+   * [목적] 컴포넌트 마운트 시 사용자 위치(좌표) 탐색 및 상태 저장
+   * [의도] 1. Geolocation → 2. IP → 3. 기본값 순으로 시도
+   */
   useEffect(() => {
-    // 서버 사이드 렌더링 시 실행 방지
     if (typeof window === 'undefined') return;
-    
     async function getLocation() {
       // 1. 브라우저 Geolocation API 시도
       if (navigator.geolocation) {
@@ -108,15 +114,14 @@ export default function useLocation() {
           const position = await new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, {
               enableHighAccuracy: true,
-              timeout: 15000,  // 타임아웃 증가 (15초)
-              maximumAge: 300000  // 5분간 캐시된 위치 허용
+              timeout: 15000,
+              maximumAge: 300000
             });
           });
-          
           setLocation({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-            city: '', // 나중에 역지오코딩으로 채울 수 있음
+            city: '',
             country: '',
             source: 'geolocation'
           });
@@ -124,23 +129,17 @@ export default function useLocation() {
           setLoading(false);
           return;
         } catch (geoError) {
-          console.warn('Geolocation 오류:', geoError.message);
           // Geolocation 실패 시 IP 기반으로 폴백
         }
       }
-      
       // 2. IP 기반 위치정보 폴백 - 여러 서비스 시도
       try {
-        // 첫 번째 IP 서비스 시도
         let ipLocation = await fetchLocationByIP();
-        
         // IP 위치가 명확하지 않은 경우(기본값과 같은 경우) 다른 서비스 시도
         if (ipLocation.source === 'default') {
           try {
-            // 다른 IP 위치 서비스 시도 (예: ipinfo.io 등)
             const response = await fetch('https://ipinfo.io/json');
             const data = await response.json();
-            
             if (data && data.loc) {
               const [lat, lon] = data.loc.split(',');
               ipLocation = {
@@ -152,10 +151,9 @@ export default function useLocation() {
               };
             }
           } catch (alternativeError) {
-            console.warn('대체 IP 위치 서비스 오류:', alternativeError);
+            // 대체 IP 위치 서비스 실패 시 무시
           }
         }
-        
         setLocation(ipLocation);
         setSource(ipLocation.source);
         setLoading(false);
@@ -173,7 +171,6 @@ export default function useLocation() {
         setLoading(false);
       }
     }
-
     getLocation();
   }, []);
 

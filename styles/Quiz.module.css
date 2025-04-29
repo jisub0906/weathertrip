@@ -1,3 +1,6 @@
+/* =========================
+   퀴즈 전체 컨테이너(중앙 정렬, 카드형)
+   ========================= */
 .quizContainer {
   max-width: 800px;
   margin: 2rem auto;
@@ -7,6 +10,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* =========================
+   문제 영역(질문+옵션)
+   ========================= */
 .questionContainer {
   margin-top: 2rem;
 }
@@ -24,6 +30,9 @@
   gap: 1rem;
 }
 
+/* =========================
+   선택지(옵션) 스타일
+   ========================= */
 .option {
   padding: 1rem;
   border: 2px solid var(--border-light);
@@ -46,6 +55,9 @@
   border-color: var(--primary);
 }
 
+/* =========================
+   정답/피드백/해설 영역
+   ========================= */
 .feedback {
   margin-top: 2rem;
   padding: 1.5rem;
@@ -60,6 +72,9 @@
   line-height: 1.6;
 }
 
+/* =========================
+   다음 문제/재시작 버튼
+   ========================= */
 .nextButton {
   padding: 0.8rem 1.5rem;
   background-color: var(--primary);
@@ -75,24 +90,6 @@
 .nextButton:hover {
   background-color: var(--primary-dark);
   transform: translateY(-2px);
-}
-
-.resultContainer {
-  text-align: center;
-  padding: 2rem;
-}
-
-.resultTitle {
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-}
-
-.resultScore {
-  font-size: 1.5rem;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
 }
 
 .restartButton {
@@ -112,7 +109,30 @@
   transform: translateY(-2px);
 }
 
-/* 모바일 최적화 */
+/* =========================
+   결과(점수/타이틀) 영역
+   ========================= */
+.resultContainer {
+  text-align: center;
+  padding: 2rem;
+}
+
+.resultTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.resultScore {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+/* =========================
+   모바일/태블릿 반응형 스타일
+   ========================= */
 @media (max-width: 768px) {
   .quizContainer {
     margin: 1rem;
@@ -133,6 +153,9 @@
   }
 }
 
+/* =========================
+   퀴즈 메인/로딩/에러/타이틀 등 공통 스타일
+   ========================= */
 .main {
   padding-top: 80px;
   min-height: 100vh;

@@ -6,10 +6,20 @@ import styles from '../../styles/AboutProject.module.css';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
+/**
+ * Weather Trip 프로젝트 소개 페이지 컴포넌트
+ * - 프로젝트 개요, 주요 기능, 개발 과정, 기술 스택 등 다양한 섹션을 그룹별로 제공
+ * - 사이드바 네비게이션, 검색, 섹션별 스크롤 이동, fade-in 애니메이션 등 UI/UX 기능 포함
+ * @returns 프로젝트 소개 페이지(React 컴포넌트)
+ */
 const Project = () => {
+  // 현재 활성화된(화면에 보이는) 섹션 id
   const [activeSection, setActiveSection] = useState('overview');
 
-  // 그룹핑된 섹션 구조 및 아이콘
+  /**
+   * 그룹핑된 섹션 구조 및 아이콘
+   * - 각 그룹은 여러 개의 문서 섹션을 포함하며, 사이드바 네비게이션에 사용됨
+   */
   const groupedSections = [
     {
       group: '프로젝트 개요',
@@ -54,14 +64,19 @@ const Project = () => {
     },
   ];
 
-  // 검색 input 상태
+  // 검색 input 상태 (사이드바 내 문서 검색)
   const [searchTerm, setSearchTerm] = useState('');
+  // 검색 input DOM 참조
   const searchInputRef = useRef();
 
-  // 마운트 시 검색어 강제 초기화
+  // 컴포넌트 마운트 시 검색어를 강제로 초기화 (UX 개선)
   useEffect(() => { setSearchTerm(''); }, []);
 
-  // 검색 필터링된 섹션 id 목록
+  /**
+   * 검색어에 따라 필터링된 섹션 id 목록 반환
+   * - 검색어가 비어 있으면 전체 섹션 id 반환
+   * - 검색어가 있으면 해당 제목에 포함된 섹션만 반환
+   */
   const filteredSectionIds =
     searchTerm.trim() === ''
       ? groupedSections.flatMap(group => group.items.map(item => item.id))
@@ -71,18 +86,26 @@ const Project = () => {
           ).map(item => item.id)
         );
 
-  // 맨 위로 스크롤 함수
+  /**
+   * 페이지 맨 위로 스크롤하는 함수
+   * - 각 섹션 내 '맨 위로' 버튼에서 사용
+   */
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // fade-in 애니메이션 적용을 위한 ref
+  // fade-in 애니메이션 적용을 위한 섹션별 ref 객체
   const sectionRefs = useRef({});
   useEffect(() => {
+    /**
+     * 스크롤 시 각 섹션이 뷰포트에 들어오면 fadeInSection 클래스를 추가
+     * - 사용자에게 자연스러운 등장 애니메이션 제공
+     */
     const handleScroll = () => {
       Object.values(sectionRefs.current).forEach(ref => {
         if (ref) {
           const rect = ref.getBoundingClientRect();
+          // 섹션 상단이 뷰포트 하단에서 80px 위에 들어오면 애니메이션 적용
           if (rect.top < window.innerHeight - 80) {
             ref.classList.add('fadeInSection');
           }
@@ -90,11 +113,15 @@ const Project = () => {
       });
     };
     window.addEventListener('scroll', handleScroll);
-    handleScroll();
+    handleScroll(); // 마운트 시 한 번 실행
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
+    /**
+     * 스크롤 위치에 따라 현재 활성화된 섹션을 동적으로 변경
+     * - 사이드바 네비게이션의 활성 상태와 연동
+     */
     const handleScroll = () => {
       const sectionElements = groupedSections.flatMap(group =>
         group.items.map(item => ({
@@ -103,6 +130,7 @@ const Project = () => {
         }))
       );
 
+      // 현재 뷰포트 기준으로 가장 먼저 보이는 섹션을 active로 설정
       const currentSection = sectionElements.find(section => {
         if (!section.element) return false;
         const rect = section.element.getBoundingClientRect();
@@ -118,6 +146,10 @@ const Project = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  /**
+   * 특정 섹션으로 스크롤 이동
+   * @param sectionId - 이동할 섹션의 id
+   */
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {

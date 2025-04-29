@@ -2,18 +2,32 @@ import React, { useState, useEffect } from 'react';
 import styles from '../../styles/KoreaMap.module.css';
 import koreaGeoData from '../../public/TL_SCCO_CTPRVN.json';
 
+/**
+ * 대한민국 SVG 지도 컴포넌트
+ * @param onRegionSelect - 지역 클릭 시 호출되는 콜백 (영문 코드)
+ * @param selectedRegion - 선택된 지역 코드(영문)
+ * @returns SVG 기반 대한민국 지도 UI
+ */
 export default function KoreaMap({ onRegionSelect, selectedRegion }) {
+  // 각 지역별 SVG path 데이터를 저장하는 상태
   const [pathData, setPathData] = useState({});
   
-  // GeoJSON을 SVG 경로로 변환하는 함수
+  /**
+   * [목적] GeoJSON 데이터를 SVG 경로(path) 데이터로 변환하여 상태에 저장합니다.
+   * [의도] 지도 렌더링을 위한 SVG path 생성
+   */
   useEffect(() => {
-    // 지도 영역 크기 정의 (SVG viewBox에 맞춤)
+    // SVG viewBox 크기 정의
     const width = 800;
     const height = 800;
     
-    // 지리 좌표를 SVG 좌표로 스케일링하기 위한 함수
+    /**
+     * [목적] 지리 좌표(경도, 위도)를 SVG 좌표로 변환합니다.
+     * @param coordinates - 변환할 좌표 배열
+     * @returns 변환된 SVG 좌표 배열
+     */
     function projectGeoToSvg(coordinates) {
-      // 지리 좌표의 범위를 구함 (한국 지도 좌표계의 최소/최대값)
+      // 전체 지도 영역의 최소/최대값 계산
       let minX = Infinity, maxX = -Infinity;
       let minY = Infinity, maxY = -Infinity;
       
@@ -42,66 +56,61 @@ export default function KoreaMap({ onRegionSelect, selectedRegion }) {
         }
       });
       
-      // 패딩 적용
+      // SVG 패딩 및 스케일 계산
       const padding = 50;
       const xScale = (width - padding*2) / (maxX - minX);
       const yScale = (height - padding*2) / (maxY - minY);
-      
-      // 축척을 조정하여 비율 유지
+      // 비율 유지(가로/세로 중 작은 쪽 기준)
       const scale = Math.min(xScale, yScale);
-      
-      // 지리 좌표를 SVG 좌표로 변환
+      // 좌표 변환 (y축 반전)
       return coordinates.map(([x, y]) => [
         padding + (x - minX) * scale,
-        height - padding - (y - minY) * scale // y 축은 반전 (지리좌표와 SVG 좌표계 차이)
+        height - padding - (y - minY) * scale
       ]);
     }
     
-    // GeoJSON 폴리곤을 SVG 경로 문자열로 변환
+    /**
+     * [목적] GeoJSON Polygon/MultiPolygon을 SVG path 문자열로 변환합니다.
+     * @param feature - GeoJSON Feature 객체
+     * @returns SVG path 문자열
+     */
     function createPathFromGeoJSON(feature) {
       let path = "";
-      
       if (feature.geometry.type === "MultiPolygon") {
         feature.geometry.coordinates.forEach(polygon => {
           polygon.forEach(ring => {
             const projectedRing = projectGeoToSvg(ring);
-            
             projectedRing.forEach(([x, y], i) => {
               if (i === 0) path += `M${x},${y} `;
               else path += `L${x},${y} `;
             });
-            
             path += "Z ";
           });
         });
       } else if (feature.geometry.type === "Polygon") {
         feature.geometry.coordinates.forEach(ring => {
           const projectedRing = projectGeoToSvg(ring);
-          
           projectedRing.forEach(([x, y], i) => {
             if (i === 0) path += `M${x},${y} `;
             else path += `L${x},${y} `;
           });
-          
           path += "Z ";
         });
       }
-      
       return path;
     }
     
-    // 각 지역의 경로 데이터 생성
+    // 각 지역의 SVG path 데이터 생성
     const paths = {};
     koreaGeoData.features.forEach(feature => {
-      // 지역 코드나 이름으로 매핑
+      // 지역 코드(영문명)로 매핑
       const regionId = feature.properties.CTP_ENG_NM.toLowerCase();
       paths[regionId] = createPathFromGeoJSON(feature);
     });
-    
     setPathData(paths);
   }, []);
   
-  // 지역 매핑 테이블 (GeoJSON의 영문명을 한글명 및 id로 매핑)
+  // GeoJSON 영문명 ↔ 한글명/코드 매핑 테이블
   const regionMapping = {
     'seoul': { nameKo: '서울', code: 'seoul' },
     'busan': { nameKo: '부산', code: 'busan' },
@@ -122,11 +131,13 @@ export default function KoreaMap({ onRegionSelect, selectedRegion }) {
     'jeju-do': { nameKo: '제주도', code: 'jeju' }
   };
   
-  // 각 지역 렌더링
+  /**
+   * [목적] 각 지역의 SVG path를 렌더링합니다.
+   * @returns SVG <path> 배열
+   */
   const renderRegions = () => {
     return Object.keys(pathData).map((regionId) => {
       const mapping = regionMapping[regionId] || { nameKo: regionId, code: regionId };
-      
       return (
         <path
           key={regionId}
@@ -142,20 +153,21 @@ export default function KoreaMap({ onRegionSelect, selectedRegion }) {
     });
   };
   
-  // 지역 이름 위치 계산 (중앙점)
+  /**
+   * [목적] 각 지역의 한글 레이블을 SVG에 표시합니다.
+   * [의도] 지도 위에 지역명을 시각적으로 안내
+   * @returns SVG <text> 배열
+   */
   const renderRegionLabels = () => {
-    // 구현 생략 - 복잡한 알고리즘이 필요하므로 기존 하드코딩된 레이블 사용
+    // (실제 중심점 계산은 복잡하므로, 하드코딩된 위치 사용)
     return Object.entries(regionMapping).map(([id, info]) => {
-      // 여기서는 간단히 하드코딩된 위치 정보를 사용
-      // 실제 구현에서는 각 경로의 중심점 계산 필요
+      // 하드코딩된 레이블 위치 정보
       const labelPositions = {
         'seoul': {x: 400, y: 280},
         'busan': {x: 540, y: 470},
-        // 다른 지역 위치 생략...
+        // ... (다른 지역 위치 생략)
       };
-      
       const pos = labelPositions[info.code] || {x: 0, y: 0};
-      
       return (
         <text 
           key={info.code} 

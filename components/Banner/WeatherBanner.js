@@ -4,15 +4,26 @@ import styles from '../../styles/WeatherBanner.module.css';
 import useLocation from '@/hooks/useLocation';
 import axios from 'axios';
 
+/**
+ * 현재 위치 기반 날씨 정보를 바탕으로 여행지 추천 메시지를 보여주는 배너 컴포넌트
+ * @returns 날씨 추천 배너 UI
+ */
 export default function WeatherBanner() {
+  // 날씨 정보 상태
   const [weather, setWeather] = useState(null);
+  // 라우터 인스턴스
   const router = useRouter();
+  // 위치 정보 커스텀 훅 (위도, 경도, 로딩, 에러)
   const { location, loading, error } = useLocation();
 
   useEffect(() => {
+    // 위치 정보가 없거나 로딩 중이면 날씨 요청하지 않음
     if (!location || loading) return;
     let cancelled = false;
 
+    /**
+     * 현재 위치 기준 날씨 정보를 서버에서 받아오는 비동기 함수
+     */
     const fetchWeather = async () => {
       try {
         const response = await axios.get('/api/weather/weather', {
@@ -21,22 +32,27 @@ export default function WeatherBanner() {
             longitude: location.longitude,
           },
         });
-
+        // 컴포넌트 언마운트 시 setState 방지
         if (!cancelled && response.data?.success) {
           setWeather(response.data.data);
         }
       } catch (error) {
-        console.error('🌩️ 날씨 API 호출 실패:', error);
+        // 날씨 API 호출 실패 시 무시
       }
     };
 
     fetchWeather();
-
     return () => {
       cancelled = true;
     };
   }, [location, loading]);
 
+  /**
+   * 온도/날씨 조건에 따라 추천 메시지와 이모지 반환
+   * @param temp - 현재 기온
+   * @param condition - 날씨 상태 문자열
+   * @returns 추천 메시지(이모지+JSX)
+   */
   const getBannerMessage = (temp, condition) => {
     if (condition.includes('Rain') || condition.includes('Snow')) {
       return {
@@ -86,9 +102,12 @@ export default function WeatherBanner() {
     }
   };
 
+  // 날씨 정보가 없으면 아무것도 렌더링하지 않음
   if (!weather) return null;
 
+  // 날씨 정보 구조 분해
   const { temperature, condition } = weather;
+  // 추천 메시지 및 이모지 추출
   const { emoji, jsx } = getBannerMessage(temperature, condition);
 
   return (

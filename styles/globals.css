@@ -1,3 +1,6 @@
+/* =========================
+   글로벌 색상 및 테마 변수 정의
+   ========================= */
 :root {
     /* 기본 색상 변수 */
     --primary: #148566;
@@ -19,12 +22,18 @@
     --snowy: #ECEFF1;
   }
   
+  /* =========================
+     박스 모델/기본 리셋
+     ========================= */
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
   
+  /* =========================
+     바디 및 전체 폰트/배경
+     ========================= */
   body {
     font-family: 'Noto Sans KR', 'Poppins', sans-serif;
     background-color: var(--background);
@@ -35,6 +44,9 @@
     -moz-osx-font-smoothing: grayscale;
   }
   
+  /* =========================
+     공통 컨테이너 레이아웃
+     ========================= */
   .container {
     width: 100%;
     max-width: 1280px;
@@ -42,6 +54,9 @@
     padding: 0 24px;
   }
   
+  /* =========================
+     헤더(상단바) 및 네비게이션
+     ========================= */
   .header {
     background-color: var(--primary);
     padding: 16px 0;
@@ -88,6 +103,9 @@
     cursor: pointer;
   }
   
+  /* =========================
+     메인 콘텐츠 영역
+     ========================= */
   .mainContent {
     margin-top: 80px;
     padding: 40px 0;
@@ -108,7 +126,9 @@
     font-size: 14px;
   }
   
-  /* 헤더 스타일 */
+  /* =========================
+     헤더 스타일(고정/스크롤)
+     ========================= */
   header {
     position: fixed;
     top: 0;
@@ -165,7 +185,9 @@
     cursor: pointer;
   }
   
-  /* 히어로 섹션 */
+  /* =========================
+     히어로(메인 배너) 섹션
+     ========================= */
   .hero {
     position: relative;
     height: 100vh;
@@ -207,6 +229,9 @@
     opacity: 0.9;
   }
   
+  /* =========================
+     버튼 스타일(공통/라이트/아웃라인)
+     ========================= */
   .btn {
     display: inline-block;
     padding: 15px 30px;
@@ -236,7 +261,9 @@
     border: 2px solid var(--text-light);
   }
   
-  /* 섹션 스타일 */
+  /* =========================
+     섹션(공통) 스타일
+     ========================= */
   .section {
     padding: 100px 0;
   }
@@ -255,7 +282,9 @@
     max-width: 600px;
   }
   
-  /* 카드 스타일 */
+  /* =========================
+     카드/태그/날씨카드 등 컴포넌트
+     ========================= */
   .card {
     background-color: var(--card-bg);
     border-radius: 8px;
@@ -298,7 +327,6 @@
     color: var(--text-secondary);
   }
   
-  /* 태그 스타일 */
   .tag {
     display: inline-block;
     padding: 4px 12px;
@@ -310,7 +338,9 @@
     margin-right: 8px;
   }
   
-  /* 날씨 카드 스타일 */
+  /* =========================
+     날씨 카드(공통) 스타일
+     ========================= */
   .weather-card {
     display: flex;
     align-items: center;
@@ -352,7 +382,9 @@
     font-size: 1rem;
   }
   
-  /* 푸터 스타일 */
+  /* =========================
+     푸터(공통) 스타일
+     ========================= */
   footer {
     background-color: var(--secondary);
     color: var(--text-light);
@@ -433,7 +465,9 @@
     font-size: 0.9rem;
   }
   
-  /* 모바일 대응 */
+  /* =========================
+     반응형(태블릿/모바일) 스타일
+     ========================= */
   @media (max-width: 992px) {
     .hero-title {
       font-size: 3rem;
@@ -477,7 +511,9 @@
     }
   }
   
-  /* 필터 스타일 */
+  /* =========================
+     필터/지도/관광지 목록 등 기타 UI
+     ========================= */
   .filters {
     margin-bottom: 32px;
     display: flex;
@@ -505,14 +541,12 @@
     background-color: var(--primary-light);
   }
   
-  /* 지도 스타일 */
   .map-container {
     height: 500px;
     border-radius: 8px;
     overflow: hidden;
   }
   
-  /* 관광지 목록 스타일 */
   .attractions-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

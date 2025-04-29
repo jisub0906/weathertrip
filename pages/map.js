@@ -7,7 +7,13 @@ import SearchBar from "../components/Search/SearchBar";
 import useLocation from "../hooks/useLocation";
 import styles from "../styles/KakaoMap.module.css";
 
+/**
+ * 지도 기반 관광지 탐색 페이지 컴포넌트
+ * - 카카오맵, 관광지 검색/선택, 내 주변/전체 관광지, 반응형 사이드바 등 제공
+ * @returns JSX.Element - 지도 페이지 UI
+ */
 export default function Map() {
+  // 위치 정보, 관광지 목록, 선택/검색 상태 등 주요 상태 변수
   const { location, error: locationError, loading: locationLoading } = useLocation();
   const [nearbyAttractions, setNearbyAttractions] = useState([]);
   const [allAttractions, setAllAttractions] = useState([]);
@@ -19,72 +25,66 @@ export default function Map() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-
   const router = useRouter();
   const keyword = router.query.keyword || "";
 
-  // ✅ 자동 포커싱 로직 (로컬스토리지 기반)
+  /**
+   * 로컬스토리지 기반 자동 포커싱 로직
+   * - 검색어/관광지ID가 저장되어 있으면 해당 관광지로 자동 포커스
+   */
   useEffect(() => {
     const savedKeyword = localStorage.getItem('searchKeyword');
     const savedAttractionId = localStorage.getItem('selectedAttractionId');
-
     if (savedKeyword && savedAttractionId) {
       setSearchKeyword(savedKeyword);
-
       const checkReady = setInterval(() => {
         if (mapRef.current?.mapReady && allAttractions.length > 0) {
           clearInterval(checkReady);
-
           const matched = allAttractions.find((a) => a._id?.toString?.() === savedAttractionId);
           if (matched) {
-            console.log('✅ 자동 포커싱 실행:', matched.name);
             handleAttractionClick(matched);
-          } else {
-            console.warn('❌ 해당 관광지를 찾을 수 없습니다');
           }
-
           localStorage.removeItem('searchKeyword');
           localStorage.removeItem('selectedAttractionId');
         }
       }, 500);
-
       setTimeout(() => {
         clearInterval(checkReady);
-        console.log('⏱️ 지도와 관광지 로드 타임아웃');
       }, 10000);
     }
   }, [allAttractions]);
 
+  /**
+   * 쿼리스트링(keyword) 기반 관광지 검색 및 지도 이동
+   */
   useEffect(() => {
     if (!keyword) return;
-
     const fetchKeywordLocation = async () => {
       try {
         const res = await fetch(`/api/attractions/search?name=${encodeURIComponent(keyword)}`);
         const data = await res.json();
-
         if (data?.attraction) {
           const lat = data.attraction["위도(도)"] || data.attraction.location?.coordinates?.[1];
           const lng = data.attraction["경도(도)"] || data.attraction.location?.coordinates?.[0];
-
           if (mapRef.current?.moveToCoords) {
             mapRef.current.moveToCoords(lat, lng);
           }
-
           if (mapRef.current?.addSearchMarker) {
             mapRef.current.addSearchMarker(lat, lng);
           }
-
           setSelectedAttraction(data.attraction);
         }
       } catch (err) {
-        console.error("키워드 기반 관광지 검색 실패:", err);
+        // 키워드 기반 관광지 검색 실패 시 무시
       }
     };
-
     fetchKeywordLocation();
   }, [keyword]);
 
+  /**
+   * 내 주변 관광지 데이터 로드 콜백
+   * @param attractions - 관광지 배열
+   */
   const handleNearbyAttractionsLoad = useCallback((attractions) => {
     setNearbyAttractions(attractions || []);
     if (!isNearbyMode) {
@@ -92,6 +92,10 @@ export default function Map() {
     }
   }, [isNearbyMode]);
 
+  /**
+   * 전체 관광지 데이터 로드 콜백
+   * @param attractions - 관광지 배열
+   */
   const handleAllAttractionsLoad = useCallback((attractions) => {
     setAllAttractions(attractions || []);
     if (!isNearbyMode) {
@@ -99,6 +103,9 @@ export default function Map() {
     }
   }, [isNearbyMode]);
 
+  /**
+   * 내 주변 관광지 모드 전환 및 지도 이동
+   */
   const handleShowNearby = useCallback(() => {
     if (mapRef.current?.moveToCurrentLocation) {
       mapRef.current.moveToCurrentLocation();
@@ -106,6 +113,9 @@ export default function Map() {
     }
   }, []);
 
+  /**
+   * 전체 관광지 모드 전환 및 전체 데이터 로드
+   */
   const handleShowAll = useCallback(() => {
     setIsNearbyMode(false);
     if (mapRef.current?.fetchAllAttractions) {
@@ -113,10 +123,12 @@ export default function Map() {
     }
   }, []);
 
+  // 모드 전환 시 필터링된 관광지 목록 갱신
   useEffect(() => {
     setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
   }, [isNearbyMode, nearbyAttractions, allAttractions]);
 
+  // 반응형(모바일) 여부 감지
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -128,6 +140,10 @@ export default function Map() {
     }
   }, []);
 
+  /**
+   * 관광지 클릭 시 상세 정보 및 지도 이동
+   * @param attraction - 관광지 객체
+   */
   const handleAttractionClick = useCallback((attraction) => {
     setSelectedAttraction(attraction);
     if (mapRef.current?.handleAttractionClick) {
@@ -137,7 +153,6 @@ export default function Map() {
       const lat = attraction.location?.coordinates?.[1] || attraction["위도(도)"];
       const lng = attraction.location?.coordinates?.[0] || attraction["경도(도)"];
       if (lat && lng) {
-        console.log("📍 moveToCoords 실행!", lat, lng);
         mapRef.current.moveToCoords(lat, lng);
         mapRef.current.addSearchMarker(lat, lng);
       }
@@ -147,26 +162,30 @@ export default function Map() {
     }
   }, [isMobile]);
 
+  /**
+   * 사이드바 닫기 핸들러
+   */
   const handleCloseSidebar = () => {
     setSidebarOpen(false);
   };
 
+  /**
+   * 관광지 검색 핸들러
+   * @param keyword - 검색어
+   * @param attractionId - 특정 관광지 ID(선택적)
+   */
   const handleSearch = (keyword, attractionId) => {
-    console.log('검색 실행:', keyword, attractionId);
     if (!keyword) {
       setFilteredAttractions(isNearbyMode ? nearbyAttractions : allAttractions);
       return;
     }
-
     setSearchKeyword(keyword);
     const searchData = isNearbyMode ? nearbyAttractions : allAttractions;
     const filtered = searchData.filter(attraction =>
       (attraction._id === attractionId) ||
       ((attraction.name || '').toLowerCase().includes(keyword.toLowerCase()) && !attractionId)
     );
-    console.log('검색 결과:', filtered);
     setFilteredAttractions(filtered);
-
     if (filtered.length > 0 && mapRef.current) {
       const firstAttraction = filtered[0];
       const lat = firstAttraction.location?.coordinates?.[1] || firstAttraction.latitude;
@@ -184,7 +203,6 @@ export default function Map() {
         <title>지도로 관광지 찾기 | 날씨 관광 앱</title>
         <meta name="description" content="현재 위치 주변의 관광지를 지도에서 찾아보세요." />
       </Head>
-
       <Header>
         <aside className={`${styles.attractionsSidebar} ${isMobile && !sidebarOpen ? styles.closed : ''}`}>
           <div className={styles.sidebarHeader}>
@@ -228,7 +246,6 @@ export default function Map() {
             </div>
           )}
         </aside>
-
         {/* 모바일에서 sidebar가 닫혀있을 때만 floating 열기 버튼 */}
         {isMobile && !sidebarOpen && (
           <button
@@ -247,7 +264,6 @@ export default function Map() {
           >📍</button>
         )}
       </Header>
-
       <main className={styles.mapArea}>
         {locationLoading && (
           <div className={styles.mapLoadingOverlay}>
@@ -255,14 +271,12 @@ export default function Map() {
             <p>위치 정보를 불러오는 중...</p>
           </div>
         )}
-
         {locationError && (
           <div className={styles.mapLoadingOverlay}>
             <p>위치 정보를 불러오는데 문제가 발생했습니다.</p>
             <p>{locationError}</p>
           </div>
         )}
-
         {!locationLoading && (
           <KakaoMap
             ref={mapRef}

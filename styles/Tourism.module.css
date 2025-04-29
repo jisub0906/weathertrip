@@ -1,8 +1,14 @@
+/* =========================
+   관광지 메인 컨테이너(전체 배경/패딩)
+   ========================= */
 .tourismContainer {
     padding: 40px 0;
     background-color: var(--background);
   }
   
+  /* =========================
+     헤더/타이틀/서브타이틀 영역
+     ========================= */
   .tourismHeader {
     text-align: center;
     margin-bottom: 60px;
@@ -22,6 +28,9 @@
     margin: 0 auto;
   }
   
+  /* =========================
+     필터 바/필터 버튼
+     ========================= */
   .filterBar {
     display: flex;
     justify-content: center;
@@ -47,6 +56,9 @@
     color: var(--text-light);
   }
   
+  /* =========================
+     관광지 카드 그리드/카드
+     ========================= */
   .tourismGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -176,6 +188,9 @@
     background-color: var(--primary-dark);
   }
   
+  /* =========================
+     반응형(PC/태블릿/모바일) 스타일
+     ========================= */
   @media (max-width: 992px) {
     .tourismGrid {
       grid-template-columns: repeat(2, 1fr);
@@ -207,6 +222,9 @@
     }
   }
   
+  /* =========================
+     서비스 안내/버튼 그룹 영역
+     ========================= */
   .serviceSection {
     padding: 60px 0;
     text-align: center;

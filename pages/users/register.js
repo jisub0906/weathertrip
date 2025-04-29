@@ -4,8 +4,14 @@ import Link from 'next/link';
 import styles from '../../styles/Register.module.css';
 import Header from '../../components/Layout/Header';
 
+/**
+ * 회원가입 페이지 컴포넌트
+ * - 사용자가 회원 정보를 입력하여 회원가입을 진행할 수 있는 폼을 제공
+ * @returns JSX.Element - 회원가입 UI
+ */
 export default function Register() {
   const router = useRouter();
+  // formData: 회원가입 입력값 상태
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,10 +22,16 @@ export default function Register() {
     birthdate: '',
     phone: ''
   });
-
+  // errors: 각 입력 필드 및 제출 에러 상태
   const [errors, setErrors] = useState({});
+  // isLoading: 회원가입 요청 중 여부
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * 입력값 변경 핸들러
+   * - 입력 필드의 값이 변경될 때 상태를 업데이트
+   * @param e - input change 이벤트 객체
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -27,6 +39,7 @@ export default function Register() {
       [name]: value
     }));
 
+    // 해당 필드의 에러 메시지 초기화
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -35,6 +48,11 @@ export default function Register() {
     }
   };
 
+  /**
+   * 입력값 유효성 검사
+   * - 필수값, 이메일/비밀번호/닉네임/전화번호 형식 등 검증
+   * @returns boolean - 유효성 통과 여부
+   */
   const validateForm = () => {
     const newErrors = {};
 
@@ -82,6 +100,11 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * 회원가입 폼 제출 핸들러
+   * - 유효성 검사 후 회원가입 요청을 수행
+   * @param e - form submit 이벤트 객체
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -89,6 +112,7 @@ export default function Register() {
     setIsLoading(true);
 
     try {
+      // 회원가입 API 요청
       const response = await fetch('/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +143,7 @@ export default function Register() {
         <div className={styles.registerBox}>
           <h1 className={styles.title}>회원가입</h1>
           <form onSubmit={handleSubmit}>
-            {/* 이름 입력 */}
+            {/* 이름 입력 영역 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="name">이름</label>
               <input
@@ -133,7 +157,7 @@ export default function Register() {
               {errors.name && <p className={styles.errorText}>{errors.name}</p>}
             </div>
 
-            {/* 이메일 입력 */}
+            {/* 이메일 입력 영역 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="email">이메일</label>
               <input
@@ -147,7 +171,7 @@ export default function Register() {
               {errors.email && <p className={styles.errorText}>{errors.email}</p>}
             </div>
 
-            {/* 비밀번호 입력 */}
+            {/* 비밀번호 입력 영역 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="password">비밀번호</label>
               <input
@@ -161,7 +185,7 @@ export default function Register() {
               {errors.password && <p className={styles.errorText}>{errors.password}</p>}
             </div>
 
-            {/* 비밀번호 확인 입력 */}
+            {/* 비밀번호 확인 입력 영역 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="confirmPassword">비밀번호 확인</label>
               <input
@@ -175,7 +199,7 @@ export default function Register() {
               {errors.confirmPassword && <p className={styles.errorText}>{errors.confirmPassword}</p>}
             </div>
 
-            {/* 닉네임 입력 */}
+            {/* 닉네임 입력 영역 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="nickname">닉네임</label>
               <input
@@ -190,7 +214,7 @@ export default function Register() {
               {errors.nickname && <p className={styles.errorText}>{errors.nickname}</p>}
             </div>
 
-            {/* 성별 선택 */}
+            {/* 성별 선택 영역 */}
             <div className={styles.formGroup}>
               <label className={styles.label}>성별</label>
               <div className={styles.radioGroup}>
@@ -219,7 +243,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* 생년월일 입력 */}
+            {/* 생년월일 입력 영역 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="birthdate">생년월일</label>
               <input
@@ -232,7 +256,7 @@ export default function Register() {
               />
             </div>
 
-            {/* 전화번호 입력 */}
+            {/* 전화번호 입력 영역 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="phone">전화번호</label>
               <input

@@ -1,4 +1,6 @@
-/* 전체 레이아웃 */
+/* =========================
+   마이페이지 전체 레이아웃(중앙 정렬)
+   ========================= */
 .container {
   display: flex;
   justify-content: center;
@@ -8,6 +10,9 @@
   padding: 2rem;
 }
 
+/* =========================
+   마이페이지 박스(회원 정보/수정/탈퇴)
+   ========================= */
 .mypageBox {
   background: white;
   padding: 2.5rem;
@@ -17,7 +22,9 @@
   max-width: 420px;
 }
 
-/* 제목 */
+/* =========================
+   타이틀(마이페이지/회원정보 등)
+   ========================= */
 .title {
   text-align: center;
   font-size: 1.8rem;
@@ -26,14 +33,15 @@
   color: #333;
 }
 
-/* form group */
+/* =========================
+   입력 폼 그룹(라벨+인풋)
+   ========================= */
 .formGroup {
   margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
 }
 
-/* 라벨 */
 .label {
   font-size: 0.95rem;
   font-weight: 500;
@@ -41,7 +49,6 @@
   color: #555;
 }
 
-/* 인풋 */
 .input {
   width: 100%;
   padding: 0.75rem;
@@ -57,7 +64,9 @@
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
 
-/* 라디오 버튼 그룹 */
+/* =========================
+   성별/기타 라디오 버튼 그룹
+   ========================= */
 .radioGroup {
   display: flex;
   gap: 1.5rem;
@@ -73,7 +82,9 @@
   margin-right: 0.4rem;
 }
 
-/* 버튼 그룹 */
+/* =========================
+   수정/탈퇴 버튼 그룹
+   ========================= */
 .buttonGroup {
   display: flex;
   gap: 1rem;
@@ -110,7 +121,9 @@
   background-color: #d32f2f;
 }
 
-/* 링크 */
+/* =========================
+   하단 링크(메인/로그아웃 등)
+   ========================= */
 .link {
   color: #2196f3;
   text-decoration: none;
@@ -123,7 +136,9 @@
   text-decoration: underline;
 }
 
-/* 반응형 */
+/* =========================
+   반응형(모바일) 스타일
+   ========================= */
 @media (max-width: 480px) {
   .mypageBox {
     padding: 2rem;
@@ -139,7 +154,9 @@
   }
 }
 
-/* ✅ 회원탈퇴 입력창 드롭다운 스타일 */
+/* =========================
+   회원탈퇴 입력창 드롭다운/애니메이션
+   ========================= */
 .withdrawBox {
   background-color: #fff;
   border-radius: 12px;
@@ -151,7 +168,6 @@
   position: relative;
 }
 
-/* ✅ 부드럽게 아래로 열리는 애니메이션 */
 @keyframes fadeSlideDown {
   from {
     opacity: 0;
@@ -163,7 +179,6 @@
   }
 }
 
-/* ✅ 제목 정렬 */
 .withdrawTitle {
   font-size: 1.2rem;
   font-weight: 600;

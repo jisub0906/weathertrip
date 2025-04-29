@@ -1,6 +1,14 @@
 import { getDatabase } from '../../../lib/db/mongodb';
 
+/**
+ * 반경 내 관광지 검색 API 라우트 핸들러
+ * - GET: 위도/경도, 반경, 날씨 조건 등으로 주변 관광지 목록 반환
+ * @param req - Next.js API 요청 객체
+ * @param res - Next.js API 응답 객체
+ * @returns JSON 응답(관광지 배열, 검색 파라미터, 총 개수 등)
+ */
 export default async function handler(req, res) {
+  // GET 메서드만 허용
   if (req.method !== 'GET') {
     return res.status(405).json({ 
       success: false,
@@ -9,6 +17,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    // DB 연결 및 컬렉션 참조
     const db = await getDatabase();
     const attractions = db.collection('attractions');
 
@@ -21,7 +30,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2dsphere 인덱스 확인 및 생성
+    // 2dsphere 인덱스 확인 및 생성(위치 기반 검색을 위한 필수 인덱스)
     const indexes = await attractions.indexes();
     const hasGeoIndex = indexes.some(index => 
       index.key && index.key.location === '2dsphere'
@@ -30,22 +39,18 @@ export default async function handler(req, res) {
     if (!hasGeoIndex) {
       try {
         await attractions.createIndex({ location: '2dsphere' });
-        console.log('2dsphere 인덱스 생성 완료');
       } catch (indexError) {
-        console.error('2dsphere 인덱스 생성 실패:', indexError);
+        // 인덱스 생성 실패 시 무시(검색은 계속 시도)
       }
     }
 
-    // 전체 관광지 수 확인
+    // 전체 관광지 수 확인(검색 파라미터에 활용)
     const totalCount = await attractions.countDocuments();
-    console.log(`전체 관광지 수: ${totalCount}`);
 
-    // 샘플 데이터 구조 확인
-    const sampleAttraction = await attractions.findOne();
-    console.log('샘플 관광지 데이터:', sampleAttraction);
-
+    // 쿼리 파라미터 추출 및 기본값 처리
     const { latitude, longitude, radius = 5, limit = 20, weatherCondition } = req.query;
     
+    // 위도/경도 필수 체크
     if (!latitude || !longitude) {
       return res.status(400).json({ 
         success: false,
@@ -67,7 +72,10 @@ export default async function handler(req, res) {
     const searchRadius = parseFloat(radius);
     const searchLimit = parseInt(limit);
 
-    // 날씨 조건에 따른 관광지 타입 필터링
+    /**
+     * 날씨 조건에 따른 관광지 타입 필터링 쿼리 생성
+     * - 비/눈: 실내, 맑음: 야외, 그 외: 전체
+     */
     let typeQuery = {};
     if (weatherCondition) {
       switch (weatherCondition) {
@@ -83,7 +91,11 @@ export default async function handler(req, res) {
       }
     }
 
-    // MongoDB 쿼리 파이프라인
+    /**
+     * MongoDB Aggregation Pipeline
+     * - $geoNear: 위치 기반 반경 내 관광지 검색
+     * - $addFields/$match/$sort/$limit/$project: 거리 계산, 필터링, 정렬, 필드 선택
+     */
     const pipeline = [
       {
         $geoNear: {
@@ -131,29 +143,11 @@ export default async function handler(req, res) {
       }
     ];
 
-    console.log('검색 파라미터:', {
-      coordinates: [lng, lat],
-      radius: searchRadius,
-      limit: searchLimit,
-      typeQuery
-    });
-
     let results = [];
     try {
       results = await attractions.aggregate(pipeline).toArray();
-      console.log(`검색 결과: ${results.length}개 관광지 찾음`);
-      if (results.length > 0) {
-        console.log('첫 번째 결과:', {
-          name: results[0].name,
-          distance: results[0].distance,
-          coordinates: results[0].location?.coordinates,
-          tags: results[0].tags,
-          테마명: results[0].테마명,
-          실내구분: results[0].실내구분
-        });
-      }
     } catch (error) {
-      console.error('관광지 검색 오류:', error);
+      // DB/서버 오류 처리
       return res.status(500).json({
         success: false,
         message: '관광지 검색 중 오류가 발생했습니다.',
@@ -174,7 +168,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('서버 오류:', error);
+    // DB/서버 오류 처리
     return res.status(500).json({
       success: false,
       message: '서버 오류가 발생했습니다.',

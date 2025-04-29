@@ -1,3 +1,6 @@
+/* =========================
+   회원정보 수정 모달 오버레이(배경 어둡게, 중앙 정렬)
+   ========================= */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -11,24 +14,30 @@
   z-index: 9999;
 }
 
+/* =========================
+   모달 본문(회원정보 입력/수정)
+   ========================= */
 .modal {
   background: white;
-  padding: 32px; /* ✅ 여유롭게 */
+  padding: 32px;
   border-radius: 10px;
-  width: 400px; /* ✅ 넓이 조금 더 */
+  width: 400px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .modal h3 {
-  text-align: center; /* ✅ 중앙 정렬 */
+  text-align: center;
   font-size: 20px;
   margin-bottom: 24px;
 }
 
+/* =========================
+   정보 입력 행(라벨+인풋/셀렉트)
+   ========================= */
 .infoRow {
   display: flex;
   flex-direction: column;
-  margin-bottom: 18px; /* ✅ 항목 간 여백 증가 */
+  margin-bottom: 18px;
 }
 
 .infoRow label {
@@ -43,11 +52,14 @@
   border-radius: 4px;
 }
 
+/* =========================
+   버튼 그룹(취소/저장)
+   ========================= */
 .buttonGroup {
   display: flex;
-  justify-content: center; /* ✅ 중앙 정렬 */
+  justify-content: center;
   gap: 12px;
-  margin-top: 30px; /* ✅ 버튼 위 공간 여유 */
+  margin-top: 30px;
 }
 
 .grayButton {

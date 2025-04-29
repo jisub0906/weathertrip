@@ -6,32 +6,48 @@ import Image from 'next/image';
 import styles from '../../styles/Header.module.css';
 import { HeaderHeightProvider } from '../../src/contexts/HeaderHeightContext';
 
+/**
+ * 사이트 상단 네비게이션 및 사용자 메뉴를 제공하는 헤더 컴포넌트
+ * @param children - 헤더 아래에 렌더링될 자식 요소
+ * @returns 헤더 및 네비게이션 UI
+ */
 export default function Header({ children }) {
+  // 로그인 세션 정보
   const { data: session } = useSession();
+  // 라우터 인스턴스
   const router = useRouter();
+  // 스크롤 여부(헤더 스타일 변경)
   const [scrolled, setScrolled] = useState(false);
+  // 드롭다운 메뉴 열림 여부
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // 드롭다운 메뉴 ref
   const dropdownRef = useRef(null);
+  // 헤더 영역 ref
   const headerRef = useRef(null);
+  // 헤더 높이 상태(모바일 등 레이아웃 보정용)
   const [headerHeight, setHeaderHeight] = useState(56);
 
+  // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
+  /**
+   * 현재 경로가 활성화된 네비게이션인지 판별
+   */
   const isActive = (path) => {
     return router.pathname === path;
   };
 
+  // 스크롤 시 헤더 스타일 변경
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -40,13 +56,13 @@ export default function Header({ children }) {
         setScrolled(false);
       }
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
+  // 헤더 높이 측정 및 상태 반영
   useLayoutEffect(() => {
     if (headerRef.current) {
       setHeaderHeight(headerRef.current.offsetHeight);
@@ -57,6 +73,7 @@ export default function Header({ children }) {
     <HeaderHeightProvider value={headerHeight}>
       <header ref={headerRef} className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
         <nav className={styles.nav}>
+          {/* 로고 및 홈 링크 */}
           <Link href="/" className={styles.logo}>
             <Image
               src="/logo.png"
@@ -73,6 +90,7 @@ export default function Header({ children }) {
             />
           </Link>
 
+          {/* 주요 네비게이션 링크 */}
           <div className={styles.navLinks}>
             <Link href="/map" className={`${styles.navItem} ${isActive('/map') ? styles.active : ''}`}>
               지도
@@ -85,6 +103,7 @@ export default function Header({ children }) {
             </Link>
           </div>
 
+          {/* 로그인/회원/드롭다운 메뉴 */}
           <div className={styles.authButtons}>
             {session ? (
               <>

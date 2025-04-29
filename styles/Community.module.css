@@ -1,3 +1,6 @@
+/* =========================
+   커뮤니티 페이지 전체 컨테이너 및 타이틀
+   ========================= */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -28,6 +31,9 @@
   border-radius: 2px;
 }
 
+/* =========================
+   리뷰 리스트 및 카드
+   ========================= */
 .reviewList {
   display: flex;
   flex-direction: column;
@@ -81,6 +87,9 @@
   font-weight: 500;
 }
 
+/* =========================
+   리뷰/관광지 콘텐츠 영역
+   ========================= */
 .contentContainer {
   display: flex;
   flex-direction: column;
@@ -173,6 +182,9 @@
   border: 1px solid #eaeaea;
 }
 
+/* =========================
+   로딩/더보기/상태 메시지
+   ========================= */
 .loading, .noMore {
   text-align: center;
   padding: 1.5rem;
@@ -180,7 +192,9 @@
   font-weight: 500;
 }
 
-/* Pull to Refresh styles */
+/* =========================
+   Pull to Refresh(모바일 새로고침) 스타일
+   ========================= */
 .pullToRefresh {
   position: fixed;
   top: 0;
@@ -257,7 +271,9 @@
   margin-right: 10px;
 }
 
-/* Animations */
+/* =========================
+   애니메이션 효과
+   ========================= */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -272,7 +288,9 @@
   animation: bounce 1s infinite;
 }
 
-/* Web version layout - horizontal arrangement */
+/* =========================
+   웹/모바일 반응형 레이아웃
+   ========================= */
 @media (min-width: 769px) {
   .contentContainer {
     flex-direction: row;
@@ -297,7 +315,6 @@
   }
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
   .container {
     margin: 1rem auto;
@@ -336,7 +353,9 @@
   }
 }
 
-/* Dark mode support */
+/* =========================
+   다크 모드 지원
+   ========================= */
 @media (prefers-color-scheme: dark) {
   .container {
     color: #e0e0e0;
@@ -383,6 +402,9 @@
   }
 }
 
+/* =========================
+   탭/퀴즈/서브타이틀 등 기타 UI
+   ========================= */
 .tabContainer {
   display: flex;
   justify-content: center;

@@ -5,6 +5,12 @@ import Footer from "../../components/Layout/Footer";
 import styles from "../../styles/AboutTeam.module.css";
 import Image from "next/image";
 
+/**
+ * Weather Trip 팀 소개 페이지 컴포넌트
+ * - 팀원별 역할, 기술 스택, 프로젝트 소개 등 팀의 주요 정보를 시각적으로 제공
+ * - 각 팀원별 카드, 팀 설명, 프로젝트 제작 이야기 등으로 구성
+ * @returns 팀 소개 페이지(React 컴포넌트)
+ */
 const Team = () => {
   return (
     <>
@@ -25,6 +31,7 @@ const Team = () => {
             </p>
           </div>
 
+          {/* 팀원 소개 영역: 각 팀원별 역할, 기술스택, 자기소개 등 카드 형태로 시각화 */}
           <div className={styles.teamSection}>
             <div className={styles.sectionTitle}>
               <h2>팀원 소개</h2>
@@ -32,6 +39,7 @@ const Team = () => {
             </div>
 
             <div className={styles.teamMembers}>
+              {/* 김성현 팀장 카드 */}
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
                   <Image
@@ -65,6 +73,7 @@ const Team = () => {
                 </div>
               </div>
 
+              {/* 이민호 팀원 카드 */}
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
                   <Image
@@ -97,6 +106,7 @@ const Team = () => {
                 </div>
               </div>
 
+              {/* 이지섭 팀원 카드 */}
               <div className={styles.memberCard}>
                 <div className={styles.memberImage}>
                   <Image
@@ -131,6 +141,7 @@ const Team = () => {
             </div>
           </div>
 
+          {/* 팀/프로젝트 설명 영역: 서비스 목적, 개발 동기, 팀의 성장 이야기 등 소개 */}
           <div className={styles.teamInfo}>
             <h2>Weather-Trip 소개</h2>
             <div className={styles.teamDescription}>

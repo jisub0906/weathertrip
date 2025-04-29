@@ -1,7 +1,13 @@
+/* =========================
+   날씨 메인 컨테이너(전체 배경/패딩)
+   ========================= */
 .weatherContainer {
     padding: 40px 0;
   }
   
+  /* =========================
+     헤더/타이틀/서브타이틀 영역
+     ========================= */
   .weatherHeader {
     text-align: center;
     margin-bottom: 60px;
@@ -21,6 +27,9 @@
     margin: 0 auto;
   }
   
+  /* =========================
+     날씨 카드(현재 날씨/정보)
+     ========================= */
   .weatherCard {
     display: flex;
     max-width: 600px;
@@ -98,6 +107,9 @@
     fill: currentColor;
   }
   
+  /* =========================
+     추천 버튼
+     ========================= */
   .recommendButton {
     display: inline-flex;
     align-items: center;
@@ -115,6 +127,9 @@
     background-color: var(--primary-dark);
   }
   
+  /* =========================
+     날씨 비주얼(배경 이미지/오버레이)
+     ========================= */
   .weatherVisual {
     flex: 1;
     min-height: 350px;
@@ -135,6 +150,9 @@
     background-color: rgba(20, 133, 102, 0.3);
   }
   
+  /* =========================
+     일기예보/예보 텍스트
+     ========================= */
   .weatherForecast {
     margin-top: 40px;
     text-align: center;
@@ -155,6 +173,9 @@
     font-weight: 500;
   }
   
+  /* =========================
+     반응형(태블릿/모바일) 스타일
+     ========================= */
   @media (max-width: 768px) {
     .weatherCard {
       flex-direction: column;

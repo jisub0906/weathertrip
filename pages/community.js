@@ -7,6 +7,11 @@ import Header from "../components/Layout/Header";
 import LanguageToggleButton from "../components/Translate/LanguageToggleButton";
 import Quiz from "../components/Quiz/Quiz";
 
+/**
+ * 커뮤니티 페이지 컴포넌트
+ * - 관광지 리뷰 목록, 퀴즈, 다국어 번역, 무한 스크롤, 당겨서 새로고침 등 다양한 커뮤니티 기능 제공
+ * @returns JSX.Element - 커뮤니티 UI
+ */
 export default function Community() {
   const { data: session } = useSession();
   const [reviews, setReviews] = useState([]);
@@ -24,41 +29,40 @@ export default function Community() {
   const [quizData, setQuizData] = useState([]);
   const [quizLoading, setQuizLoading] = useState(false);
 
-  // 리뷰 번역을 위한 언어 선택
+  const originalReviewsRef = useRef(new Map());
+
+  /**
+   * 리뷰 번역을 위한 언어 선택
+   * @param text - 번역할 문자열
+   * @param lang - 대상 언어 코드
+   * @returns Promise<string> - 번역된 문자열(실패 시 원본 반환)
+   */
   const translateReviewContent = async (text, lang) => {
     try {
-      if (!text || !lang) return text; // 필터링
-  
+      if (!text || !lang) return text;
       const textToTranslate = text.replace(" →", "");
-  
       const res = await fetch("/api/translate/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: textToTranslate, targetLang: lang }),
       });
-  
-      // ✅ 응답 상태 확인
       if (!res.ok) {
-        const errorText = await res.text(); // 텍스트로 응답 받기
-        console.error("DeepL 응답 오류:", {
-          status: res.status,
-          message: errorText,
-        });
         return text; // 번역 실패 시 원본 반환
       }
-  
       const result = await res.json();
-  
       const translatedText = result.translations?.[0]?.text || text;
       return text.includes("→") ? `${translatedText} →` : translatedText;
-  
     } catch (error) {
-      console.error("번역 실패:", error);
       return text;
     }
   };
 
-  // 퀴즈 번역을 위한 언어 선택
+  /**
+   * 퀴즈 번역을 위한 언어 선택
+   * @param quiz - 퀴즈 객체
+   * @param lang - 대상 언어 코드
+   * @returns Promise<object> - 번역된 퀴즈 객체
+   */
   const translateQuizContent = async (quiz, lang) => {
     try {
       const translatedQuestion = await translateReviewContent(
@@ -72,7 +76,6 @@ export default function Community() {
         quiz.explanation,
         lang
       );
-
       return {
         ...quiz,
         question: translatedQuestion,
@@ -80,12 +83,9 @@ export default function Community() {
         explanation: translatedExplanation,
       };
     } catch (error) {
-      console.error("퀴즈 번역 실패:", error);
       return quiz;
     }
   };
-
-  const originalReviewsRef = useRef(new Map());
 
   // 퀴즈 번역을 위한 언어 선택
   useEffect(() => {
@@ -213,6 +213,10 @@ export default function Community() {
   const [isPulling, setIsPulling] = useState(false);
   const pullThreshold = 100; // Distance to trigger refresh (pixels)
 
+  /**
+   * 리뷰 카드 클릭 시 관광지 상세 페이지로 이동
+   * @param attraction - 관광지 객체
+   */
   const handleCardClick = (attraction) => {
     if (!attraction?.name) return;
     localStorage.setItem("searchKeyword", attraction.name);
@@ -220,7 +224,10 @@ export default function Community() {
     window.location.href = "/map";
   };
 
-  // Fetch review data
+  /**
+   * 리뷰 데이터(무한 스크롤/새로고침) 비동기 로드
+   * @param isRefresh - true면 새로고침, false면 추가 로드
+   */
   const fetchReviews = async (isRefresh = false) => {
     try {
       if (isRefresh) {
@@ -228,24 +235,19 @@ export default function Community() {
       } else {
         setLoading(true);
       }
-
       let url = `/api/attractions/reviews?limit=10`;
       if (!isRefresh && lastTimestampRef.current && lastIdRef.current) {
         url += `&lastTimestamp=${lastTimestampRef.current}&lastId=${lastIdRef.current}`;
       }
-
       const response = await fetch(url);
       const data = await response.json();
-
       const newReviews = data.reviews.filter(
         (review) => !reviewsSetRef.current.has(review._id)
       );
-
       if (isRefresh) {
-        // Add new reviews to the top on refresh
+        // 새로고침 시 상단에 추가, 중복 제거
         setReviews((prev) => {
           const updatedReviews = [...newReviews, ...prev];
-          // Remove duplicates
           const seen = new Set();
           return updatedReviews.filter((review) => {
             if (seen.has(review._id)) return false;
@@ -254,23 +256,18 @@ export default function Community() {
           });
         });
       } else {
-        // Add to bottom for infinite scroll
         setReviews((prev) => [...prev, ...newReviews]);
       }
-
-      // Add new review IDs to the Set
       newReviews.forEach((review) => {
         reviewsSetRef.current.add(review._id);
       });
-
-      // Update pagination info
       setHasMore(data.pagination.hasNextPage);
       if (data.pagination.lastTimestamp) {
         lastTimestampRef.current = data.pagination.lastTimestamp;
         lastIdRef.current = data.pagination.lastId;
       }
     } catch (error) {
-      console.error("Error loading reviews:", error);
+      // 리뷰 로드 실패 시 무시(별도 처리 불필요)
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -365,7 +362,11 @@ export default function Community() {
     };
   }, [pullStartY, isPulling, isRefreshing, activeTab]);
 
-  // Format date
+  /**
+   * 날짜 포맷 변환 함수
+   * @param dateString - ISO 날짜 문자열
+   * @returns string - yyyy년 m월 d일
+   */
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("ko-KR", {
@@ -375,18 +376,22 @@ export default function Community() {
     }).format(date);
   };
 
-  // Component for the review card to improve code organization
+  /**
+   * 리뷰 카드 렌더링 컴포넌트
+   * @param review - 리뷰 객체
+   * @param isLastElement - 마지막 요소 여부(무한 스크롤 ref용)
+   * @returns JSX.Element
+   */
   const ReviewCard = ({ review, isLastElement }) => (
     <div className={styles.reviewCard}>
-      {/* User name & date */}
+      {/* 유저명/날짜 */}
       <div className={styles.reviewHeader}>
         <span className={styles.userName}>{review.user?.nickname || "익명"}</span>
         <span className={styles.date}>{formatDate(review.createdAt)}</span>
       </div>
-
-      {/* Container that wraps attraction and review */}
+      {/* 관광지/리뷰 컨테이너 */}
       <div className={styles.contentContainer}>
-        {/* Attraction information - left side */}
+        {/* 관광지 정보(좌측) */}
         <div className={styles.attractionContainer}>
           <div
             className={styles.attractionLink}
@@ -415,7 +420,6 @@ export default function Community() {
                   {review.translatedLabel || "관광지 상세보기 →"}
                 </div>
               </div>
-
               {review.attraction.images?.[0] && (
                 <Image
                   src={review.attraction.images[0]}
@@ -428,8 +432,7 @@ export default function Community() {
             </div>
           </div>
         </div>
-
-        {/* Review content - right side */}
+        {/* 리뷰 내용(우측) */}
         {review.content && (
           <div className={styles.reviewContent}>
             <p>{review.content}</p>
@@ -439,7 +442,9 @@ export default function Community() {
     </div>
   );
 
-  // 퀴즈 데이터 가져오기
+  /**
+   * 퀴즈 데이터 비동기 로드
+   */
   const fetchQuizData = async () => {
     try {
       setQuizLoading(true);
@@ -450,7 +455,7 @@ export default function Community() {
       const data = await response.json();
       setQuizData(data);
     } catch (error) {
-      console.error("퀴즈 데이터 로딩 오류:", error);
+      // 퀴즈 데이터 로드 실패 시 무시(별도 처리 불필요)
     } finally {
       setQuizLoading(false);
     }

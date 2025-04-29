@@ -2,7 +2,12 @@
 import { getDatabase } from '../../../lib/db/mongodb';
 const axios = require('axios');
 
-// 날씨 데이터를 가져오는 함수
+/**
+ * 외부/내부 날씨 API를 호출하여 날씨 데이터를 가져오는 함수
+ * @param {number|string} longitude - 경도
+ * @param {number|string} latitude - 위도
+ * @returns {Promise<object>} 날씨 데이터 객체
+ */
 async function fetchWeather(longitude, latitude) {
   try {
     // 내부 weather API 호출
@@ -54,7 +59,10 @@ async function fetchWeather(longitude, latitude) {
   }
 }
 
-// 기본 날씨 데이터
+/**
+ * 기본 날씨 데이터 반환 함수 (API 실패 시 사용)
+ * @returns {object} 기본 날씨 데이터
+ */
 function getDefaultWeather() {
   return {
     temperature: 23,
@@ -68,7 +76,14 @@ function getDefaultWeather() {
   };
 }
 
-// 주변 관광지 찾기 함수
+/**
+ * 반경 내 주변 관광지 검색 함수
+ * @param {number|string} longitude - 경도
+ * @param {number|string} latitude - 위도
+ * @param {string} weatherCondition - 날씨 조건
+ * @param {number} radius - 검색 반경(km)
+ * @returns {Promise<object>} 관광지 검색 결과
+ */
 async function findNearbyAttractions(longitude, latitude, weatherCondition, radius = 5) {
   try {
     const db = await getDatabase();
@@ -175,7 +190,14 @@ async function findNearbyAttractions(longitude, latitude, weatherCondition, radi
   }
 }
 
-// 두 좌표 간의 거리 계산 함수 (하버사인 공식)
+/**
+ * 두 좌표 간의 거리 계산 함수 (하버사인 공식)
+ * @param {number} lat1
+ * @param {number} lon1
+ * @param {number} lat2
+ * @param {number} lon2
+ * @returns {number} 거리(km)
+ */
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // 지구 반경 (km)
   const dLat = toRad(lat2 - lat1);
@@ -193,7 +215,11 @@ function toRad(value) {
   return value * Math.PI / 180;
 }
 
-// 특정 관광지 찾기 함수
+/**
+ * 관광지 ID로 단일 관광지 정보 조회
+ * @param {ObjectId} attractionId
+ * @returns {Promise<object|null>} 관광지 정보
+ */
 async function findAttraction(attractionId) {
   try {
     const db = await getDatabase();
@@ -207,7 +233,11 @@ async function findAttraction(attractionId) {
   }
 }
 
-// 관광지명 인식 함수
+/**
+ * 메시지에서 관광지명 인식 (간단한 포함/공백 무시 매칭)
+ * @param {string} message
+ * @returns {Promise<object|null>} 관광지 정보
+ */
 async function identifyAttraction(message) {
   const lowerMessage = message.toLowerCase();
   
@@ -240,7 +270,11 @@ async function identifyAttraction(message) {
   return null;
 }
 
-// 메시지 의도 분석 함수
+/**
+ * 메시지 의도 분석 함수
+ * @param {string} message
+ * @returns {string} 의도값(nearby|weather|info|unknown)
+ */
 function analyzeIntent(message) {
   const lowerMessage = message.toLowerCase();
   
@@ -259,7 +293,15 @@ function analyzeIntent(message) {
   return 'unknown';
 }
 
-// 응답 생성 함수
+/**
+ * 챗봇 응답 생성 함수
+ * @param {string} intent - 분석된 의도
+ * @param {string} message - 원본 메시지
+ * @param {object|null} attraction - 관광지 정보
+ * @param {object|null} weatherData - 날씨 정보
+ * @param {object|null} nearbyAttractions - 주변 관광지 정보
+ * @returns {Promise<{response: string, context: object}>}
+ */
 async function generateResponse(intent, message, attraction, weatherData, nearbyAttractions) {
   try {
     console.log('응답 생성 시작:', { intent, message });
@@ -346,6 +388,13 @@ async function generateResponse(intent, message, attraction, weatherData, nearby
   }
 }
 
+/**
+ * 챗봇 메인 API 라우트 핸들러
+ * - POST: 메시지, 위치, 관광지ID 등 입력에 따라 챗봇 응답 생성
+ * @param req - Next.js API 요청 객체
+ * @param res - Next.js API 응답 객체
+ * @returns JSON 응답(챗봇 응답, 추가 데이터)
+ */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ 

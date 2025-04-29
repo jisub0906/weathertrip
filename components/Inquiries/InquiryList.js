@@ -1,22 +1,44 @@
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
-import Pagination from '../Page/Pagination'; // ✅ 추가
+import Pagination from '../Page/Pagination';
 import styles from '../../styles/Inquiries.module.css';
 
+/**
+ * 문의 목록을 카드 형태로 보여주고, 답변/삭제/필터 등 관리 기능을 제공하는 컴포넌트
+ * @param inquiries - 문의 데이터 배열
+ * @param onDelete - 삭제/새로고침 콜백
+ * @param onAttractionClick - 관광지명 클릭 시 콜백
+ * @param onFilter - 필터 적용 콜백
+ * @returns 문의 리스트 UI
+ */
 export default function InquiryList({ inquiries, onDelete, onAttractionClick, onFilter }) {
+  // 현재 로그인 세션 정보
   const { data: session } = useSession();
+  // 펼쳐진(상세보기) 문의 ID
   const [openId, setOpenId] = useState(null);
+  // 새로고침 중 여부
   const [isRefreshing, setIsRefreshing] = useState(false);
+  // 답변 입력 상태 (문의별)
   const [replyText, setReplyText] = useState({});
+  // 현재 페이지 번호
   const [currentPage, setCurrentPage] = useState(1);
+  // 한 페이지당 문의 개수
   const itemsPerPage = 5;
+  // 전체 페이지 수
   const totalPages = Math.ceil(inquiries.length / itemsPerPage);
 
+  /**
+   * 문의 카드 클릭 시 상세 열기/닫기 토글
+   */
   const toggleOpen = (id) => setOpenId((prev) => (prev === id ? null : id));
 
+  // 현재 페이지에 보여줄 문의 데이터 슬라이스
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentInquiries = inquiries.slice(startIndex, startIndex + itemsPerPage);
 
+  /**
+   * 답변 삭제/등록 후 새로고침(중복 방지)
+   */
   const safeRefresh = () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
@@ -27,10 +49,14 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
   return (
     <div className={styles.inquiryList}>
       {currentInquiries.map((inquiry) => {
+        // 문의 작성자/관리자 여부
         const isOwner = session?.user?.email === inquiry.email;
         const isAdmin = session?.user?.role === 'admin';
+        // 현재 카드가 열려있는지 여부
         const isOpen = openId === inquiry._id;
+        // 삭제되지 않은 답변 존재 여부
         const hasVisibleAnswer = inquiry.answers?.some((ans) => !ans.isDeleted);
+        // 닉네임 표시
         const displayName = inquiry.nickname;
 
         return (
@@ -84,8 +110,10 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
 
             {isOpen && (
               <>
+                {/* 문의 상세 내용 */}
                 <div className={styles.content}>{inquiry.content}</div>
 
+                {/* 답변 목록 렌더링 */}
                 {inquiry.answers?.map((ans) => (
                   <div key={ans._id} className={styles.answerBox}>
                     <div className={styles.answerLabelRow}>
@@ -103,6 +131,7 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
                       )}
                     </div>
 
+                    {/* 관리자만 답변 삭제 가능 */}
                     {isAdmin && !ans.isDeleted && (
                       <div className={styles.buttonRowRight}>
                         <button
@@ -130,6 +159,7 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
                   </div>
                 ))}
 
+                {/* 답변이 없고, 관리자만 답변 등록 가능 */}
                 {isAdmin && !hasVisibleAnswer && (
                   <div className={styles.answerBox}>
                     <textarea
@@ -170,7 +200,7 @@ export default function InquiryList({ inquiries, onDelete, onAttractionClick, on
         );
       })}
 
-      {/* ✅ 페이징 하단 추가 */}
+      {/* 페이지네이션 */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

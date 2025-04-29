@@ -1,9 +1,15 @@
+/* =========================
+   추천 페이지 전체 컨테이너(중앙 정렬)
+   ========================= */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
   }
   
+  /* =========================
+     로딩/에러/상태 메시지
+     ========================= */
   .loading {
     text-align: center;
     padding: 1rem;
@@ -19,6 +25,34 @@
     margin-bottom: 1rem;
   }
   
+  .statusMessage {
+    background-color: #e3f2fd;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .errorMessage {
+    background-color: #ffebee;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    text-align: center;
+    color: #d32f2f;
+  }
+  
+  .noResults {
+    text-align: center;
+    padding: 2rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    margin: 2rem 0;
+  }
+  
+  /* =========================
+     페이지 타이틀/히어로 섹션
+     ========================= */
   .pageTitle {
     text-align: center;
     font-size: 2.5rem;
@@ -67,6 +101,9 @@
     font-size: 0.9rem;
   }
   
+  /* =========================
+     필터/검색 영역
+     ========================= */
   .filtersSection {
     background-color: var(--card-bg);
     border-radius: 12px;
@@ -123,6 +160,9 @@
     border-color: var(--primary);
   }
   
+  /* =========================
+     추천 관광지 리스트/카드 그리드
+     ========================= */
   .attractionsTitle {
     font-size: 1.8rem;
     margin-bottom: 1.5rem;
@@ -197,79 +237,9 @@
     font-weight: 500;
   }
   
-  @media (max-width: 992px) {
-    .attractionsGrid {
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .pageTitle {
-      font-size: 2rem;
-    }
-    
-    .filtersSection {
-      padding: 1.2rem;
-    }
-    
-    .filterOptions {
-      gap: 0.5rem;
-    }
-    
-    .filterOption {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.85rem;
-    }
-    
-    .attractionsGrid {
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 1rem;
-    }
-    
-    .attractionContent {
-      padding: 1.2rem;
-    }
-    
-    .attractionContent h3 {
-      font-size: 1.2rem;
-    }
-  
-    .heroText {
-      font-size: 1.2rem;
-    }
-  
-    .heroIcons {
-      font-size: 1.5rem;
-      gap: 0.8rem;
-    }
-  }
-  
-  .statusMessage {
-    background-color: #e3f2fd;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 8px;
-    text-align: center;
-  }
-  
-  .errorMessage {
-    background-color: #ffebee;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 8px;
-    text-align: center;
-    color: #d32f2f;
-  }
-  
-  .noResults {
-    text-align: center;
-    padding: 2rem;
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    margin: 2rem 0;
-  }
-  
+  /* =========================
+     날씨 정보 카드
+     ========================= */
   .weatherCard {
     display: flex;
     background-color: #f8f9fa;
@@ -337,7 +307,9 @@
     font-style: italic;
   }
   
-  /* 인스타그램 스타일 피드 */
+  /* =========================
+     인스타그램 스타일 피드/포스트
+     ========================= */
   .instagramFeed {
     width: 100%;
     max-width: 1200px;
@@ -488,10 +460,57 @@
     grid-column: 1 / -1;
   }
   
-  /* 반응형 스타일 */
+  /* =========================
+     반응형(태블릿/모바일) 스타일
+     ========================= */
   @media (max-width: 992px) {
+    .attractionsGrid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
     .instagramFeed {
       grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .pageTitle {
+      font-size: 2rem;
+    }
+    
+    .filtersSection {
+      padding: 1.2rem;
+    }
+    
+    .filterOptions {
+      gap: 0.5rem;
+    }
+    
+    .filterOption {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+    
+    .attractionsGrid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .attractionContent {
+      padding: 1.2rem;
+    }
+    
+    .attractionContent h3 {
+      font-size: 1.2rem;
+    }
+  
+    .heroText {
+      font-size: 1.2rem;
+    }
+  
+    .heroIcons {
+      font-size: 1.5rem;
+      gap: 0.8rem;
     }
   }
   

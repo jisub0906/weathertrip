@@ -2,23 +2,39 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from '../../styles/ChatBot.module.css';
 
+/**
+ * 관광지 정보, 날씨, 주변 정보 등을 대화형으로 안내하는 챗봇 컴포넌트
+ * @param selectedAttraction - 선택된 관광지 객체(선택적)
+ * @param userLocation - 사용자 위치 정보(선택적)
+ * @returns 챗봇 UI
+ */
 export default function ChatBot({ selectedAttraction, userLocation }) {
-  const [isOpen, setIsOpen] = useState(false);  // 챗봇 창 열림 여부
-  const [messages, setMessages] = useState([]); // 대화 메시지 목록
-  const [inputValue, setInputValue] = useState(''); // 입력창의 현재 텍스트
-  const [isTyping, setIsTyping] = useState(false); // 챗봇 타이밍 상태
-  const [hasError, setHasError] = useState(false); // 오류 발생 여부
-  const [hasWelcome, setHasWelcome] = useState(false); // 환영 메시지 표시 여부
-  const messagesEndRef = useRef(null); // 스크롤 이동용
-  const inputRef = useRef(null); // 입력창 포커스용용
+  // 챗봇 창 열림 여부
+  const [isOpen, setIsOpen] = useState(false);
+  // 대화 메시지 목록
+  const [messages, setMessages] = useState([]);
+  // 입력창의 현재 텍스트
+  const [inputValue, setInputValue] = useState('');
+  // 챗봇 타이핑 상태
+  const [isTyping, setIsTyping] = useState(false);
+  // 오류 발생 여부
+  const [hasError, setHasError] = useState(false);
+  // 환영 메시지 표시 여부
+  const [hasWelcome, setHasWelcome] = useState(false);
+  // 메시지 영역 스크롤 이동용 ref
+  const messagesEndRef = useRef(null);
+  // 입력창 포커스용 ref
+  const inputRef = useRef(null);
 
-  // 메시지 스크롤 유지지
+  /**
+   * 메시지 영역이 갱신될 때마다 스크롤을 맨 아래로 이동
+   */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
   };
 
   useEffect(() => {
-    scrollToBottom(); // 메시지 목록이 변경될 때마다 스크롤 이동
+    scrollToBottom();
   }, [messages]);
 
   // 선택된 관광지 변경 시 환영 메시지 표시
@@ -34,7 +50,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
     }
   }, [selectedAttraction, hasWelcome]);
 
-  // 챗봇 열기/닫기 시 포커스 처리
+  // 챗봇 열기/닫기 시 입력창 포커스 처리
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -43,7 +59,9 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
     }
   }, [isOpen]);
 
-  // 메시지 전송 함수
+  /**
+   * 메시지 전송 및 챗봇 응답 처리
+   */
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -51,7 +69,6 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
       type: 'user',
       text: inputValue
     };
-    // 사용자 메시지 추가
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsTyping(true);
@@ -62,14 +79,13 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
       const requestData = {
         message: userMessage.text,
         attractionId: selectedAttraction?._id,
-        // 사용자 위치 정보가 있으면 전달
         ...(userLocation && {
           longitude: userLocation.longitude,
           latitude: userLocation.latitude
         })
       };
 
-      // API 호출
+      // 챗봇 API 호출
       const response = await fetch('/api/chat/chatbot', {
         method: 'POST',
         headers: {
@@ -88,11 +104,10 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
         throw new Error(data.message || '응답 처리 중 오류가 발생했습니다.');
       }
 
-      // 응답을 통해 추가 컨텐츠 렌더링
+      // 챗봇 응답에 따라 추가 컨텐츠(날씨, 주변 관광지, 상세정보 등) 렌더링
       let additionalContent = null;
-      
-      // 날씨 정보 렌더링
       if (data.additionalData?.weather) {
+        // 날씨 정보 카드 렌더링
         const weather = data.additionalData.weather;
         additionalContent = (
           <div className={styles.weatherCard}>
@@ -108,9 +123,8 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
             </div>
           </div>
         );
-      } 
-      // 주변 관광지 정보 렌더링
-      else if (data.additionalData?.nearbyAttractions && data.additionalData.nearbyAttractions.length > 0) {
+      } else if (data.additionalData?.nearbyAttractions && data.additionalData.nearbyAttractions.length > 0) {
+        // 주변 관광지 리스트 렌더링
         const attractions = data.additionalData.nearbyAttractions;
         additionalContent = (
           <div className={styles.attractionsList}>
@@ -147,11 +161,9 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
             ))}
           </div>
         );
-      }
-      // 관광지 상세 정보 렌더링 (info 의도)
-      else if (data.context?.attraction) {
+      } else if (data.context?.attraction) {
+        // 관광지 상세 정보 카드 렌더링
         const attr = data.context.attraction;
-        // 관광지 정보가 있는 경우에만 카드 표시
         if (attr) {
           additionalContent = (
             <div className={styles.attractionDetail}>
@@ -178,7 +190,6 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
                   <div key={idx} className={styles.tagBadge}>{tag}</div>
                 ))}
               </div>
-              {/* 영업시간 및 입장료 정보 표시 (있는 경우) */}
               {(attr.openingHours || attr.admissionFee) && (
                 <div className={styles.attractionExtraInfo}>
                   {attr.openingHours && (
@@ -200,7 +211,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
         }
       }
 
-      // 메시지에 부가 컨텐츠 추가 (자연스러운 타이핑 효과를 위한 지연)
+      // 자연스러운 대화 경험을 위한 타이핑 지연 효과
       const typingDelay = Math.min(data.response.length * 20, 2000);
       setTimeout(() => {
         setIsTyping(false);
@@ -212,9 +223,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
       }, typingDelay);
 
     } catch (error) {
-      console.error('챗봇 API 호출 오류:', error);
-      
-      // 에러 응답 표시
+      // 챗봇 API 호출 실패 시 에러 메시지 표시
       setTimeout(() => {
         setIsTyping(false);
         setHasError(true);
@@ -227,7 +236,9 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
     }
   };
 
-  // 키 입력 이벤트 처리
+  /**
+   * 입력창에서 엔터 입력 시 메시지 전송
+   */
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -235,21 +246,26 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
     }
   };
 
-  // 텍스트 영역 자동 크기 조절
+  /**
+   * 입력창 값 변경 및 자동 높이 조절
+   */
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
     adjustTextareaHeight(e.target);
   };
 
-  // 텍스트 영역 높이 자동 조절
+  /**
+   * 텍스트 영역 높이 자동 조절
+   */
   const adjustTextareaHeight = (element) => {
     element.style.height = 'auto';
     element.style.height = `${Math.min(element.scrollHeight, 120)}px`;
   };
 
-  // 날씨 아이콘 가져오기
+  /**
+   * 날씨 상태/아이콘 코드에 따라 이모지 또는 이미지 반환
+   */
   const getWeatherIcon = (condition, iconCode) => {
-    // OpenWeatherMap 아이콘 사용
     if (iconCode) {
       return (
         <img 
@@ -260,8 +276,6 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
         />
       );
     }
-    
-    // 대체 이모티콘
     switch (condition) {
       case 'Clear': return '☀️';
       case 'Clouds': return '☁️';
@@ -275,7 +289,9 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
     }
   };
 
-  // 챗봇 제목 설정
+  /**
+   * 챗봇 헤더 타이틀 반환
+   */
   const getChatbotTitle = () => {
     if (selectedAttraction) {
       return `${selectedAttraction.name} 가이드`;
@@ -283,35 +299,28 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
     return '관광 도우미';
   };
 
-  // 추천 질문 버튼 클릭 처리 - 자동 전송 기능 추가
+  /**
+   * 추천 질문 버튼 클릭 시 자동 메시지 전송
+   */
   const handleSuggestedQuestionClick = (question) => {
-    // UI에 메시지 추가
     const userMessage = {
       type: 'user',
       text: question
     };
-    
-    // UI에 메시지 추가
     setMessages(prev => [...prev, userMessage]);
-    setInputValue(''); // 입력창 비우기
+    setInputValue('');
     setIsTyping(true);
     setHasError(false);
-    
-    // API 호출 처리
     const sendMessageWithText = async () => {
       try {
-        // API 호출을 위한 데이터 준비
         const requestData = {
           message: question,
           attractionId: selectedAttraction?._id,
-          // 사용자 위치 정보가 있으면 전달
           ...(userLocation && {
             longitude: userLocation.longitude,
             latitude: userLocation.latitude
           })
         };
-
-        // API 호출
         const response = await fetch('/api/chat/chatbot', {
           method: 'POST',
           headers: {
@@ -319,21 +328,14 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
           },
           body: JSON.stringify(requestData),
         });
-
         if (!response.ok) {
           throw new Error(`API 응답 오류 (${response.status})`);
         }
-
         const data = await response.json();
-
         if (!data.success) {
           throw new Error(data.message || '응답 처리 중 오류가 발생했습니다.');
         }
-
-        // 응답 처리
         let additionalContent = null;
-        
-        // 날씨 정보 렌더링
         if (data.additionalData?.weather) {
           const weather = data.additionalData.weather;
           additionalContent = (
@@ -350,9 +352,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
               </div>
             </div>
           );
-        } 
-        // 주변 관광지 정보 렌더링
-        else if (data.additionalData?.nearbyAttractions && data.additionalData.nearbyAttractions.length > 0) {
+        } else if (data.additionalData?.nearbyAttractions && data.additionalData.nearbyAttractions.length > 0) {
           const attractions = data.additionalData.nearbyAttractions;
           additionalContent = (
             <div className={styles.attractionsList}>
@@ -389,11 +389,8 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
               ))}
             </div>
           );
-        }
-        // 관광지 상세 정보 렌더링 (info 의도)
-        else if (data.context?.attraction) {
+        } else if (data.context?.attraction) {
           const attr = data.context.attraction;
-          // 관광지 정보가 있는 경우에만 카드 표시
           if (attr) {
             additionalContent = (
               <div className={styles.attractionDetail}>
@@ -420,7 +417,6 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
                     <div key={idx} className={styles.tagBadge}>{tag}</div>
                   ))}
                 </div>
-                {/* 영업시간 및 입장료 정보 표시 (있는 경우) */}
                 {(attr.openingHours || attr.admissionFee) && (
                   <div className={styles.attractionExtraInfo}>
                     {attr.openingHours && (
@@ -441,8 +437,6 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
             );
           }
         }
-
-        // 타이핑 지연 효과 (자연스러운 대화 경험을 위해)
         const typingDelay = Math.min(data.response.length * 20, 2000);
         setTimeout(() => {
           setIsTyping(false);
@@ -452,11 +446,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
             additionalContent: additionalContent
           }]);
         }, typingDelay);
-
       } catch (error) {
-        console.error('챗봇 API 호출 오류:', error);
-        
-        // 에러 응답 표시
         setTimeout(() => {
           setIsTyping(false);
           setHasError(true);
@@ -468,43 +458,32 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
         }, 500);
       }
     };
-    
-    // 메시지 전송 실행
     sendMessageWithText();
   };
 
-  // 관광지 항목 클릭 처리 (새로 추가) - 자동 전송 기능 추가
+  /**
+   * 관광지 항목 클릭 시 해당 관광지 정보 자동 질문 전송
+   */
   const handleAttractionClick = (attractionName) => {
-    // 관광지 이름으로 질문 생성
     const question = `${attractionName} 알려줘`;
-    
-    // 입력 텍스트와 함께 직접 메시지 전송 처리
     const userMessage = {
       type: 'user',
       text: question
     };
-    
-    // UI에 메시지 추가
     setMessages(prev => [...prev, userMessage]);
-    setInputValue(''); // 입력창 비우기
+    setInputValue('');
     setIsTyping(true);
     setHasError(false);
-    
-    // API 호출 처리
     const sendMessageWithText = async () => {
       try {
-        // API 호출을 위한 데이터 준비
         const requestData = {
           message: question,
           attractionId: selectedAttraction?._id,
-          // 사용자 위치 정보가 있으면 전달
           ...(userLocation && {
             longitude: userLocation.longitude,
             latitude: userLocation.latitude
           })
         };
-
-        // API 호출
         const response = await fetch('/api/chat/chatbot', {
           method: 'POST',
           headers: {
@@ -512,21 +491,14 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
           },
           body: JSON.stringify(requestData),
         });
-
         if (!response.ok) {
           throw new Error(`API 응답 오류 (${response.status})`);
         }
-
         const data = await response.json();
-
         if (!data.success) {
           throw new Error(data.message || '응답 처리 중 오류가 발생했습니다.');
         }
-
-        // 응답 처리 (기존 handleSendMessage 함수와 동일)
         let additionalContent = null;
-        
-        // 날씨 정보 렌더링
         if (data.additionalData?.weather) {
           const weather = data.additionalData.weather;
           additionalContent = (
@@ -543,9 +515,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
               </div>
             </div>
           );
-        } 
-        // 주변 관광지 정보 렌더링
-        else if (data.additionalData?.nearbyAttractions && data.additionalData.nearbyAttractions.length > 0) {
+        } else if (data.additionalData?.nearbyAttractions && data.additionalData.nearbyAttractions.length > 0) {
           const attractions = data.additionalData.nearbyAttractions;
           additionalContent = (
             <div className={styles.attractionsList}>
@@ -582,11 +552,8 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
               ))}
             </div>
           );
-        }
-        // 관광지 상세 정보 렌더링 (info 의도)
-        else if (data.context?.attraction) {
+        } else if (data.context?.attraction) {
           const attr = data.context.attraction;
-          // 관광지 정보가 있는 경우에만 카드 표시
           if (attr) {
             additionalContent = (
               <div className={styles.attractionDetail}>
@@ -613,7 +580,6 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
                     <div key={idx} className={styles.tagBadge}>{tag}</div>
                   ))}
                 </div>
-                {/* 영업시간 및 입장료 정보 표시 (있는 경우) */}
                 {(attr.openingHours || attr.admissionFee) && (
                   <div className={styles.attractionExtraInfo}>
                     {attr.openingHours && (
@@ -634,8 +600,6 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
             );
           }
         }
-
-        // 타이핑 지연 효과 (자연스러운 대화 경험을 위해)
         const typingDelay = Math.min(data.response.length * 20, 2000);
         setTimeout(() => {
           setIsTyping(false);
@@ -645,11 +609,7 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
             additionalContent: additionalContent
           }]);
         }, typingDelay);
-
       } catch (error) {
-        console.error('챗봇 API 호출 오류:', error);
-        
-        // 에러 응답 표시
         setTimeout(() => {
           setIsTyping(false);
           setHasError(true);
@@ -661,17 +621,14 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
         }, 500);
       }
     };
-    
-    // 메시지 전송 실행
     sendMessageWithText();
   };
 
-  // 추천 질문 렌더링
+  /**
+   * 추천 질문 렌더링
+   */
   const renderSuggestedQuestions = () => {
-    // 기본 추천 질문
     let questions = ['주변 관광지 알려줘', '오늘 날씨 어때?'];
-    
-    // 관광지 선택 시 추가 질문
     if (selectedAttraction) {
       questions = [
         `${selectedAttraction.name} 영업시간이 어떻게 돼?`,
@@ -680,7 +637,6 @@ export default function ChatBot({ selectedAttraction, userLocation }) {
         '오늘 날씨 어때?'
       ];
     }
-    
     return (
       <div className={styles.suggestedQuestions}>
         {questions.map((q, idx) => (

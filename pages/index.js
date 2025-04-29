@@ -13,10 +13,10 @@ import styles from '../styles/Home.module.css';
 import Image from 'next/image';
 import { calculateAttractionsDistance } from '../utils/distance';
 
-
-
-
-// 컴포넌트 외부로 이동
+/**
+ * 지역별 위경도 좌표 상수
+ * - 관광지 API 요청 시 지역 중심 좌표로 활용
+ */
 const REGION_COORDINATES = {
   'seoul': { latitude: 37.5665, longitude: 126.9780 },
   'busan': { latitude: 35.1796, longitude: 129.0756 },
@@ -38,8 +38,18 @@ const REGION_COORDINATES = {
   'all': { latitude: 36.5, longitude: 127.8 }
 };
 
-
-// 관광지 목록 섹션 컴포넌트
+/**
+ * 관광지 목록 섹션 컴포넌트
+ * - 관광지 목록, 거리 계산, 목록 열기/닫기 등 UI 제공
+ * @param loading - 관광지 데이터 로딩 여부
+ * @param error - 에러 메시지
+ * @param attractions - 관광지 배열
+ * @param isOpen - 목록 열림 여부
+ * @param onOpenChange - 목록 열기/닫기 핸들러
+ * @param userLocation - 사용자 위치
+ * @param onCardClic - 관광지 카드 클릭 핸들러
+ * @returns JSX.Element
+ */
 const AttractionListSection = ({ 
   loading, 
   error, 
@@ -49,6 +59,7 @@ const AttractionListSection = ({
   userLocation,
   onCardClic 
 }) => {
+  // 관광지와 사용자 위치 간 거리 계산
   const attractionsWithDistance = calculateAttractionsDistance(attractions, userLocation);
 
   return (
@@ -105,17 +116,34 @@ const AttractionListSection = ({
   );
 };
 
+/**
+ * 메인 페이지(Home)
+ * - 지역별 관광지, 인기 여행지, 날씨, 지도, 배너 등 다양한 정보 제공
+ * @returns JSX.Element - 홈 UI
+ */
 export default function Home() {
   const { location: userLocation } = useLocation();
+  // activeRegion: 현재 선택된 지역
   const [activeRegion, setActiveRegion] = useState('seoul');
+  // attractions: 현재 지역의 관광지 목록
   const [attractions, setAttractions] = useState([]);
+  // loading: 관광지 데이터 로딩 상태
   const [loading, setLoading] = useState(false);
+  // error: 관광지 데이터 에러 메시지
   const [error, setError] = useState(null);
+  // popularAttractions: 인기 여행지 목록
   const [popularAttractions, setPopularAttractions] = useState([]);
+  // popularLoading: 인기 여행지 로딩 상태
   const [popularLoading, setPopularLoading] = useState(false);
+  // isListOpen: 관광지 목록 패널 열림 여부
   const [isListOpen, setIsListOpen] = useState(false);
+  // attractionReviews: 인기 여행지별 최근 리뷰 맵
   const [attractionReviews, setAttractionReviews] = useState({});
 
+  /**
+   * 관광지 카드 클릭 시 상세 페이지로 이동
+   * @param attraction - 관광지 객체
+   */
   const handleCardClick = (attraction) => {
     if (!attraction?.name) return;
     localStorage.setItem('searchKeyword', attraction.name);
@@ -123,6 +151,10 @@ export default function Home() {
     window.location.href = '/map';
   };
   
+  /**
+   * 지역별 관광지 데이터 비동기 로드
+   * @param region - 선택된 지역 코드
+   */
   const fetchAttractions = useCallback(async (region) => {
     setLoading(true);
     setError(null);
@@ -136,14 +168,12 @@ export default function Home() {
           limit: 100
         }
       });
-
       if (response.data && response.data.attractions) {
         setAttractions(response.data.attractions);
       } else {
         setAttractions([]);
       }
     } catch (err) {
-      console.error('관광지 데이터 로딩 오류:', err);
       setError('관광지 정보를 불러오는데 실패했습니다.');
       setAttractions([]);
     } finally {
@@ -151,16 +181,26 @@ export default function Home() {
     }
   }, []);
 
+  /**
+   * 지역 선택 시 상태 및 관광지 데이터 갱신
+   * @param region - 선택된 지역 코드
+   */
   const handleRegionSelect = useCallback((region) => {
     setActiveRegion(region);
     setIsListOpen(true);
     fetchAttractions(region);
   }, [fetchAttractions]);
 
+  // 최초 렌더링 시 서울 지역 관광지 로드
   useEffect(() => {
     fetchAttractions('seoul');
   }, [fetchAttractions]);
 
+  /**
+   * 특정 관광지의 최근 리뷰 5개를 가져오는 함수
+   * @param attractionId - 관광지 ObjectId
+   * @returns string - HTML로 조합된 리뷰 텍스트
+   */
   const fetchAttractionReviews = async (attractionId) => {
     try {
       const response = await fetch(`/api/attractions/${attractionId}/review`);
@@ -170,11 +210,11 @@ export default function Home() {
         .join('<br /><br />');
       return latestReviews || '';
     } catch (error) {
-      console.error('리뷰 데이터 로딩 실패:', error);
       return '';
     }
   };
 
+  // 인기 여행지 및 각 여행지별 최근 리뷰 로드
   useEffect(() => {
     const fetchPopularAttractions = async () => {
       setPopularLoading(true);
@@ -183,29 +223,24 @@ export default function Home() {
         if (response.data.success && response.data.data.attractions) {
           const attractions = response.data.data.attractions;
           setPopularAttractions(attractions);
-          
           const reviewsPromises = attractions.map(attraction => 
             fetchAttractionReviews(attraction._id)
           );
           const reviews = await Promise.all(reviewsPromises);
-          
           const reviewsMap = attractions.reduce((acc, attraction, index) => {
             acc[attraction._id] = reviews[index];
             return acc;
           }, {});
-          
           setAttractionReviews(reviewsMap);
         } else {
           setPopularAttractions([]);
         }
       } catch (error) {
-        console.error('인기 관광지 데이터 로딩 실패:', error);
         setPopularAttractions([]);
       } finally {
         setPopularLoading(false);
       }
     };
-
     fetchPopularAttractions();
   }, []);
 
@@ -215,7 +250,6 @@ export default function Home() {
         <title>weather trip</title>
         <meta name="description" content="대한민국의 다양한 관광지를 찾아보세요." />
       </Head>
-
       <TopBanner />
       <Header />
       <main className={styles.main}>
@@ -232,7 +266,6 @@ export default function Home() {
           onCardClic={handleCardClick}
         />
       </main>
-
       <section className={styles.popularSection}>
         <div className={styles.container}>
           <h2 className={styles.sectionTitle}>인기 여행지</h2>

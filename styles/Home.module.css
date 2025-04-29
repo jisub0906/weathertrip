@@ -1,4 +1,6 @@
-/* 기본 페이지 스타일 */
+/* =========================
+   전체 페이지 레이아웃 및 공통 변수
+   ========================= */
 .page {
     --gray-rgb: 0, 0, 0;
     --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
@@ -15,7 +17,9 @@
     font-family: var(--font-geist-sans);
   }
   
-  /* 배너 섹션 */
+  /* =========================
+     상단 롤링 배너 영역
+     ========================= */
   .rollingBanner {
     width: 100%;
     height: 400px;
@@ -24,12 +28,18 @@
     margin-bottom: 40px;
   }
   
+  /* =========================
+     날씨 배너 영역
+     ========================= */
   .weatherBanner {
     width: 100%;
     margin-bottom: 40px;
   }
   
-  /* 관광지 목록 섹션 */
+  /* =========================
+     하단 고정 관광지 목록 섹션
+     (모바일/PC 모두 하단에서 슬라이드 업)
+     ========================= */
   .attractionListSection {
     position: fixed;
     bottom: 0;
@@ -48,10 +58,14 @@
     overflow-y: auto;
   }
   
+  /* 관광지 목록 섹션이 열렸을 때 슬라이드 업 효과 */
   .attractionListSection.open {
     transform: translateY(0);
   }
   
+  /* =========================
+     관광지 목록 헤더(고정)
+     ========================= */
   .listHeader {
     position: sticky;
     top: 0;
@@ -65,6 +79,7 @@
     z-index: 1;
   }
   
+  /* 닫기 버튼(모달 닫기 등) */
   .closeButton {
     background: none;
     border: none;
@@ -84,7 +99,9 @@
     background-color: rgba(0, 0, 0, 0.05);
   }
   
-  /* 관광지 목록 테이블 */
+  /* =========================
+     관광지 목록 테이블 스타일
+     ========================= */
   .attractionListTable {
     width: 100%;
     border-collapse: collapse;
@@ -115,6 +132,7 @@
     background-color: rgba(0, 0, 0, 0.02);
   }
   
+  /* 랭킹 번호 컬럼 */
   .rankNumber {
     font-weight: bold;
     text-align: center;
@@ -122,18 +140,22 @@
     color: #4CAF50;
   }
   
+  /* 평점 컬럼 */
   .rating {
     color: #FF9800;
     width: 120px;
     letter-spacing: 2px;
   }
   
+  /* 지역명 컬럼 */
   .region {
     color: #666;
     width: 100px;
   }
   
-  /* 페이지네이션 스타일 */
+  /* =========================
+     페이지네이션(관광지 목록 하단)
+     ========================= */
   .pagination {
     display: flex;
     justify-content: center;
@@ -173,7 +195,9 @@
     border-color: #4CAF50;
   }
   
-  /* 선택된 지역 및 결과 수 표시 스타일 */
+  /* =========================
+     선택된 지역 및 결과 수 표시
+     ========================= */
   .resultsInfo {
     background-color: #f8f9fa;
     padding: 1rem 1.5rem;
@@ -198,7 +222,9 @@
     font-size: 0.9rem;
   }
   
-  /* 인기 관광지 섹션 */
+  /* =========================
+     인기 관광지(추천) 섹션
+     ========================= */
   .popularSection {
     margin-top: 3rem;
     padding: 4rem 0;
@@ -229,6 +255,7 @@
     transform: translateY(-5px);
   }
   
+  /* 인기 관광지 이미지 영역 */
   .imageContainer {
     margin: -1.5rem -1.5rem 1rem -1.5rem;
     position: relative;
@@ -256,6 +283,7 @@
     border-radius: 12px 12px 0 0;
   }
   
+  /* 좋아요(찜) 카운트 표시 */
   .likeCount {
     display: inline-flex;
     align-items: center;
@@ -265,7 +293,9 @@
     margin-right: 1rem;
   }
   
-  /* 공통 스타일 */
+  /* =========================
+     공통 컨테이너 및 타이틀 스타일
+     ========================= */
   .container {
     max-width: 1020px;
     margin: 0 auto;
@@ -287,6 +317,7 @@
     text-align: center;
   }
   
+  /* 로딩/에러 메시지 */
   .loading, .error {
     text-align: center;
     padding: 20px;
@@ -297,7 +328,9 @@
     color: #dc3545;
   }
   
-  /* 관광지 목록 스타일 */
+  /* =========================
+     관광지 목록 카드 스타일
+     ========================= */
   .attractionsList {
     display: flex;
     flex-direction: column;
@@ -344,6 +377,7 @@
     color: #4CAF50;
   }
   
+  /* 거리 표시 뱃지 */
   .distance {
     display: inline-flex;
     align-items: center;
@@ -360,8 +394,11 @@
     color: #FF9800;
   }
   
-  /* 반응형 스타일 */
+  /* =========================
+     반응형(태블릿/모바일) 스타일
+     ========================= */
   @media (max-width: 768px) {
+    /* 모바일/태블릿에서 패딩, 배너, 카드 등 크기 조정 */
     .page {
       padding: 16px;
       padding-bottom: 60px;
@@ -412,6 +449,7 @@
   }
   
   @media (max-width: 480px) {
+    /* 소형 모바일에서 배너, 패딩 등 추가 축소 */
     .page {
       padding: 16px;
       padding-bottom: 60px;
@@ -422,6 +460,9 @@
     }
   }
 
+/* =========================
+   태그/테마/실내외 구분 뱃지 스타일
+   ========================= */
 .tag {
   display: inline-block;
   padding: 4px 8px;
@@ -442,6 +483,9 @@
   color: #1976d2;
 }
 
+/* =========================
+   관광지 설명 텍스트 박스
+   ========================= */
 .description {
   font-size: 0.9rem;
   color: #666;

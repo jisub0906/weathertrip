@@ -1,3 +1,6 @@
+/* =========================
+   헤더(상단바) 전체 영역 및 고정 스타일
+   ========================= */
 .header {
   background-color: white;
   padding: 1rem 2rem;
@@ -8,6 +11,7 @@
   transition: box-shadow 0.3s ease;
 }
 
+/* 네비게이션 바(로고, 메뉴, 인증버튼 포함) */
 .nav {
   max-width: 1200px;
   margin: 0 auto;
@@ -16,6 +20,7 @@
   align-items: center;
 }
 
+/* 로고 영역 */
 .logo {
   display: flex;
   align-items: center;
@@ -34,6 +39,7 @@
   height: auto;
 }
 
+/* 네비게이션 링크(메뉴) */
 .navLinks {
   display: flex;
   align-items: center;
@@ -60,6 +66,7 @@
   color: #2196f3;
 }
 
+/* 활성 메뉴 하단 바/비활성 메뉴 애니메이션 */
 .navItem.active::after {
   content: '';
   position: absolute;
@@ -90,6 +97,7 @@
   transform: scaleX(1);
 }
 
+/* 인증(로그인/회원가입) 버튼 그룹 */
 .authButtons {
   display: flex;
   gap: 1rem;
@@ -133,13 +141,14 @@
   box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
 }
 
-/* 드롭다운 컨테이너 */
+/* =========================
+   드롭다운(프로필/메뉴) 영역
+   ========================= */
 .dropdown {
   position: relative;
   display: inline-block;
 }
 
-/* 드롭다운 열기 버튼 */
 .dropdownTrigger {
   background: none;
   border: none;
@@ -150,7 +159,6 @@
   transition: color 0.2s ease;
 }
 
-/* 드롭다운 메뉴 */
 .dropdownMenu {
   display: flex;
   flex-direction: column;
@@ -169,7 +177,6 @@
   transform: translateX(-50%);
 }
 
-/* 드롭다운 내부 항목 */
 .dropdownItem {
   padding: 0.6rem 1rem;
   font-size: 0.9rem;
@@ -194,7 +201,9 @@
   margin-left: 4px;
 }
 
-/* fade-in 애니메이션 */
+/* =========================
+   fade-in 애니메이션
+   ========================= */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -207,8 +216,9 @@
   }
 }
 
-
-/* 모바일 최적화 - 로고 크기 증가 */
+/* =========================
+   반응형(태블릿/모바일) 스타일
+   ========================= */
 @media (max-width: 768px) {
   .header {
     padding: 0.75rem 1rem;
@@ -252,7 +262,6 @@
   }
 }
 
-/* 더 작은 화면 최적화 */
 @media (max-width: 480px) {
   .logo img {
     width: 140px;

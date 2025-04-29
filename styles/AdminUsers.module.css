@@ -1,3 +1,6 @@
+/* =========================
+   관리자 유저 관리 페이지 전체 컨테이너
+   ========================= */
 .pageContainer {
   padding: 40px;
   max-width: 1200px;
@@ -5,6 +8,7 @@
   font-family: 'Noto Sans KR', sans-serif;
 }
 
+/* 페이지 상단 타이틀 */
 .title {
   font-size: 24px;
   font-weight: 600;
@@ -12,6 +16,9 @@
   margin-bottom: 30px;
 }
 
+/* =========================
+   유저 테이블 영역
+   ========================= */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -34,6 +41,7 @@
   font-size: 14px;
 }
 
+/* 테이블 내 액션 버튼 그룹 */
 .actionButtons {
   display: flex;
   justify-content: center;
@@ -60,6 +68,7 @@
   cursor: pointer;
 }
 
+/* 빠른 이동 버튼 및 링크 영역 */
 .quickLinks {
   text-align: center;
   margin-top: 40px;
@@ -84,9 +93,11 @@
   background-color: #1976d2;
 }
 
-
-/* 반응형 */
+/* =========================
+   반응형(모바일) 스타일
+   ========================= */
 @media (max-width: 768px) {
+  /* 4번째 컬럼부터는 모바일에서 숨김 처리 (테이블 가독성 확보 목적) */
   .table th:nth-child(n+4):not(:last-child),
   .table td:nth-child(n+4):not(:last-child) {
     display: none;

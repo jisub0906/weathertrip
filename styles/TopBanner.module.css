@@ -1,4 +1,7 @@
 /* styles/TopBanner.module.css */
+/* =========================
+   상단 배너 전체 영역(고정/알림/이벤트)
+   ========================= */
 .topBanner {
   background: linear-gradient(135deg, #FFD54F 0%, #FFEB3B 100%);
   color: rgba(0, 0, 0, 0.8);
@@ -13,6 +16,9 @@
   transition: all 0.3s ease;
 }
 
+/* =========================
+   상단 배너 빛나는 효과(shine 애니메이션)
+   ========================= */
 .topBanner::before {
   content: '';
   position: absolute;
@@ -24,6 +30,9 @@
   animation: shine 3s infinite;
 }
 
+/* =========================
+   상단 배너 원형 배경 효과
+   ========================= */
 .topBanner::after {
   content: '';
   position: absolute;
@@ -36,6 +45,9 @@
   z-index: 0;
 }
 
+/* =========================
+   배너 내부 컨텐츠(아이콘+텍스트)
+   ========================= */
 .bannerContent {
   display: flex;
   align-items: center;
@@ -55,6 +67,9 @@
   line-height: 1.4;
 }
 
+/* =========================
+   shine 애니메이션(빛나는 효과)
+   ========================= */
 @keyframes shine {
   0% {
     left: -100%;
@@ -67,7 +82,9 @@
   }
 }
 
-/* 모바일 최적화 */
+/* =========================
+   반응형(태블릿/모바일) 스타일
+   ========================= */
 @media (max-width: 768px) {
   .topBanner {
     padding: 0.7rem 1rem;
@@ -79,7 +96,6 @@
   }
 }
 
-/* 더 작은 화면 최적화 */
 @media (max-width: 480px) {
   .topBanner {
     padding: 0.6rem 0.8rem;

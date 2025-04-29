@@ -1,4 +1,7 @@
 /* styles/ChatBot.module.css */
+/* =========================
+   챗봇 전체 컨테이너 및 토글 버튼
+   ========================= */
 .chatbotContainer {
   position: fixed;
   bottom: 20px;
@@ -28,6 +31,9 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
+/* =========================
+   챗봇 대화창(고정 위치)
+   ========================= */
 .chatWindow {
   position: fixed;
   bottom: 80px;
@@ -44,6 +50,7 @@
   border: 1px solid rgba(0,0,0,0.1);
 }
 
+/* 대화창 애니메이션 */
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
@@ -54,6 +61,9 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* =========================
+   챗봇 헤더(상단 바)
+   ========================= */
 .chatHeader {
   display: flex;
   align-items: center;
@@ -94,6 +104,9 @@
   transform: scale(1.1);
 }
 
+/* =========================
+   메시지 영역(스크롤/대화)
+   ========================= */
 .messages {
   flex: 1;
   padding: 18px;
@@ -123,6 +136,9 @@
   background: #a1a1a1;
 }
 
+/* =========================
+   챗봇 환영 메시지/추천 질문
+   ========================= */
 .welcomeMessage {
   padding: 12px;
   background-color: rgba(255, 255, 255, 0.8);
@@ -166,6 +182,9 @@
   background-color: #c8e6c9;
 }
 
+/* =========================
+   메시지(유저/봇) 스타일
+   ========================= */
 .message {
   max-width: 80%;
   padding: 12px 16px;
@@ -175,7 +194,7 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   font-size: 14px;
   line-height: 1.4;
-  white-space: pre-line; /* 줄바꿈 표시를 위한 스타일 추가 */
+  white-space: pre-line; /* 줄바꿈 표시를 위한 스타일 */
 }
 
 @keyframes fadeIn {
@@ -197,6 +216,9 @@
   border-bottom-left-radius: 5px;
 }
 
+/* =========================
+   타이핑(입력중) 인디케이터
+   ========================= */
 .typing {
   background-color: rgba(255, 255, 255, 0.7);
   padding: 10px 14px;
@@ -232,12 +254,16 @@
   30% { transform: translateY(-5px); }
 }
 
+/* 에러 메시지(대화 내) */
 .error {
   background-color: #ffebee;
   color: #d32f2f;
   border-left: 3px solid #d32f2f;
 }
 
+/* =========================
+   입력 영역(텍스트/전송)
+   ========================= */
 .inputArea {
   display: flex;
   padding: 12px;
@@ -298,7 +324,9 @@
   cursor: not-allowed;
 }
 
-/* 날씨 카드 스타일 개선 */
+/* =========================
+   날씨 카드/관광지 리스트(챗봇 내)
+   ========================= */
 .weatherCard {
   margin-top: 12px;
   padding: 16px;
@@ -338,7 +366,7 @@
   margin-top: 6px;
 }
 
-/* 완전히 새로 작성된 관광지 목록 스타일 */
+/* 관광지 리스트/아이템(챗봇 내) */
 .attractionsList {
   margin-top: 12px;
   width: 100%;
@@ -462,7 +490,9 @@
   width: 100%;
 }
 
-/* 반응형 스타일 */
+/* =========================
+   반응형(모바일) 스타일
+   ========================= */
 @media (max-width: 480px) {
   .chatWindow {
     width: 90%;

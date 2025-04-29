@@ -1,8 +1,12 @@
+/* =========================
+   전체 페이지 레이아웃 및 컨테이너
+   ========================= */
 .container {
   min-height: 100vh;
   background-color: #f8f9fa;
 }
 
+/* 메인 레이아웃: 사이드바 + 본문을 가로로 배치 */
 .layout {
   display: flex;
   max-width: 1400px;
@@ -11,6 +15,9 @@
   gap: 2rem;
 }
 
+/* =========================
+   사이드바 영역
+   ========================= */
 .sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -35,6 +42,7 @@
   border-bottom: 2px solid #eaeaea;
 }
 
+/* 사이드바 내 네비게이션 및 검색 */
 .nav {
   list-style: none;
   padding: 0;
@@ -97,6 +105,7 @@
   background: #bbdefb;
 }
 
+/* 네비게이션 그룹 및 구분 타이틀 */
 .groupedNav {
   margin-top: 1.2rem;
 }
@@ -120,6 +129,7 @@
   margin-right: 0.5rem;
 }
 
+/* 메인/서브 네비게이션 스타일 구분 */
 .nav .mainNav {
   font-weight: 700;
   background: #e3f2fd;
@@ -168,6 +178,9 @@
   border-left: 2px solid #1976d2;
 }
 
+/* =========================
+   본문(메인) 영역
+   ========================= */
 .main {
   flex: 1;
   max-width: 800px;
@@ -207,6 +220,7 @@
   overflow: visible;
 }
 
+/* 각 섹션별 구분 및 스타일 */
 .section {
   margin-bottom: 4rem;
   scroll-margin-top: 2rem;
@@ -259,6 +273,7 @@
   font-size: 1.1rem;
 }
 
+/* 주요 기능 리스트 스타일 */
 .featureList {
   list-style: none;
   padding: 0;
@@ -294,6 +309,7 @@
   line-height: 1.7;
 }
 
+/* 프로젝트 진행 프로세스 리스트 스타일 */
 .processList {
   list-style: none;
   padding: 0;
@@ -339,6 +355,7 @@
   line-height: 1.7;
 }
 
+/* 기술 스택 그리드 및 카테고리 */
 .techStack {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -376,12 +393,14 @@
   border-bottom: none;
 }
 
+/* fadeIn 효과 섹션 */
 .fadeInSection {
   opacity: 1 !important;
   transform: none !important;
   transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1);
 }
 
+/* 최상단 이동 버튼 */
 .toTopBtn {
   position: absolute;
   right: 2.2rem;
@@ -403,6 +422,9 @@
   color: #fff;
 }
 
+/* =========================
+   반응형(태블릿/모바일) 스타일
+   ========================= */
 @media (max-width: 1024px) {
   .layout {
     flex-direction: column;

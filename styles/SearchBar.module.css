@@ -1,3 +1,6 @@
+/* =========================
+   검색바 전체 컨테이너(가로 정렬)
+   ========================= */
 .searchContainer {
   display: flex;
   align-items: center;
@@ -5,6 +8,9 @@
   margin: 12px 10px;
 }
 
+/* =========================
+   검색 입력창(사이드바/상단바 등에서 사용)
+   ========================= */
 .searchInput {
   flex: 1;
   width: 100%;
@@ -20,6 +26,9 @@
   background-color: white;
 }
 
+/* =========================
+   검색 버튼
+   ========================= */
 .searchButton {
   height: 40px;
   /* ✅ 너무 커지지 않게! */
@@ -33,6 +42,9 @@
   white-space: nowrap;
 }
 
+/* =========================
+   비활성화(로딩/입력불가) 상태
+   ========================= */
 .searchInput:disabled {
   background-color: #f5f5f5;
   color: #aaa;

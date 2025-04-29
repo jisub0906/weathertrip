@@ -1,52 +1,61 @@
+/* =========================
+   AI 추천 결과 전체 컨테이너
+   ========================= */
 .aiRecommendation {
     padding: 10px 0;
-  }
-  
-  .recommendationContent {
+}
+
+/* 추천 결과 본문 영역 */
+.recommendationContent {
     text-align: center;
-  }
-  
-  .recommendationContent h4 {
+}
+
+.recommendationContent h4 {
     color: #2c3e50;
     font-size: 1.1rem;
     margin-bottom: 12px;
     font-weight: 600;
-  }
-  
-  .recommendationText {
+}
+
+/* 추천 텍스트(결과) 스타일 */
+.recommendationText {
     color: #34495e;
     font-size: 1rem;
     line-height: 1.6;
     margin: 0;
     font-weight: 400;
     word-break: keep-all;
-  }
-  
-  .loading {
+}
+
+/* 로딩 상태 메시지 */
+.loading {
     color: #7f8c8d;
     font-size: 0.9rem;
     text-align: center;
     padding: 10px;
     animation: pulse 1.5s infinite ease-in-out;
-  }
-  
-  .error {
+}
+
+/* 에러 메시지 스타일 */
+.error {
     color: #e74c3c;
     font-size: 0.9rem;
     text-align: center;
     padding: 10px;
     margin-bottom: 5px;
-  }
-  
-  .errorDetails {
+}
+
+/* 에러 상세 설명 */
+.errorDetails {
     color: #95a5a6;
     font-size: 0.8rem;
     text-align: center;
     margin: 0;
-  }
-  
-  @keyframes pulse {
+}
+
+/* 로딩 효과(깜빡임) 애니메이션 */
+@keyframes pulse {
     0% { opacity: 0.6; }
     50% { opacity: 1; }
     100% { opacity: 0.6; }
-  } 
+} 

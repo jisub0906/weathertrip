@@ -2,7 +2,15 @@ import { useState } from "react";
 import RoleChangeConfirmModal from "./RoleChangeConfirmModal";
 import styles from "../../styles/UserEditModal.module.css";
 
+/**
+ * 회원 정보 수정 모달 컴포넌트
+ * @param user - 수정 대상 사용자 정보 객체
+ * @param onClose - 모달 닫기/취소 콜백 함수
+ * @param onSave - 수정된 정보 저장 콜백 함수
+ * @returns 회원 정보 수정 모달 UI
+ */
 export default function UserEditModal({ user, onClose, onSave }) {
+  // 각 입력 필드별 상태 관리
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone);
@@ -11,9 +19,11 @@ export default function UserEditModal({ user, onClose, onSave }) {
   const [birthdate, setBirthdate] = useState(user.birthdate || "");
   const [role, setRole] = useState(user.role || "user");
 
+  // 역할 변경 시 확인 모달 노출 여부 및 임시 저장 데이터
   const [showRoleConfirm, setShowRoleConfirm] = useState(false);
   const [pendingSave, setPendingSave] = useState(null);
 
+  // 현재 입력된 사용자 정보 객체
   const userData = {
     id: user._id,
     name,
@@ -25,18 +35,26 @@ export default function UserEditModal({ user, onClose, onSave }) {
     role,
   };
 
+  /**
+   * 저장 버튼 클릭 시 역할 변경 여부에 따라 분기 처리
+   * 역할이 변경된 경우 관리자 인증 모달을 띄우고, 그렇지 않으면 바로 저장 콜백 호출
+   */
   const handleSubmit = () => {
     if (user.role !== role) {
-      // 역할이 변경되면 인증 모달 띄우기
+      // 역할이 변경된 경우: 인증 모달을 띄우고, 입력값을 임시 저장
       setPendingSave(userData);
       setShowRoleConfirm(true);
-      console.log('DB에서 찾은 사용자:', user);
-
     } else {
+      // 역할이 변경되지 않은 경우: 바로 저장
       onSave(userData);
     }
   };
 
+  /**
+   * 역할 변경 인증 모달에서 비밀번호 입력 후 호출되는 콜백
+   * 관리자 비밀번호와 함께 저장 콜백을 실행
+   * @param adminPassword - 입력된 관리자 비밀번호
+   */
   const handleRoleConfirm = (adminPassword) => {
     setShowRoleConfirm(false);
     onSave({ ...pendingSave, adminPassword });
