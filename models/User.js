@@ -1,8 +1,5 @@
 import { getCollection, toObjectId } from '../lib/db/mongodb';
 
-// 허용되는 전화번호 앞자리 목록
-const validPhonePrefixes = ['010', '011', '016', '017', '018', '019'];
-
 /**
  * 사용자 데이터 정제 함수
  * @param user - 사용자 객체
@@ -13,7 +10,7 @@ function sanitizeUserData(user, includePassword = false) {
   if (!user) return null;
   const { _id, password, ...userData } = user;
   return {
-    id: _id.toString(),
+    id: _id ? _id.toString() : undefined,
     ...(includePassword ? { password } : {}),
     ...userData
   };
@@ -57,7 +54,7 @@ export const User = {
       throw new Error('비밀번호는 특수문자(!@#$%^&*)를 포함해야 합니다.');
     }
     // 전화번호 검증
-    if (!this.validatePhone(userData.phone)) {
+    if (!User.validatePhone(userData.phone)) {
       throw new Error('유효하지 않은 전화번호 형식입니다.');
     }
     // 이메일/닉네임/전화번호 중복 체크
