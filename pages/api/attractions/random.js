@@ -21,8 +21,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 쿼리 파라미터에서 limit 추출(기본 10)
-    const { limit = 10 } = req.query;
+    // 쿼리 파라미터에서 limit 추출(기본 10, 1~20 범위로 제한)
+    let { limit = 10 } = req.query;
+    limit = parseInt(limit);
+    if (isNaN(limit) || limit < 1 || limit > 20) limit = 10;
     const now = Date.now();
 
     /**
@@ -44,7 +46,7 @@ export default async function handler(req, res) {
      * MongoDB Aggregation Pipeline
      * - 이미지가 있는 관광지만 필터링
      * - 랜덤 샘플링($sample)
-     * - 첫 번째 이미지만 반환
+     * - 첫 번째 이미지만 image 필드로 반환
      */
     const pipeline = [
       {
@@ -53,13 +55,13 @@ export default async function handler(req, res) {
         }
       },
       {
-        $sample: { size: parseInt(limit) }
+        $sample: { size: limit }
       },
       {
         $project: {
           name: 1,
           address: 1,
-          images: { $slice: ['$images', 1] }, // 첫 번째 이미지만 선택
+          image: { $arrayElemAt: ['$images', 0] }, // 첫 번째 이미지만 단일 필드로 반환
           description: 1,
           location: 1
         }
@@ -80,6 +82,10 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     // DB/서버 오류 처리
-    return res.status(500).json({ message: '서버 오류가 발생했습니다.', error: error.message });
+    return res.status(500).json({
+      message: '서버 오류가 발생했습니다.',
+      error: error.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    });
   }
 } 
