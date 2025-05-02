@@ -121,7 +121,11 @@ const Team = () => {
                   <h3>이지섭</h3>
                   <p className={styles.memberRole}>팀원</p>
                   <p className={styles.memberBio}>
-                  프로젝트 컨셉과 디자인을 통합 기획하고 초기 구조를 설계했으며, CSV 기반 지도 구축과 UI/UX 최적화, 챗봇 인터랙션 구현 및 디자인 일관성에 기여했습니다. 또한 Google의 search API와 Image BB 기능을 연동하여 DB에 자동 이미지 저장 기능을 구현했습니다.
+                    프로젝트 컨셉과 디자인을 통합 기획하고 초기 구조를
+                    설계했으며, CSV 기반 지도 구축과 UI/UX 최적화, 챗봇 인터랙션
+                    구현 및 디자인 일관성에 기여했습니다. 또한 Google의 search
+                    API와 Image BB 기능을 연동하여 DB에 자동 이미지 저장 기능을
+                    구현했습니다.
                   </p>
                   <div className={styles.memberSkills}>
                     <span className={styles.skillTag}>React</span>
