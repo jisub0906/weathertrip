@@ -68,7 +68,7 @@
      ========================= */
   .listHeader {
     position: sticky;
-    top: 0;
+    top: -16px;
     background: white;
     display: flex;
     justify-content: space-between;
