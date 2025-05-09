@@ -54,11 +54,11 @@ const Team = () => {
                   <h3>김성현</h3>
                   <p className={styles.memberRole}>팀장</p>
                   <p className={styles.memberBio}>
-                    프로젝트의 기획과 전체 설계를 주도하고, AI 추천 및 다국어
-                    번역 기능을 개발했습니다. 프로젝트의 기획과 전체 설계를
-                    리드하며, AI 추천 및 번역 기능을 구축했습니다. 배너 영역과
-                    API 통합 로직을 설계하고, 컴포넌트 구조 최적화와 UI/UX 품질
-                    향상에 집중했습니다.
+                    프로젝트의 기획과 전체 설계를 리드하며, AI 추천 및 번역
+                    기능을 구축했습니다. 배너 영역을 구현 하였으며, 기능 디자인
+                    및 API 통합 로직을 설계하였습니다. 컴포넌트 구조 최적화와
+                    UI/UX 품질 향상에 집중했으며, 오류 대응 및 기능 안정성
+                    확보에도 기여했습니다.
                   </p>
                   <div className={styles.memberSkills}>
                     <span className={styles.skillTag}>React</span>
@@ -121,10 +121,11 @@ const Team = () => {
                   <h3>이지섭</h3>
                   <p className={styles.memberRole}>팀원</p>
                   <p className={styles.memberBio}>
-                    프로젝트 컨셉과 디자인을 통합 기획하고, 초기 개발 환경과
-                    구조를 설계했습니다. CSV 데이터를 활용한 지도 구축을
-                    완료했으며, UI/UX 최적화와 반응형 웹 구현, 챗봇 인터랙션과
-                    디자인 일관성 강화에 기여했습니다.
+                    프로젝트 컨셉과 디자인을 통합 기획하고 초기 구조를
+                    설계했으며, CSV 기반 지도 구축과 UI/UX 최적화, 챗봇 인터랙션
+                    구현 및 디자인 일관성에 기여했습니다. 또한 Google의 search
+                    API와 Image BB 기능을 연동하여 DB에 자동 이미지 저장 기능을
+                    구현했습니다.
                   </p>
                   <div className={styles.memberSkills}>
                     <span className={styles.skillTag}>React</span>
@@ -146,7 +147,7 @@ const Team = () => {
             <h2>Weather-Trip 소개</h2>
             <div className={styles.teamDescription}>
               <p>
-                 Weather Trip은 날씨 정보를 활용하여 사용자의 현재 위치를
+                Weather Trip은 날씨 정보를 활용하여 사용자의 현재 위치를
                 기반으로 최적의 관광지를 추천하는 맞춤형 여행 도우미
                 애플리케이션입니다. 우리 팀은 사용자가 실시간 날씨 정보에 따라
                 가장 알맞은 여행 계획을 세울 수 있도록 지원하고, 주변 관광지를
@@ -157,7 +158,7 @@ const Team = () => {
               </p>
               <h2>프로젝트 제작 이야기</h2>
               <p>
-                 이 프로젝트는 개발에 첫발을 내디딘 우리 팀이 학원에서 함께 땀
+                이 프로젝트는 개발에 첫발을 내디딘 우리 팀이 학원에서 함께 땀
                 흘리며 완성해낸 첫 번째 결과물이자, 수많은 고민과 시행착오,
                 그리고 끊임없는 학습의 과정을 통해 만들어낸 소중한 성과입니다.
                 모두가 생소한 기술들을 하나하나 익혀가며, 보다 사용자 친화적인

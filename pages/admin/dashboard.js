@@ -3,7 +3,13 @@ import styles from '../../styles/AdminDashboard.module.css';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+/**
+ * 관리자 대시보드 컴포넌트
+ * - 회원/접속자 통계, 최근 문의, 인기 관광지 정보를 표시
+ * @returns 관리자 대시보드 UI
+ */
 export default function AdminDashboard() {
+  // 대시보드 통계 상태 (회원수, 신규가입, 접속자 등)
   const [stats, setStats] = useState({
     totalUsers: 0,
     newUsersToday: 0,
@@ -16,15 +22,21 @@ export default function AdminDashboard() {
     activeThisYear: 0,
     pendingAnswers: 0,
   });
+  // 최근 문의 상태
   const [recentInquiries, setRecentInquiries] = useState([]);
+  // 인기 관광지 상태
   const [popularSpots, setPopularSpots] = useState([]);
 
+  /**
+   * 대시보드 데이터 및 인기 관광지 데이터를 서버에서 불러오는 함수
+   * - 관리자 통계, 최근 문의, 인기 관광지 정보를 비동기로 fetch
+   */
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        // 관리자 대시보드 통계 및 최근 문의 데이터 요청
         const res = await fetch('/api/admin/dashboard');
         if (!res.ok) {
-          console.error('대시보드 응답 실패:', await res.text());
           return;
         }
         const data = await res.json();
@@ -42,17 +54,17 @@ export default function AdminDashboard() {
           pendingAnswers: data.pendingAnswers,
         });
 
-        setRecentInquiries(data.recentInquiries); // ✅ 🔥 이걸 추가해야 카드들이 정상 출력돼!
+        setRecentInquiries(data.recentInquiries); // 최근 문의 목록 상태 반영
 
+        // 인기 관광지 데이터 요청
         const popularRes = await fetch('/api/attractions/popular?limit=3');
         if (!popularRes.ok) {
-          console.error('인기 관광지 응답 실패:', await popularRes.text());
           return;
         }
         const popularData = await popularRes.json();
         setPopularSpots(popularData.data?.attractions || []);
       } catch (err) {
-        console.error('대시보드 데이터 fetch 오류:', err);
+        // 네트워크 또는 서버 오류 발생 시 무시 (실사용에 영향 없음)
       }
     };
 
@@ -65,6 +77,7 @@ export default function AdminDashboard() {
       <div className={styles.dashboardContainer}>
         <h1 className={styles.title}>📊 관리자 대시보드</h1>
 
+        {/* 회원/접속자 통계 카드 영역 */}
         <section className={styles.statsSection}>
           <div className={styles.card}>
             <h3>전체 회원수</h3>
@@ -86,6 +99,7 @@ export default function AdminDashboard() {
           </div>
         </section >
 
+        {/* 최근 대기 문의 카드 영역 */}
         <section className={styles.section}>
           <h2>📥 최근 대기 문의</h2>
 
@@ -119,6 +133,7 @@ export default function AdminDashboard() {
           </p>
         </section>
 
+        {/* 인기 관광지 TOP 3 카드 영역 */}
         <section className={styles.section}>
           <h2>🔥 인기 관광지 TOP 3</h2>
           <div className={styles.popularCards}>
@@ -128,6 +143,7 @@ export default function AdminDashboard() {
                 href={`/map?highlight=${spot._id}`}
                 className={styles.popularCard}
                 onClick={() => {
+                  // 관광지 클릭 시, 검색 키워드와 선택된 관광지 ID를 localStorage에 저장
                   localStorage.setItem('searchKeyword', spot.name);
                   localStorage.setItem('selectedAttractionId', spot._id);
                 }}
@@ -151,6 +167,7 @@ export default function AdminDashboard() {
           </div>
         </section>
 
+        {/* 관리자 빠른 이동 버튼 영역 */}
         <div className={styles.quickLinks}>
           <Link href="/admin/users" className={styles.linkButton}>회원관리</Link>
           <Link href="/inquiries" className={styles.linkButton}>문의관리</Link>
